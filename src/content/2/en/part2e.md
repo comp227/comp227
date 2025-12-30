@@ -304,7 +304,6 @@ const App = () => {
       <Notification message={errorMessage} />
 
       // ...
-
       <Footer /> // highlight-line
     </div>
   )

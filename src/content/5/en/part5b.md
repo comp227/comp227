@@ -11,15 +11,15 @@ lang: en
 
 Let's modify the application so that the login form is not displayed by default:
 
-![browser showing log in button by default](../../images/5/10e.png)
+![browser showing log in button by default]
 
-The login form appears when the user presses the ***login*** button:
+Rather, the login form appears when the user presses the ***login*** button.
 
-![user at login screen about to press cancel](../../images/5/11e.png)
+![The User on the login screen is about to press cancel](../../images/5/11e.png)
 
-The user can close the login form by clicking the ***cancel*** button.
+The user can then close the login form by clicking the ***cancel*** button.
 
-Let's start by extracting the login form into its own component:
+Let's start by extracting the login form into a separate component and file:
 
 ```js
 const LoginForm = ({
@@ -32,7 +32,6 @@ const LoginForm = ({
   return (
     <div>
       <h2>Login</h2>
-
       <form onSubmit={handleSubmit}>
         <div>
           username
@@ -58,9 +57,9 @@ const LoginForm = ({
 export default LoginForm
 ```
 
-The state and all the functions related to it are defined outside of the component and are passed to the component as props.
+The state and all the functions related to it are defined outside of the component and are passed to the component as *props*.
 
-Notice that the props are assigned to variables through **destructuring**, which means that instead of writing:
+Notice that the *`props`* are assigned to variables through **destructuring**, which means that instead of writing:
 
 ```js
 const LoginForm = (props) => {
@@ -84,10 +83,10 @@ const LoginForm = (props) => {
 }
 ```
 
-where the properties are accessed through the `prop` object like `props.handleSubmit`.
-Instead, the properties are assigned directly to their own variables.
+where the properties are accessed through the `props` object like `props.handleSubmit`.
+Instead, the properties are assigned directly to variables.
 
-One fast way of implementing the functionality is to change the `loginForm` function of the `App` component like so:
+One fast way of implementing the functionality is to replace the `loginForm` function of the `App` component and introduce a new state variable:
 
 ```js
 const App = () => {
@@ -122,7 +121,7 @@ const App = () => {
 }
 ```
 
-You'll see that there will be a warning with LoginForm because we did not import it.
+***You'll see that there will be a warning with `LoginForm` because we did not import it.***
 Use WebStorm's context actions (hopefully using the keyboard shortcut) to select the option to *add the import statement*.
 The `App` components state now contains the boolean `loginVisible`, which defines if the login form should be shown to the user or not.
 
@@ -135,8 +134,8 @@ Both buttons have their event handlers defined directly in the component:
 <button onClick={() => setLoginVisible(false)}>cancel</button>
 ```
 
-The visibility of the component is defined by giving the component an [inline](/part2/adding_styles_to_react_app#inline-styles) style rule,
-where the value of the [display](https://developer.mozilla.org/en-US/docs/Web/CSS/display) property is `none` if we do not want the component to be displayed:
+The visibility of the component is defined by giving the component an [inline style rule](/part2/adding_styles_to_react_app#inline-styles),
+where the value of the [`display` property](https://developer.mozilla.org/en-US/docs/Web/CSS/display) is `none` if we do not want the component to be displayed:
 
 ```js
 const hideWhenVisible = { display: loginVisible ? 'none' : '' }
@@ -159,6 +158,13 @@ display: 'none';
 ```
 
 If `loginVisible` is `false`, then `display` will not receive any value related to the visibility of the component.
+
+> **FYI:**, Since we are moving components, I'm going to show you how to move the `Footer` component outside of *App.jsx*.
+> Select the entire function for `Footer`, and then in Webstorm, select *Refactor->Move*.
+> Then in the ***To*** field, make sure to add the *Components* Folder in between *src* and *Footer.jsx*
+> Make sure that only Footer is selected as the member to move, and click ***Refactor***.
+> Notice how Webstorm added the import and export portions and moved the `Footer` to its own file, *components/Footer.jsx*!
+> Remember ***utilize the IDE to help you refactor when possible***.
 
 ### The components children, AKA props.children
 
@@ -236,7 +242,11 @@ This time the *children are rendered from within the parent component*:
 </div>
 ```
 
-Unlike the normal props we've seen before, ***`children`*** is automatically added by React and *always exists*.
+Unlike the normal props we've seen before, ***`children`*** are:
+
+- automatically added by React
+- *always exist*.
+
 If a component is defined with an automatically closing `/>` tag, like this:
 
 ```js
@@ -271,7 +281,7 @@ const TaskForm = ({ onSubmit, handleChange, value}) => {
 }
 ```
 
-Next, let's define the form component inside of a `Togglable` component:
+Next, let's define the form component inside of a `Togglable` component in our `taskForm` function in `App.jsx`:
 
 ```js
 <Togglable buttonLabel="new task">
@@ -288,17 +298,18 @@ You can find the code for our current application in its entirety in the *part5-
 
 ### State of the forms
 
-The state of the application currently is in the `App` component.
+The state of the application is currently in the `App` component.
 
-React documentation says the [following](https://react.dev/learn/sharing-state-between-components) about where to place the state:
+Is this where we should keep that state?
+Here's what the [React documentation says](https://react.dev/learn/sharing-state-between-components):
 
 > *Sometimes, you want the state of two components to always change together.*
 > *We recommend lifting that shared state up to their closest common ancestor, and then pass it down via **props**.*
 
-If we think about the *state* in the forms, like a new task's contents, the `App` component does not need it for anything.
+If we think about the *state* in the forms, like a new task's contents, ***the `App` component does not need it for anything***.
 We could move the state in `App` into the appropriate subcomponents.
 
-The component for a task changes like so:
+We'll start by modifying *TaskForm.jsx* to have the task creation state.
 
 ```js
 import { useState } from 'react'
@@ -334,14 +345,14 @@ const TaskForm = ({ createTask }) => {
 export default TaskForm
 ```
 
-> **NOTE** To make task creation work the same, we changed the application so that tasks are unimportant by default.
+> **NOTE** To make task creation work the same, we changed the application so that tasks are ***unimportant by default***.
 > The highlighted line above shows `important` now having the value `false`.
 
-The `newTask` state attribute and the event handler responsible for changing it have been moved from the `App` component to the component responsible for the task form.
+The `newTask` state attribute and its change event handler have been moved from the `App` component to the component responsible for the task form.
 
-There is only one prop left, the `createTask` function, which the form calls when a new task is created.
+`TaskForm` has one prop left, the `createTask` function, which the form calls when a new task is created.
 
-The `App` component becomes simpler now that we have got rid of the `newTask` state and its event handler.
+The `App` component becomes simpler now that we have moved the `newTask` state and its event handler.
 The `addTask` function for creating new tasks receives a new task as a parameter, and the function is the only prop we send to the form:
 
 ```js
@@ -356,7 +367,7 @@ const App = () => {
   }
   // ...
   const taskForm = () => (
-    <Togglable buttonLabel='new task'>
+    <Togglable buttonLabel="new task">
       <TaskForm createTask={addTask} />
     </Togglable>
   )
@@ -372,18 +383,18 @@ branch *part5-5*.
 
 ### References to components with ref
 
-Our current implementation is quite good; it has one aspect that could be improved.
+Our current implementation works; it does have one aspect that could be improved.
 
-After a new task is created, it would make sense to hide the new task form.
+After a *new task is created, it would make sense to hide the new task form*.
 Currently, the form stays visible.
 There is a slight problem with hiding the form.
 *The visibility is controlled with the `visible` variable inside of the `Togglable` component*.
 ***How can we access it outside of the component?***
 
 There are many ways to implement closing the form from the parent component,
-but let's use the [**ref**](https://react.dev/learn/referencing-values-with-refs) mechanism of React, which offers a reference to the component.
+but let's use the [**ref**](https://react.dev/learn/referencing-values-with-refs) mechanism of React, which *offers a reference to the component*.
 
-Let's make the following changes to the `App` component:
+Let's make these changes to the `App` component:
 
 ```js
 import { useState, useEffect, useRef } from 'react' // highlight-line
@@ -393,7 +404,7 @@ const App = () => {
   const taskFormRef = useRef() // highlight-line
 
   const taskForm = () => (
-    <Togglable buttonLabel='new task' ref={taskFormRef}>  // highlight-line
+    <Togglable buttonLabel="new task" ref={taskFormRef}>  // highlight-line
       <TaskForm createTask={addTask} />
     </Togglable>
   )
@@ -402,10 +413,10 @@ const App = () => {
 }
 ```
 
-The [useRef](https://react.dev/reference/react/useRef) hook is used to create a `taskFormRef` ref,
+The [`useRef` hook](https://react.dev/reference/react/useRef) is used to create a `taskFormRef` ref,
 that is assigned to the `Togglable` component containing the creation task form.
-The `taskFormRef` variable acts as a reference to the component.
-This hook ensures the same reference (ref) that is kept throughout re-renders of the component.
+The **`taskFormRef` variable acts as a reference to the component**.
+This hook ensures the same reference (*ref*) that is kept throughout re-renders of the component.
 
 We also need to make the following changes to the `Togglable` component:
 
@@ -451,6 +462,31 @@ This way the component can access the ref that is assigned to it.
 
 The component uses the [`useImperativeHandle`](https://react.dev/reference/react/useImperativeHandle) hook
 to make its `toggleVisibility` function available outside of the component.
+
+> **FYI:** If you add this code as is and you already have eslint configured,
+> you might see that Component `Togglable` causes a nasty-looking warning:
+> *Component definition is missing display name*:
+>
+> ![vscode showing component definition error](../../images/5/25x.png)
+>
+> You can read more about this ESlint rule in the
+> [ESlint react plugin's docs](https://github.com/yannickcr/eslint-plugin-react/blob/master/docs/rules/display-name.md).
+> In short, this rule is about helping you better debug your code.
+> If you run the program, you might notice that *react-devtools* shows this component without a name:
+>
+> ![react devtools showing forwardRef as anonymous](../../images/5/26ea.png)
+>
+> A quick fix is to assign our component a *`displayName`* property:
+>
+> ```js
+> const Togglable = React.forwardRef((props, ref) => {
+>   // ...
+> })
+>
+> Togglable.displayName = 'Togglable'; // highlight-line
+>
+> export default Togglable
+> ```
 
 We can now hide the form by calling `taskFormRef.current.toggleVisibility()` after a new task has been created:
 
@@ -510,11 +546,11 @@ And use it like this:
 </div>
 ```
 
-We create *three separate instances of the component* that all have their separate state:
+We create *three separate instances of the component* that all ***have their separate state***:
 
 ![browser of three togglable components](../../images/5/12e.png)
 
-The `ref` attribute is used for assigning a reference to each of the components in the variables `togglable1`, `togglable2` and `togglable3`.
+The `ref` attribute is used for assigning a reference to each of the components in the variables above: `togglable1`, `togglable2` and `togglable3`.
 
 ### Web developers pledge v5
 
@@ -531,7 +567,9 @@ but will also add a few more items:
 
 <div class="tasks">
 
-### Exercises 5.5-5.10
+### Exercises 5.5-5.11
+
+> ***Hint:***: If you're stuck on one of these exercises, why not revisit `populate`?
 
 #### 5.5 Watchlist frontend, Step 5
 
@@ -595,19 +633,9 @@ const Show = ({ show }) => {
 
 > **Pertinent:** even though the functionality implemented in this part is almost identical to the functionality provided by the `Togglable` component,
 the component can not be used directly to achieve the desired behavior.
-The easiest solution will be ***to add a state to the blog post that controls the displayed form of the blog post***.
+The easiest solution will be ***to add a state to the show that controls the displayed form of the show***.
 
 #### 5.8: Watchlist frontend, Step 8
-
-We notice that something is wrong.
-When a new show is recommended in the app, the name of the user that recommended that show is not shown in the details of the show:
-
-<!-- ![browser showing missing name underneath like button]() -->
-
-It's only when we reload the browser, that the information of the person is displayed.
-This is not acceptable, find out where the problem is and make the necessary correction.
-
-#### 5.9: Watchlist frontend, Step 9
 
 Implement the functionality for the like button.
 Likes are increased by making an HTTP ***PUT*** request to the unique address of the show in the backend.
@@ -617,9 +645,9 @@ If you wanted to add a like to the following show:
 
 ```js
 {
-  _id: "5a43fde2cbd20b12a2c34e91",
+    _id: "5a43fde2cbd20b12a2c34e91",
   user: {
-    _id: "5a43e6b6c37f3d065eaaa581",
+      _id: "5a43e6b6c37f3d065eaaa581",
     username: "powercat",
     name: "Tommy Tiger Jr"
   },
@@ -634,7 +662,7 @@ You would have to make an HTTP PUT request to the address ***/api/shows/5a43fde2
 
 ```js
 {
-  user: "5a43e6b6c37f3d065eaaa581",
+    user: "5a43e6b6c37f3d065eaaa581",
   likes: 1,
   genre: "Comedy",
   title: "Silicon Valley",
@@ -648,10 +676,20 @@ The backend also has to be updated to handle the user reference.
 it is almost certain that you are doing something wrong.
 Stick to using one or the other, and never use both at the same time "just in case".
 
+#### 5.9: Watchlist frontend, Step 9
+
+You may have noticed that something might be wrong with your app.
+When a new show is recommended in the app, the name of the user that recommended that show may not be shown in the details of the show:
+
+<!-- ![browser showing missing name underneath like button]() -->
+
+It's only when we reload the browser, that the information of the person is displayed.
+This is not acceptable, find out where the problem is and make the necessary correction.
+
 #### 5.10: Watchlist frontend, Step 10
 
 Modify the application to list the shows by the number of ***likes***.
-Sorting the shows can be done with the array [sort](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort) method.
+Sorting the shows can be done with the array's [`sort` method](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort).
 
 #### 5.11: Watchlist frontend, Step 11
 
@@ -660,9 +698,9 @@ Also, implement the logic for deleting shows in the frontend.
 
 Your application could look something like this:
 
-![browser of confirmation of show removal](../../images/5/14ea.png)
+![The browser showing confirmation of show removal](../../images/5/14ea.png)
 
-The confirmation dialog for deleting a recommended show is easy to implement with the [window.confirm](https://developer.mozilla.org/en-US/docs/Web/API/Window/confirm) function.
+The confirmation dialog for deleting a recommended show is easy to implement with the [`window.confirm` function](https://developer.mozilla.org/en-US/docs/Web/API/Window/confirm).
 
 Show the button for deleting a recommended show ***only if the show was added by the user***.
 
@@ -681,27 +719,31 @@ If we forget to define it to the component:
 
 The application works, but the browser renders a button that has no label text.
 
-We would like to enforce that when the `Togglable` component is used, the button label text prop must be given a value.
+We would like to enforce that *when the `Togglable` component is used, the **`buttonLabel` text prop must be defined***.
 
-The expected and required props of a component can be defined with the [prop-types](https://github.com/facebook/prop-types) package.
+The expected and required props of a component can be defined with the [*prop-types* package](https://github.com/facebook/prop-types).
 Let's install the package:
 
 ```shell
 npm i prop-types
 ```
 
-We can define the `buttonLabel` prop as a mandatory or **required** string-type prop as shown below:
+We can define the `buttonLabel` prop as **required** for `Togglable` as shown below:
 
 ```js
 import PropTypes from 'prop-types'
+// ..
 
 const Togglable = React.forwardRef((props, ref) => {
   // ..
 })
 
+Togglable.displayName = "Togglable"
+// highlight-start
 Togglable.propTypes = {
   buttonLabel: PropTypes.string.isRequired
 }
+// highlight-end
 ```
 
 The console will display the following error message if the prop is left undefined:
@@ -709,7 +751,7 @@ The console will display the following error message if the prop is left undefin
 ![console error stating buttonLabel is undefined](../../images/5/15.png)
 
 The application still works and nothing forces us to define props despite the `PropTypes` definitions.
-Mind you, it is unprofessional to leave **any** red output in the browser console.
+Mind you, *it is unprofessional to leave **any** red output in the browser console*.
 
 Let's also define `PropTypes` to the `LoginForm` component:
 
@@ -724,7 +766,7 @@ const LoginForm = ({
    password
   }) => {
     // ...
-  }
+}
 
 LoginForm.propTypes = {
   handleSubmit: PropTypes.func.isRequired,
@@ -744,16 +786,16 @@ If the type of a passed prop is wrong, e.g. if we try to define the `handleSubmi
 In part 3 we configured the [ESlint](/part3/validation_and_es_lint#lint) code style tool to the backend.
 Let's take ESlint to use in the frontend as well.
 
-Vite has installed ESlint to the project by default, so all that's left for us to do is define our desired configuration in the *.estlintrc.cjs* file.
+Vite has installed ESlint to the project by default, so all that's left for us to do is define our desired configuration in the *.eslintrc.cjs* file.
 
-Next, we will start testing the frontend and in order to avoid undesired and irrelevant linter errors
+Next, we will start testing the frontend and to avoid undesired and irrelevant linter errors
 we will install the [eslint-plugin-jest](https://www.npmjs.com/package/eslint-plugin-jest) package:
 
 ```bash
 npm i -D eslint-plugin-jest
 ```
 
-Let's create a *.estlintrc.cjs* file with the following contents:
+Let's create a *.eslintrc.cjs* file with the following contents:
 
 ```js
 module.exports = {
@@ -769,7 +811,7 @@ module.exports = {
     'plugin:react/jsx-runtime',
     'plugin:react-hooks/recommended',
   ],
-  ignorePatterns: ['dist', '.estlintrc.cjs'],
+  ignorePatterns: ['dist', '.eslintrc.cjs'],
   parserOptions: { ecmaVersion: 'latest', sourceType: 'module' },
   settings: { react: { version: '18.2' } },
   plugins: ['react-refresh', 'jest'],
@@ -784,10 +826,10 @@ module.exports = {
     ],
     "quotes": [
         "error",
-        "single"
+        "double"
     ],
     "semi": [
-        "warn",
+        "error",
         "always"
     ],
     "eqeqeq": "error",
@@ -798,21 +840,22 @@ module.exports = {
     "arrow-spacing": [
         "error", { "before": true, "after": true }
     ],
+    'react-refresh/only-export-components': [
+      'warn',
+      { allowConstantExport: true },
+    ],
     "no-console": 0,
     "no-debugger": 0,
     "react/react-in-jsx-scope": "off",
     "react/prop-types": 0,
-  },
-  settings: {
-    "react": {
-      "version": "detect"
-    }
   }
 }
 ```
 
 > Reminder: We may need to turn on our ESLint settings like we did in [part 3](/part3/validation_and_es_lint#configure-webstorm-with-eslint)
 > Make sure that you turn on *`--eslint-fix-on-save`* and configure the node interpreter for this new project again.
+> If you are running into issues I would restart WebStorm.
+> You can also introduce a space anywhere in a file and then save and it should then fix all the errors.
 > We may update this with additional configurations, but for now, you can ask in discord if there are any issues.
 
 Let's also create [.eslintignore](https://eslint.org/docs/user-guide/configuring#ignoring-files-and-directories) file with the following contents to the repository root
@@ -833,31 +876,10 @@ npm run Lint
 
 or using the editor's Eslint plugin.
 
-Component `Togglable` causes a nasty-looking warning *Component definition is missing display name*:
+> **Pertinent:** Before you continue, ***make sure to fix all of the eslint errors,***
+> since our configuration is introducing new rules
+> that we have not exactly followed up until this point in time.
 
-![vscode showing component definition error](../../images/5/25x.png)
-
-The react-devtools also reveals that the component does not have a name:
-
-![react devtools showing forwardRef as anonymous](../../images/5/26ea.png)
-
-Fortunately, this is easy to fix
-
-```js
-import { useState, useImperativeHandle } from 'react'
-import PropTypes from 'prop-types'
-
-const Togglable = React.forwardRef((props, ref) => {
-  // ...
-})
-
-Togglable.displayName = 'Togglable'; // highlight-line
-
-export default Togglable
-```
-
-After this, I just went through the files and saved each one by adding a space to each file and then saving,
-which causes eslint to run and fix the correctable items.
 You can find the code for our current application in its entirety in the *part5-7* branch of
 [this GitHub repository](https://github.com/comp227/part2-tasks/tree/part5-7).
 
@@ -873,6 +895,6 @@ Define `PropTypes` for one of the components of your application, and ***Add ESl
 Define the configuration according to your liking.
 Fix all of the linter errors.
 
-Vite has installed ESlint to the project by default, so all that's left for you to do is define your desired configuration in the *.estlintrc.cjs* file.
+Vite has installed ESlint to the project by default, so all that's left for you to do is define your desired configuration in the *.eslintrc.cjs* file.
 
 </div>

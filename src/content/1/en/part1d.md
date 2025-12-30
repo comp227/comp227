@@ -523,6 +523,31 @@ Code will not miraculously start working after writing large amounts of addition
 
 Old-school, print-based debugging can at times be a good idea.
 I prefer using an IDE and its breakpoints though when possible.
+
+To use the debugger, we have to configure an additional setting that tells WebStorm what to do when you want to launch your program.
+
+First, near the play button at the top of the window, click on the ***Down arrow*** icon in between the *Current File* and the Play icon, and select ***Edit Configurations...***
+
+![status bar showing down arrow](../../images/1/custom/webstorm_edit_config.png)
+
+This brings up the following dialog box, where you'll choose the *plus icon* to ***Add new run configuration...***, and then you can select ***JavaScript Debug***.
+
+> Notice there is an option to create a *Node.js* configuration, but that won't be necessary for a few more weeks, so leave it for now.
+
+![WebStorm showing run/debug configurations menu](../../images/1/custom/webstorm_add_run_config.png)
+
+The most important part here is to specify the URL, which will be *`http://localhost:5173`*.
+You can name the Configuration so that it is easier to remember, for me, I just named it `localhost:5173`.
+The configuation should look something like this:
+
+![WebStorm's run configuration options for localhost:5173](../../images/1/custom/webstorm_run_config.png)
+
+Once everything is set, you can then click **OK**, and you'll now see that Current File has been replaced by ***localhost:5173***!
+
+With the debugger configured, let's go review some theory and how we will utilize it in WebStorm.
+
+### Debugging in WebStorm
+
 A **breakpoint** is a special IDE-based marker that tells your application to ***break*** (pause executing code) when it reaches a particular ***point*** (line of code).
 Breakpoints can be turned on or off by clicking on the line number to the left of a line:
 
@@ -615,7 +640,7 @@ In this case, we might be able to find what the issue may be.
 
 #### A quick aside about logging
 
-> **NB** Some of you have had much more experience merely printing things to the console instead of using the debugger.
+> **Pertinent** Some of you have had much more experience merely printing things to the console instead of using the debugger.
 > While printing things to the console is still helpful, I would also prefer for you to learn to use the debugger.
 > Nonetheless, when you the ***Console*** tab (or `console.log`) for debugging, **don't combine objects** in a Java-like fashion by using the plus operator.
 > If you write:
@@ -1284,7 +1309,7 @@ You may find the following links useful:
 - Some courses on [Egghead.io](https://egghead.io) like [Start Learning React](https://egghead.io/courses/start-learning-react) are of high quality,
   and the recently updated [Beginner's Guide to React](https://egghead.io/courses/the-beginner-s-guide-to-reactjs) is also relatively good;
   both courses introduce concepts that will also be introduced later on in this course.
-    - **NB** The first one uses class components but the latter uses the new functional ones.
+    - **FYI** The first one uses class components but the latter uses the new functional ones.
 
 ### Web developers pledge
 
@@ -1352,6 +1377,9 @@ Any mistakes here will impact your grade.
 >> Remember what was discussed [in part 1 on how to fix it](/part1/introduction_to_react#do-not-render-objects).
 
 #### 1.6: studytracker Step 1
+
+> **Pertinent:** Notice how this is labeled *studytracker*?
+> This means it should follow the rules as outlined in [part 1 related to folders](/part1/introduction_to_react#exercises-1-1-1-2)
 
 Let's figure out a way to devise a web application that helps track your self-reported feelings on whether or not you had a good study day.
 There are only three options: ***yeah***, ***kinda***, and ***nah***.
@@ -1479,6 +1507,8 @@ The application's state should still be kept in the root `App` component.
 
 #### 1.11*: studytracker Step 6
 
+> *Why is there a star/asterisk on the exercise? See [here](/part0/general_info#taking-the-course) for the explanation.*
+
 Display the statistics in an HTML [table](https://developer.mozilla.org/en-US/docs/Learn/HTML/Tables/Basics),
 so that your application looks roughly like this:
 
@@ -1548,7 +1578,7 @@ Expand your application so that you can vote for the displayed joke.
 
 ![joke app with the votes button added](../../images/1/19a.png)
 
-> **NB** store the votes of each joke into an array or object in the component's state.
+> **Pertinent:** store the votes of each joke into an array or object in the component's state.
 Remember that the correct way of updating state stored in complex data structures like objects and arrays is to make a copy of the state.
 >
 > You can create a copy of an object like this:

@@ -47,7 +47,7 @@ If you do see the options, I'd also like you to verify that you have:
 - *git bash* - (a command-line/terminal program) that comes with the git package we'll install
 - a package manager - (something like *winget*, *choco*, *scoop* or *brew*)
 
-If you have all of that then you can [move on to step 4](#4-install-node).
+If you have all of that then you can [move on to step 4](#4-install-nvm).
 
 If this is all foreign to you, then please read on.
 
@@ -566,13 +566,41 @@ As for the code that you put in there, all you will do is write a comment that:
 
 Once you do that, should you verify that your files have all turned **white in color** in your webstorm files project.
 
-As a final verification, add a screenshot of your WebStorm IDE showing the embedded git bash terminal (or your external terminal) overlayed at the bottom and having typed `nvm` list.
+As a final verification, add a screenshot of your WebStorm IDE showing the embedded git bash terminal overlayed at the bottom and having typed `nvm list` and `git status`.
+> If you are on a mac, you can have your external editor showing at the bottom of the screen instead, ensure we can still see the rest of webstorm.
 
 Please name the screenshot file with the name *`09`*.
 Make sure the file has the correct extension.
 Make a new change to your *Hello.jsx* file mentioning you uploaded the picture and then use `git push` in your terminal of choice.
 
 You can verify that you did this correctly by looking at github again!
+
+#### Troubleshooting Exercise 0.9
+
+Are your files still different colors?
+You may not have setup the previous parts correctly.
+If you missed multiple parts here, then part of this should be a sign that you may need to **slow down while reading this content**.
+
+Here are some things to check:
+
+- Is your file watcher running?
+    - You should see a status message at the bottom of WebStorm to let us know the file watcher is in fact running.  You should see the message popup everytime you edit the jsx file.
+      ![message showing file watcher is running](../../images/0/custom/file_watcher_status_bar.png)
+    - If you don't see this popup, please review [the file watcher settings](#9-additional-webstorm-setup)
+- Did you create the send-all command?
+    - If your terminal pops up with this message:
+      ![terminal showing send-all not there](../../images/0/custom/file_watcher_send_all_command.png)
+    - Then you did not add the [`send-all` alias](#3-configure-git).
+- Did you use the correct alias so that the terminal shows up from within WebStorm? See the #mac discussion in discord for further details, but for now, using `/bin/bash` works.
+- Did you login to GitHub using your credentials and told it to always remember?
+    If you are getting any popups like this, do not close them, but save your credentials instead.
+    ![Windows GitHub Login](../../images/0/custom/windows_github.png)
+    ![Mac GitHub Login](../../images/0/custom/mac_github.png)
+- Is `git push` working from your terminal?
+    - If you have yet to work with the git terminal, you may need to login for the first time using the command line.
+    - You can use your previous token or generate a new one and make sure to store it.
+
+Again, make sure that you pay close attention to any messages that come up!
 
 </div>
 

@@ -9,7 +9,7 @@ const partNameTranslations = {
   en: [
     'Fundamentals of Web apps',
     'Introduction to React',
-    'Communicating with server',
+    'Communicating with a server',
     'Programming a server with NodeJS and Express',
     'Testing Express servers, user administration',
     'Testing React apps',

@@ -619,12 +619,14 @@ then I would consider digging deeper by leveraging WebStorm's powerful debugger 
 [we covered in part 1](/part1/a_more_complex_state_debugging_react_apps#web-storm-ide-debugger-introduction).
 You can also get help from search tools and LLMs to help you understand the errors, just not to produce solutions.
 
-The original author added this chapter to the material after the model answer for the next question exploded completely
-(due to props being of the wrong type), and it had to be debugged using `console.log`.
-
 ***As you continue through, please remember the
 [pledge](/part1/a_more_complex_state_debugging_react_apps#web-developers-pledge)
 you took to help you improve as a web developer***.
+
+> **FYI:** If you see errors in ESLint related to props validation and you are unsure what they are,
+> you may want to go back and look at the [explanation about those errors in part 1](/part1/introduction_to_react#possible-error-message)
+> **Also:** The original author added this chapter to the material after the model answer for the next question exploded completely
+(due to `props` being of the wrong type), and it had to be debugged using `console.log`.
 
 </div>
 
@@ -659,7 +661,7 @@ Your folders for this repo should be:
 
 Let's finish the code for rendering companies' handheld arcade games and systems from exercises 1.1 - 1.5.
 If you need help getting your solution to a good state, please let me know.
-I would recommend that you use `vite` from the base directory (like we did in [part 1](/introduction_to_react#starting-development))
+I would recommend that you use `vite` from the base directory, like we did in [part 1](/part1/introduction_to_react#starting-development)
 and then just copy over your old *src* folder from your arcade folder from lab 1.
 
 Remember that your files should all be white in color. You should also make sure that you **push** your code anytime that you decide to stop for a while.

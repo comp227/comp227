@@ -7,113 +7,115 @@ lang: en
 
 <div class="content">
 
-Users must be able to log into our application, and when a user is logged in,
+Now that we have created users on the backend, let's move on and add more functionality related to users and their tasks.
+In particular, users must be able to log into our application, and when a user is logged in,
 their user information must automatically be attached to any new tasks they create.
 
-We will now implement support for
+Let's start by implementing support for
 [**token-based authentication**](https://www.digitalocean.com/community/tutorials/the-ins-and-outs-of-token-based-authentication#how-token-based-works) to the backend.
 
 The principles of token-based authentication are depicted in the following sequence diagram:
 
 ![sequence diagram of token-based authentication](../../images/4/16e.png)
 
-- User starts by logging in using a login form implemented with React
+1. User starts by logging in using a login form implemented with React
     - We will add the login form to the frontend in [part 5](/part5)
-- This causes the React code to send the username and the password to the server address ***/api/login*** as a HTTP POST request.
-- If the username and the password are correct, the server generates a **token** that somehow identifies the logged-in user.
+2. This causes the React code to send the username and the password to the server address ***/api/login*** as a HTTP POST request.
+3. If the username and the password are correct, the server generates a **token** that somehow identifies the logged-in user.
     - The token is signed digitally, making it highly impracticable to falsify cryptographically
-- The backend responds with a status code indicating the operation was successful and returns the token with the response.
-- The browser saves the token, for example to the state of a React application.
-- When the user creates a new task (or does some other operation requiring identification), the React code sends the token to the server with the request.
-- The server uses the token to identify the user
+4. The backend responds with a status code indicating the operation was successful and returns the token with the response.
+5. The browser saves the token, for example to the state of a React application.
+6. When the user creates a new task (or does some other operation requiring identification), the React code sends the token to the server with the request.
+7. The server uses the token to identify the user
 
 Let's first implement the functionality for logging in.
-Install the [jsonwebtoken](https://github.com/auth0/node-jsonwebtoken) library, which allows us to generate [JSON web tokens](https://jwt.io/).
+Install the [*jsonwebtoken* library](https://github.com/auth0/node-jsonwebtoken), which allows us to generate [JSON web tokens](https://jwt.io/).
 
 ```bash
 npm i jsonwebtoken
 ```
 
-The code for login functionality goes to the file *controllers/login.js*.
+The code for logging in goes to the file *controllers/login.js*.
 
 ```js
-const jwt = require('jsonwebtoken')
-const bcrypt = require('bcrypt')
-const loginRouter = require('express').Router()
-const User = require('../models/user')
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
+const loginRouter = require("express").Router();
+const User = require("../models/user");
 
-loginRouter.post('/', async (request, response) => {
-  const { username, password } = request.body
+loginRouter.post("/", async (request, response) => {
+  const { username, password } = request.body;
 
-  const user = await User.findOne({ username })
+  const user = await User.findOne({ username });
   const passwordCorrect = user === null
     ? false
-    : await bcrypt.compare(password, user.passwordHash)
+    : await bcrypt.compare(password, user.passwordHash);
 
   if (!(user && passwordCorrect)) {
     return response.status(401).json({
-      error: 'invalid username or password'
-    })
+      error: "invalid username or password"
+    });
   }
 
   const userForToken = {
     username: user.username,
     id: user._id,
-  }
+  };
 
-  const token = jwt.sign(userForToken, process.env.SECRET)
+  const token = jwt.sign(userForToken, process.env.SECRET);
 
   response
     .status(200)
-    .send({ token, username: user.username, name: user.name })
-})
+    .send({ token, username: user.username, name: user.name });
+});
 
-module.exports = loginRouter
+module.exports = loginRouter;
 ```
 
-The code starts by searching for the user from the database by the `username` attached to the request.
+The code starts by searching for the user from the database via the `username` attached to the request.
 
 ```js
-const user = await User.findOne({ username })
+const user = await User.findOne({ username });
 ```
 
-Next, it checks the `password`, also attached to the request.
+Next, it checks the `password`, which is also attached to the request.
 
 ```js
 const passwordCorrect = user === null
   ? false
-  : await bcrypt.compare(password, user.passwordHash)
+  : await bcrypt.compare(password, user.passwordHash);
 ```
 
-Because the passwords themselves are not saved to the database, but **hashes** calculated from the passwords,
-the `bcrypt.compare` method is used to check if the password is correct:
+Remember that passwords themselves are not saved to the database.
+Instead, we store the **hashes** calculated from the passwords.
+This means we need to use `bcrypt.compare` to check if the password is correct:
 
 ```js
-await bcrypt.compare(password, user.passwordHash)
+await bcrypt.compare(password, user.passwordHash);
 ```
 
 If the user is not found, or the password is incorrect,
-the request is responded with the status code [401 unauthorized](https://www.rfc-editor.org/rfc/rfc9110.html#name-401-unauthorized).
+we respond to the request with the status code [401 unauthorized](https://www.rfc-editor.org/rfc/rfc9110.html#name-401-unauthorized).
 The reason for the failure is explained in the response body.
 
 ```js
 if (!(user && passwordCorrect)) {
   return response.status(401).json({
-    error: 'invalid username or password'
-  })
+    error: "invalid username or password"
+  });
 }
 ```
 
 If the password is correct, a token is created with the method `jwt.sign`.
-The token contains the username and the user id in a digitally signed form.
+The token contains the `username` and the user `id` in a digitally signed form.
 
 ```js
 const userForToken = {
   username: user.username,
   id: user._id,
-}
+};
 
-const token = jwt.sign(userForToken, process.env.SECRET)
+const token = jwt.sign(userForToken, process.env.SECRET);
 ```
 
 The token has been digitally signed using a string from the environment variable `SECRET` as the *secret*.
@@ -126,20 +128,20 @@ The generated token and the username of the user are sent back in the response b
 ```js
 response
   .status(200)
-  .send({ token, username: user.username, name: user.name })
+  .send({ token, username: user.username, name: user.name });
 ```
 
 Now the code for login just has to be added to the application by adding the new router to *app.js*.
 
 ```js
-const loginRouter = require('./controllers/login')
+const loginRouter = require("./controllers/login");
 
 //...
 
-app.use('/api/login', loginRouter)
+app.use("/api/login", loginRouter);
 ```
 
-Let's try logging in using the WebStorm REST-client:
+Let's try logging in using the WebStorm REST client:
 
 ![WebStorm rest post with username/password](../../images/4/17e.png)
 
@@ -148,7 +150,7 @@ The following is printed to the console:
 
 ```html
 <body>
-<pre>Error: secretOrPrivateKey must have a value<br> &nbsp; &nbsp;at module.exports [as sign] (C:\Users\Osvaldo\git\part3-tasks-backend\node_modules\jsonwebtoken\sign.js:105:20)<br> &nbsp; &nbsp;at C:\Users\Osvaldo\git\part3-tasks-backend\controllers\login.js:25:23</pre>
+<pre>Error: secretOrPrivateKey must have a value<br> &nbsp; &nbsp;at module.exports [as sign] (C:\Users\powercat\comp227\part3\tasks-backend\node_modules\jsonwebtoken\sign.js:105:20)<br> &nbsp; &nbsp;at C:\Users\powercat\comp227\part3\tasks-backend\controllers\login.js:25:23</pre>
 </body>
 
 ...
@@ -174,11 +176,11 @@ This is helpful when you start having a larger test file where you have differen
 
 ### Limiting creating new tasks to logged-in users
 
-Let's change creating new tasks so that it is only possible if the post request has a valid token attached.
-The task is then saved to the tasks list of the user identified by the token.
+Let's change creating new tasks so that it is *only possible if the POST request has a valid token attached*.
+The task is then saved to the `tasks` list of the user identified by the token.
 
 There are several ways of sending the token from the browser to the server.
-We will use the [Authorization](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Authorization) header.
+We will use the [Authorization header](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Authorization).
 The header also tells which [authentication scheme](https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication#Authentication_schemes) is used.
 This can be necessary if the server offers multiple ways to authenticate.
 Identifying the scheme tells the server how the attached credentials should be interpreted.
@@ -192,73 +194,73 @@ the string `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9`, the Authorization header will
 Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9
 ```
 
-Creating new *tasks* will change like so:
+Our *controllers/tasks.js* will change like so:
 
 ```js
-const jwt = require('jsonwebtoken') //highlight-line
+const jwt = require("jsonwebtoken"); //highlight-line
 
 // ...
 //highlight-start
 const getTokenFrom = request => {
-  const authorization = request.get('authorization')
-  if (authorization && authorization.startsWith('Bearer ')) {
-    return authorization.replace('Bearer ', '')
+  const authorization = request.get("authorization");
+  if (authorization && authorization.startsWith("Bearer ")) {
+    return authorization.replace("Bearer ", "");
   }
-  return null
-}
-  //highlight-end
+  return null;
+};
+//highlight-end
 
-tasksRouter.post('/', async (request, response) => {
-  const body = request.body
+tasksRouter.post("/", async (request, response) => {
+  const body = request.body;
 //highlight-start
-  const decodedToken = jwt.verify(getTokenFrom(request), process.env.SECRET)
+  const decodedToken = jwt.verify(getTokenFrom(request), process.env.SECRET);
   if (!decodedToken.id) {
-    return response.status(401).json({ error: 'token invalid' })
+    return response.status(401).json({ error: "token invalid" });
   }
 
-  const user = await User.findById(decodedToken.id)
+  const user = await User.findById(decodedToken.id);
 //highlight-end
 
   const task = new Task({
     content: body.content,
-    important: body.important === undefined ? false : body.important,
+    important: body.important === undefined ? false : Boolean(body.important), // highlight-line
     date: new Date(),
     user: user._id
-  })
+  });
 
-  const savedTask = await task.save()
-  user.tasks = user.tasks.concat(savedTask._id)
-  await user.save()
+  const savedTask = await task.save();
+  user.tasks = user.tasks.concat(savedTask._id);
+  await user.save();
 
-  response.status(201).json(savedTask)
+  response.status(201).json(savedTask);
 })
 ```
 
 The helper function `getTokenFrom` isolates the token from the ***authorization*** header.
 The validity of the token is checked with `jwt.verify`.
-The method also decodes the token, or returns the Object which the token was based on.
+The method also decodes the token or returns the Object that the token was based on.
 
 ```js
-const decodedToken = jwt.verify(token, process.env.SECRET)
+const decodedToken = jwt.verify(token, process.env.SECRET);
 ```
 
 The object decoded from the token contains the `username` and `id` fields, which tell the server who made the request.
 
-If the object decoded from the token does not contain the user's identity (`decodedToken.id` is undefined),
+If the object decoded from the token does not contain the user's identity (`decodedToken.id` is *`undefined`*),
 error status code [401 unauthorized](https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.4.2)
 is returned and the reason for the failure is explained in the response body.
 
 ```js
 if (!decodedToken.id) {
   return response.status(401).json({
-    error: 'token invalid'
-  })
+    error: "token invalid"
+  });
 }
 ```
 
 When the identity of the maker of the request is resolved, the execution continues as before.
 
-A new task can now be created using Postman if the ***authorization*** header is given the correct value,
+A new task can now be created using a REST client if the ***authorization*** header is given the correct value,
 something like the string `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9`, where the second value is the token returned by the ***login*** operation.
 
 Using Postman this looks as follows:
@@ -272,7 +274,7 @@ and with the WebStorm REST client
 ### Error handling
 
 Token verification can also cause a `JsonWebTokenError`.
-If we for example remove a few characters from the token and try creating a new task, this happens:
+For example, if we remove a few characters from the token and try creating a new task, this happens:
 
 ```bash
 JsonWebTokenError: invalid signature
@@ -282,74 +284,76 @@ JsonWebTokenError: invalid signature
     at tasksRouter.post (/Users/powercat/comp227/part3/tasks-backend/controllers/tasks.js:40:30)
 ```
 
-Once we get an exception, if we are not running nodemon, we would may have to restart our program,
+Once we get an exception, if we are not running *nodemon* we may have to restart our program,
 as any subsequent bad requests could be met with an *Internal Server Error (500)*.
 
 There are many possible reasons for a decoding error.
 The token can be faulty (like in our example),
 falsified, or expired.
-Let's extend our errorHandler *middleware* to take into account the different decoding errors.
+Let's extend our `errorHandler` in *utils/middleware.js* to take into account the different decoding errors.
 
 ```js
 const unknownEndpoint = (request, response) => {
-  response.status(404).send({ error: 'unknown endpoint' })
+  response.status(404).send({ error: "unknown endpoint" });
 }
 
 const errorHandler = (error, request, response, next) => {
-  logger.error(error.message)
+  logger.error(error.message);
   
-  if (error.name === 'CastError') {
+  if (error.name === "CastError") {
     return response.status(400).send({
-      error: 'malformatted id'
-    })
-  } else if (error.name === 'ValidationError') {
+      error: "malformatted id"
+    });
+  } else if (error.name === "ValidationError") {
     return response.status(400).json({
       error: error.message 
-    })
-  } else if (error.name === 'JsonWebTokenError') {  // highlight-line
-    return response.status(401).json({ // highlight-line
-      error: 'invalid token' // highlight-line
-    }) // highlight-line
+    });
+    // highlight-start
+  } else if (error.name === "JsonWebTokenError") { 
+    return response.status(401).json({ 
+      error: "invalid token"
+    });
+    //highlight-end
   }
 
-  next(error)
-}
+  next(error);
+};
 ```
 
 The current application code can be found on
 [GitHub](https://github.com/comp227/part3-tasks-backend/tree/part4-9), branch *part4-9*.
 
 If the application has multiple interfaces requiring identification, JWT's validation should be separated into its own middleware.
-An existing library like [express-jwt](https://www.npmjs.com/package/express-jwt) could also be used.
+An existing library like [*express-jwt*](https://www.npmjs.com/package/express-jwt) could also be used.
 
 ### Problems of Token-based authentication
 
 Token authentication is pretty easy to implement, but it contains one problem.
-Once the API user, (e.g. a React app) gets a token, the API has a blind trust to the token holder.
+Once the API user, (e.g. a React app) gets a token, the API has a blind trust with the token holder.
 What if the access rights of the token holder should be revoked?
 
 There are two solutions to the problem.
 The easier one is to limit the validity period of a token:
 
 ```js
-loginRouter.post('/', async (request, response) => {
-  const { username, password } = request.body
+loginRouter.post("/", async (request, response) => {
+  const { username, password } = request.body;
 
   const user = await User.findOne({ username })
   const passwordCorrect = user === null
     ? false
-    : await bcrypt.compare(password, user.passwordHash)
+    : await bcrypt.compare(password, user.passwordHash);
 
   if (!(user && passwordCorrect)) {
     return response.status(401).json({
-      error: 'invalid username or password'
-    })
+      error: "invalid username or password"
+    });
   }
 
   const userForToken = {
     username: user.username,
     id: user._id,
-  }
+  };
 
   // token expires in 60*60 seconds, that is, in one hour
   // highlight-start
@@ -357,13 +361,13 @@ loginRouter.post('/', async (request, response) => {
     userForToken, 
     process.env.SECRET,
     { expiresIn: 60*60 }
-  )
+  );
   // highlight-end
 
   response
     .status(200)
-    .send({ token, username: user.username, name: user.name })
-})
+    .send({ token, username: user.username, name: user.name });
+});
 ```
 
 Once the token expires, the client app needs to get a new token.
@@ -373,29 +377,29 @@ The error handling middleware should be extended to give a proper error in the c
 
 ```js
 const errorHandler = (error, request, response, next) => {
-  logger.error(error.message)
+  logger.error(error.message);
 
-  if (error.name === 'CastError') {
-    return response.status(400).send({ error: 'malformatted id' })
-  } else if (error.name === 'ValidationError') {
-    return response.status(400).json({ error: error.message })
-  } else if (error.name === 'JsonWebTokenError') {
+  if (error.name === "CastError") {
+    return response.status(400).send({ error: "malformatted id" });
+  } else if (error.name === "ValidationError") {
+    return response.status(400).json({ error: error.message });
+  } else if (error.name === "JsonWebTokenError") {
     return response.status(401).json({
-      error: 'invalid token'
-    })
+      error: "invalid token"
+    });
   // highlight-start  
-  } else if (error.name === 'TokenExpiredError') {
+  } else if (error.name === "TokenExpiredError") {
     return response.status(401).json({
-      error: 'token expired'
-    })
+      error: "token expired"
+    });
   }
   // highlight-end
 
-  next(error)
+  next(error);
 }
 ```
 
-The shorter the expiration time, the more safe the solution is.
+The *shorter the expiration time, the more safe the solution is*.
 So if the token gets into the wrong hands or user access to the system needs to be revoked, the token is only usable for a limited amount of time.
 On the other hand, a short expiration time forces a potential pain to a user, one must login to the system more frequently.
 
@@ -407,7 +411,7 @@ This kind of solution is often called a **server-side session**.
 The negative aspect of server-side sessions is the increased complexity in the backend and also the effect on performance
 since the token validity needs to be checked for each API request to the database.
 Database access is considerably slower compared to checking the validity of the token itself.
-That is why it is quite common to save the session corresponding to a token to a **key-value database** such as [Redis](https://redis.io/)
+That is why it is quite common to save the session corresponding to a token to a **key-value database** such as [***Redis***](https://redis.io/)
 that is limited in functionality compared to a MongoDB or relational databases but extremely fast in some usage scenarios.
 
 When server-side sessions are used, the ***token is a random string*** (quite often).
@@ -428,7 +432,7 @@ Render routes all traffic between a browser and the Render server over HTTPS.
 
 We will implement login to the frontend in the [next part](/part5).
 
-> Pertinent: At this stage, in the deployed tasks app, it is expected that the creating a task feature will stop working as the backend login feature is not yet linked to the frontend.
+> **Pertinent:** At this stage, in the deployed tasks app, it is expected that the creating a task feature will stop working as the backend login feature is not yet linked to the frontend.
 
 </div>
 
@@ -441,18 +445,18 @@ The safest way is to follow the story from part 4 chapter [User administration](
 to the chapter [Token-based authentication](/part4/token_authentication).
 You can of course also use your creativity.
 
-**One more warning:** If you notice you are mixing `async`/`await` and `then` calls, it is 99% certain you are doing something wrong.
-Use either or, never both.
+> **Warning:** If you notice you are mixing `async`/`await` and `then` calls, it is 99% certain you are doing something wrong.
+> Use either or, never both.
 
 #### 4.15: watchlist expansion, Step 3
 
 Implement a way to create new users by doing an HTTP POST request to address ***api/users***.
 Users have a *username, password and name*.
 
-Do not save passwords to the database as clear text,
+**Do not save passwords to the database as clear text**,
 but use the ***bcrypt*** library like we did in part 4 chapter [Creating new users](/part4/user_administration#creating-users).
 
-> **NB** Some Windows users have had problems with ***bcrypt***.
+> **FYI:** Some Windows users have had problems with ***bcrypt***.
 > If you run into problems, remove the library with command
 >
 > ```bash
@@ -469,24 +473,26 @@ The list of users can, for example, look as follows:
 
 #### 4.16*: watchlist expansion, Step 4
 
-Add a feature which adds the following restrictions to creating new users: Both username and password must be given.
-Both username and password must be at least 3 characters long.
-The username must be unique.
+Add a feature which adds the following restrictions to creating new users:
+
+- Both username and password must be given.
+- Both username and password must be at least 3 characters long.
+- The username must be unique.
 
 The operation must respond with a suitable status code and some kind of an error message if an invalid user is created.
 
-> **NB** Do not test password restrictions with Mongoose validations.
-It is not a good idea because the password received by the backend and the password hash saved to the database are not the same thing.
-The password length should be validated in the controller as we did in [part 3](/part3/node_js_and_express) before using Mongoose validation.
+> **Pertinent:** Do not test password restrictions with Mongoose validations.
+> It is not a good idea because the password received by the backend and the password hash saved to the database are not the same thing.
+> The password length should be validated in the controller as we did in [part 3](/part3/node_js_and_express) before using Mongoose validation.
 
 Also, implement tests that ensure invalid users are not created and that an invalid add user operation returns a suitable status code and error message.
 
 #### 4.17: watchlist expansion, Step 5
 
-Expand `show` so that each show contains information on the recommender of that show.
+Expand `show` so that *each show contains information on the recommender of that show*.
 
 Modify adding new shows so that when a new show is created, ***any*** user from the database is designated as its recommender (for example the one found first).
-Implement this according to part 4 chapter [populate](/part4/user_administration#populate).
+Implement this according to part 4's [populate section](/part4/user_administration#populate).
 Which user is designated as the recommender does not matter just yet.
 The functionality is finished in exercise 4.19.
 
@@ -500,7 +506,7 @@ and listing all users also displays the shows they recommended:
 
 #### 4.18: watchlist expansion, Step 6
 
-Implement token-based authentication according to part 4 chapter [Token authentication](/part4/token_authentication).
+Implement token-based authentication according to part 4's [Token authentication section](/part4/token_authentication).
 
 #### 4.19: watchlist expansion, Step 7
 
@@ -517,17 +523,17 @@ The middleware should take the token from the ***Authorization*** header and pla
 In other words, if you register this middleware in the *app.js* file before all routes
 
 ```js
-app.use(middleware.tokenExtractor)
+app.use(middleware.tokenExtractor);
 ```
 
 Routes can access the token with `request.token`:
 
 ```js
-showsRouter.post('/', async (request, response) => {
+showsRouter.post("/", async (request, response) => {
   // ..
-  const decodedToken = jwt.verify(request.token, process.env.SECRET)
+  const decodedToken = jwt.verify(request.token, process.env.SECRET);
   // ..
-})
+});
 ```
 
 Remember that a normal [middleware function](/part3/node_js_and_express#middleware) is a function with three parameters,
@@ -537,8 +543,8 @@ that at the end calls the last parameter `next` to move the control to the next 
 const tokenExtractor = (request, response, next) => {
   // code that extracts the token
 
-  next()
-}
+  next();
+};
 ```
 
 #### 4.21*: watchlist expansion, Step 9
@@ -551,10 +557,10 @@ If deleting a show is attempted without a token or by an invalid user, the opera
 Notice that if you fetch a show from the database,
 
 ```js
-const show = await Show.findById(...)
+const show = await Show.findById(...);
 ```
 
-the field `show.user` does not contain a string, but an Object.
+the field `show.user` does not contain a `string`, but an `Object`.
 So if you want to compare the id of the object fetched from the database and a string id, a normal comparison operation does not work.
 The id fetched from the database must be parsed into a string first.
 
@@ -572,68 +578,68 @@ Now create a new middleware `userExtractor`, that finds out the user and sets it
 When you register the middleware in *app.js*
 
 ```js
-app.use(middleware.userExtractor)
+app.use(middleware.userExtractor);
 ```
 
 the user will be set in the field `request.user`:
 
 ```js
-showsRouter.post('/', async (request, response) => {
+showsRouter.post("/", async (request, response) => {
   // get user from request object
-  const user = request.user
+  const user = request.user;
   // ..
-})
+});
 
-showsRouter.delete('/:id', async (request, response) => {
+showsRouter.delete("/:id", async (request, response) => {
   // get user from request object
-  const user = request.user
+  const user = request.user;
   // ..
-})
+});
 ```
 
 Notice that it is possible to register a middleware only for a specific set of routes.
 So instead of using `userExtractor` with all the routes,
 
 ```js
-const middleware = require('../utils/middleware');
+const middleware = require("../utils/middleware");
 // ...
 
 // use the middleware in all routes
-app.use(middleware.userExtractor) // highlight-line
+app.use(middleware.userExtractor); // highlight-line
 
-app.use('/api/shows', showsRouter)  
-app.use('/api/users', usersRouter)
-app.use('/api/login', loginRouter)
+app.use("/api/shows", showsRouter);  
+app.use("/api/users", usersRouter);
+app.use("/api/login", loginRouter);
 ```
 
 we could register it to be only executed with path ***/api/shows*** routes:
 
 ```js
-const middleware = require('../utils/middleware');
+const middleware = require("../utils/middleware");
 // ...
 
 // use the middleware only in /api/shows routes
-app.use('/api/shows', middleware.userExtractor, showsRouter) // highlight-line
-app.use('/api/users', usersRouter)
-app.use('/api/login', loginRouter)
+app.use("/api/shows", middleware.userExtractor, showsRouter); // highlight-line
+app.use("/api/users", usersRouter);
+app.use("/api/login", loginRouter);
 ```
 
 As can be seen, this happens by chaining multiple middlewares as the parameter of function `use`.
 It would also be possible to register a middleware only for a specific operation:
 
 ```js
-const middleware = require('../utils/middleware');
+const middleware = require("../utils/middleware");
 // ...
 
-router.post('/', middleware.userExtractor, async (request, response) => {
+router.post("/", middleware.userExtractor, async (request, response) => {
   // ...
-}
+};
 ```
 
 #### 4.23*:  watchlist expansion, Step 11
 
 After adding token-based authentication the tests for adding a new show broke down.
-Fix the tests.
+**Fix the tests.**
 Also, write a new test to ensure adding a show fails with the proper status code **401 Unauthorized** if a token is not provided.
 
 [This](https://github.com/visionmedia/supertest/issues/398) is most likely useful when doing the fix.

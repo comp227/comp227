@@ -7,8 +7,8 @@ lang: en
 
 <div class="content">
 
-There are usually constraints that we want to apply to the data that is stored in our application's database.
-As an example, our application shouldn't accept tasks that have a missing or empty `content` property.
+Typically, we want to constrain the data we store in our application's database.
+For example, we shouldn't store nor even accept tasks that have a missing or empty `content` property.
 The validity of the task is checked in the route handler:
 
 ```js
@@ -27,9 +27,9 @@ app.post('/api/tasks', (request, response) => {
 If the task does not have the `content` property, we respond to the request with the status code **400 bad request**.
 
 One smarter way of validating the format of the data before it is stored in the database is to use the
-[validation](https://mongoosejs.com/docs/validation.html) functionality available in Mongoose.
+[**validation functionality**](https://mongoosejs.com/docs/validation.html) available in Mongoose.
 
-We can define specific validation rules for each field in the schema:
+We can define *specific validation rules* for each field in the schema in *mongo.js*:
 
 ```js
 const taskSchema = new mongoose.Schema({
@@ -66,7 +66,7 @@ app.post('/api/tasks', (request, response, next) => { // highlight-line
 
   const task = new Task({
     content: body.content,
-    important: body.important || false,
+    important: Boolean(body.important) || false,
     date: new Date().toISOString(),
   })
 
@@ -147,8 +147,7 @@ Most of the time,
 there are simple reasons for our programs behaving in ways that we were hoping wouldn't occur.
 Your logs are vital to helping you analyze what could potentially be awry.
 
-You can find the code for our current application in its entirety in the *part3-6* branch of
-[this GitHub repository](https://github.com/comp227/part3-tasks-backend/tree/part3-6).
+You can find the code for our current application in its entirety in the [*part3-6* branch of our backend repo](https://github.com/comp227/part3-tasks-backend/tree/part3-6).
 
 </div>
 
@@ -158,9 +157,9 @@ You can find the code for our current application in its entirety in the *part3-
 
 #### 3.19*: Communities database, Step 7
 
-Expand the validation so that the name stored in the database has to be at least three characters long.
+Expand the validation so that the name stored in the database has to be *at least three characters long*.
 
-Expand the frontend so that it displays some form of error message when a validation error occurs.
+Expand the frontend so that it *displays some form of error message when a validation error occurs*.
 Error handling can be implemented by adding a `catch` block as shown below:
 
 ```js
@@ -171,8 +170,8 @@ groupService
       // ...
     })
     .catch(error => {
-      // this is the way to access the error message
-      console.log(error.response.data.error)
+        // this is the way to access the error message
+        console.log(error.response.data.error)
     })
 ```
 
@@ -180,12 +179,12 @@ You can display the default error message returned by Mongoose, even though they
 
 ![communities screenshot showing group validation failure](../../images/3/56e.png)
 
-> **Pertinent:** On update operations, mongoose validators are off by default.
+> **Pertinent:** On update operations, ***mongoose validators are `off` by default***.
 [Read the documentation](https://mongoosejs.com/docs/validation.html) to determine how to enable them.
 
 #### 3.20*: Communities database, Step 8
 
-Add validation to your communities application, which will make sure that community links are of the correct form.
+*Add validation to your communities application*, which will make sure that community links are of the correct form.
 
 A community link must
 
@@ -206,11 +205,11 @@ Verify that everything works locally by using the entire application from the ad
 
 Push the latest version to Render and verify that everything works there as well.
 
-> **NOTE**: you should **deploy the *backend*** to the cloud service.
+> **Remember:** you should **deploy the *backend*** to the cloud service.
 > Make sure that your backend is at the root of your repository.
-
-You shall NOT be deploying the frontend directly at any stage of this part.
-It is just backend repository that is deployed throughout the whole part, nothing else.
+>
+> ***You shall NOT be deploying the frontend directly at any stage for this part.***
+> It is just backend repository that is deployed throughout part 3, nothing else.
 
 </div>
 
@@ -225,7 +224,7 @@ Wikipedia says the following about lint:
   The term lint-like behavior is sometimes applied to the process of flagging suspicious language usage.
   Lint-like tools generally perform static analysis of source code.*
 
-In compiled statically typed languages like Java, IDEs like NetBeans can point out errors in the code, even ones that are more than just compile errors.
+In compiled statically typed languages like *Java*, IDEs like *NetBeans* can point out errors in the code, even ones that are more than just compile errors.
 Additional tools for performing [static analysis](https://en.wikipedia.org/wiki/Static_program_analysis) like [checkstyle](https://checkstyle.sourceforge.io),
 can be used for expanding the capabilities of the IDE to also point out problems related to style, like indentation.
 
@@ -248,7 +247,7 @@ We will answer all of the questions:
 
 ![terminal output from ESlint init](../../images/3/52be.png)
 
-The configuration will be saved in the *.estlintrc.cjs* file.
+The configuration will be saved in the *.eslintrc.js* file.
 We will change `browser` to `node` in the `env` configuration:
 
 ```js
@@ -259,6 +258,19 @@ module.exports = {
         "es2021": true
     },
     "extends": "eslint:recommended",
+    "overrides": [
+        {
+            "env": {
+                "node": true
+            },
+            "files": [
+                ".eslintrc.{js,cjs}"
+            ],
+            "parserOptions": {
+                "sourceType": "script"
+            }
+        }
+    ],
     "parserOptions": {
         "ecmaVersion": "latest"
     },
@@ -281,6 +293,7 @@ module.exports = {
         ]
     }
 };
+
 ```
 
 Let's change the rule concerning semicolons so that it only raises a warning and not an error.
@@ -301,7 +314,9 @@ Inspecting and validating a file like *index.js* can be done with the following 
 npx eslint index.js
 ```
 
-It is recommended to create some separate `npm script` for linting:
+> Though you may have also noticed a lot of warnings and errors by visiting *index.js* from within WebStorm, we'll configure lint with WebStorm in the [next section](#configure-webstorm-with-eslint)
+
+It is recommended to create separate *npm scripts* for linting:
 
 ```json
 {
@@ -319,7 +334,7 @@ It is recommended to create some separate `npm script` for linting:
 
 Now the `npm run lint` command will check every file in the project, while `npm run lint:fix` can automatically go through and fix all of the errors.
 
-Also, the files in the *build* directory get checked when the command is run.
+Also, the files in the *dist* directory get checked when the command is run.
 We do not want this to happen, and we can accomplish this by creating a [.eslintignore](https://eslint.org/docs/user-guide/configuring#ignoring-files-and-directories)
 file in the project's root with the following contents:
 
@@ -364,7 +379,7 @@ This makes the other errors easy to spot and fix right away.
 
 ![Screenshot of WebStorm ESlint plugin showing less errors after save](../../images/3/custom/eslint_after_save.png)
 
-ESlint has a vast array of [rules](https://eslint.org/docs/rules/) that are easy to take into use by editing the *.estlintrc.cjs* file.
+ESlint has a vast array of [rules](https://eslint.org/docs/rules/) that are easy to take into use by editing the *.estlintrc.js* file.
 
 Let's add the [eqeqeq](https://eslint.org/docs/rules/eqeqeq) rule that warns us if equality is checked with anything other than `===` (like `==`).
 The rule is added under the `rules` field in the configuration file.
@@ -372,9 +387,9 @@ The rule is added under the `rules` field in the configuration file.
 ```js
 {
   // ...
-  'rules': {
+  "rules": {
     // ...
-   'eqeqeq': 'error',
+   "eqeqeq": "error",
   },
 }
 ```
@@ -388,15 +403,15 @@ and let's also demand a consistent use of whitespace in the function parameters 
 ```js
 {
   // ...
-  'rules': {
+  "rules": {
     // ...
-    'eqeqeq': 'error',
-    'no-trailing-spaces': 'error',
-    'object-curly-spacing': [
-        'error', 'always'
+    "eqeqeq": "error",
+    "no-trailing-spaces": "error",
+    "object-curly-spacing": [
+        "error", "always"
     ],
-    'arrow-spacing': [
-        'error', { 'before': true, 'after': true }
+    "arrow-spacing": [
+        "error", { "before": true, "after": true }
     ]
   },
 }
@@ -405,7 +420,7 @@ and let's also demand a consistent use of whitespace in the function parameters 
 Our default configuration takes a bunch of predetermined rules into use from `eslint:recommended`:
 
 ```bash
-'extends': 'eslint:recommended',
+"extends": "eslint:recommended",
 ```
 
 This includes a rule that warns about *console.log* commands.
@@ -417,18 +432,18 @@ since we are learning and not intending to ship anything just yet.
 ```json
 {
   // ...
-  'rules': {
+  "rules": {
     // ...
-    'eqeqeq': 'error',
-    'no-trailing-spaces': 'error',
-    'object-curly-spacing': [
-        'error', 'always'
+    "eqeqeq": "error",
+    "no-trailing-spaces": "error",
+    "object-curly-spacing": [
+        "error", "always"
     ],
-    'arrow-spacing': [
-        'error', { 'before': true, 'after': true }
+    "arrow-spacing": [
+        "error", { "before": true, "after": true }
     ],
-    'no-console': 0 // highlight-line
-    'no-debugger': 0 // highlight-line
+    "no-console": 0, // highlight-line
+    "no-debugger": 0 // highlight-line
   },
 }
 ```
@@ -451,32 +466,34 @@ Doing so leads to having a line for ESlint that looks like this just above the l
 
 ```js
 // eslint-disable-next-line no-undef // highlight-line
-
-const password = process.argv[2];
+const password = process.env.PORT || 3001;
 ```
 
 If you use that suppression a lot, you'll end up for the file if it ends up generating too many comments for your file that deal with disabling ESlint rules.
 At this point, you may end up thinking that you should use ESLint's rule to suppress the errors for the entire file to remove all those comments,
-but now that could also leave you more exposed.
-It's important with ESlint (and other tests) to be mindful of the errors so that you continue to have faith in seeing them as informative, instead of a hindrance.
+*but now that could also leave you more exposed*.
+It's important with ESlint (and other tests) to be mindful of the errors so that you ***continue to have faith in seeing ESlint as informative***, instead of a hindrance.
 You also want to make sure you have faith that ESlint will catch errors for you.
 You need to keep a close balance between seeing it as being a hindrance and improving your code by maintaining a consistent style.
 In this case, a better option than suppressing error messages (which you really should avoid at this point in your learning journey) is to search for any potential ways to resolve this.
 It turns out that the best solution is not to do any suppression but to add this line to the top of your *eslintrc.js* file.
 
 ```json
-'env': {
-        'node': true, // highlight-line
-        'browser': true,
+"env": {
+        "node": true, // highlight-line
+        "browser": true,
 ```
 
 Enabling node means that ESlint knows that we can use the `process` variable,
 and allows you to rely on a system that has helped countless developers with similar situations who have come before you.
 
-> **NB** when you make changes to the *.estlintrc.cjs* file, play close attention to errors in there as well! WebStorm will highlight issues.
-If there are, WebStorm will report the issues to you, and you can look at the terminal output to see more details about it.
+> **Remember:** when you make changes to the *.estlintrc.js* file, play close attention to errors in there as well! WebStorm will highlight issues.
+> If there are, WebStorm will report the issues to you, and you can look at the terminal output to see more details about it.
 >
 > ![terminal output from npm run lint](../../images/3/55.png)
+>
+>> **FYI:** Our over eager file watcher may also give us warnings up top.
+>> If you merely type a character and then delete it quickly, it should go away.
 
 Many companies define coding standards that are enforced throughout the organization through the ESlint configuration file.
 It is not recommended to keep reinventing the wheel over and over again,
@@ -484,8 +501,7 @@ and it can be a good idea to adopt a ready-made configuration from someone else'
 Recently many projects have adopted the Airbnb [Javascript style guide](https://github.com/airbnb/javascript)
 by taking Airbnb's [ESlint](https://github.com/airbnb/javascript/tree/master/packages/eslint-config-airbnb) configuration into use.
 
-You can find the code for our current application in its entirety in the *part3-7* branch of
-[this GitHub repository](https://github.com/comp227/part3-tasks-backend/tree/part3-7).
+You can find the code for our current application in its entirety in the [*part3-7* branch of our backend repo](https://github.com/comp227/part3-tasks-backend/tree/part3-7).
 </div>
 
 <div class="tasks">

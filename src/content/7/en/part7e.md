@@ -324,7 +324,7 @@ However, MVC architecture is not usually mentioned when talking about React appl
 Furthermore, if we are using Redux, then our applications follow the [Flux](https://facebook.github.io/flux/docs/in-depth-overview) architecture
 and the role of React is even more focused on creating the views.
 The business logic of the application is handled using the Redux state and its action creators.
-If we're using [Redux Thunk](/part6/communicating_with_server_in_a_redux_application#asynchronous-actions-and-redux-thunk) familiar from part 6,
+If we're using [Redux Thunk](/part6/communicating_with_a_server_in_a_redux_application#asynchronous-actions-and-redux-thunk) familiar from part 6,
 then the business logic can be almost completely separated from the React code.
 
 Because both React and [Flux](https://facebook.github.io/flux/docs/in-depth-overview) were created at Facebook,
@@ -733,7 +733,7 @@ since as we [remember](/part6/flux_architecture_and_redux#pure-functions-immutab
 reducers must be pure functions, meaning they must not modify the store's state but instead have to replace it with a new one when a change occurs.
 
 [Redux-saga](https://redux-saga.js.org/) provides an alternative way to make asynchronous actions for
-[Redux Thunk](/part6/communicating_with_server_in_a_redux_application#asynchronous-actions-and-redux-thunk) familiar from part 6.
+[Redux Thunk](/part6/communicating_with_a_server_in_a_redux_application#asynchronous-actions-and-redux-thunk) familiar from part 6.
 Some embrace the hype and like it.
 I'm meh.
 

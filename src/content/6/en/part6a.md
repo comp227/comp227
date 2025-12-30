@@ -33,9 +33,9 @@ Flux provides a standardized way to store and modify an application's state.
 
 ### Redux
 
-Facebook has an implementation for Flux, but we will be using the [Redux library](https://redux.js.org).
+Facebook has an implementation for Flux, but we will be using the [*Redux* library](https://redux.js.org).
 It follows the same principles but is simpler to use.
-Facebook also uses Redux now instead of their original Flux.
+Facebook also uses *Redux* now instead of their original *Flux*.
 
 We will get to know Redux by implementing a counter application yet again:
 
@@ -49,10 +49,10 @@ npm i redux
 
 #### Redux's Store and Actions
 
-Like Flux, the state in Redux is housed in a [**store**](https://redux.js.org/basics/store).
+Like *Flux*, the state in *Redux* is housed in a [**store**](https://redux.js.org/basics/store).
 You can think of the store as like a mini-database that redux uses to house information.
 
-Unlike Flux, Redux stores this state in a ***single JavaScript object***.
+Unlike *Flux*, *Redux* stores this state in a ***single JavaScript object***.
 Because our application only needs the value of the counter, we will save it straight to the store.
 If the state were more complex, the different values would be saved as separate properties in the object.
 
@@ -97,7 +97,7 @@ So, here when the type of Action is *`INCREMENT`*, the state gets the *old value
 If the type of Action is *`ZERO`* the new value of state is *zero*.
 
 Let's change the code a bit.
-We have used if-else statements to build our reducer;
+We have used *`if`*-*`else`* statements to build our reducer;
 `counterReducer` responds to an action and changes the state.
 However, the [`switch`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/switch) statement is the most common approach to writing a reducer.
 
@@ -171,7 +171,7 @@ In the end, after `ZERO` and `DECREMENT` actions, the `store`'s state is ***`-1`
 In addition to `dispatch` and `getState`, `store` also has the [`subscribe`](https://redux.js.org/api/store#subscribelistener) method,
 which is used to create callback functions the *`store`* calls whenever an *action is dispatched to it*.
 
-If, for example, we would add the following function to `subscribe`, ****every change in the `store` would be printed to the console***.
+If, for example, we would add the following function to `subscribe`, ***every change in the `store` would be printed to the console***.
 
 ```js
 store.subscribe(() => {
@@ -489,7 +489,7 @@ Let us expand *package.json* with a script for running the tests:
 }
 ```
 
-And finally, *.estlintrc.cjs* needs to be altered as follows:
+And finally, *.eslintrc.cjs* needs to be altered as follows:
 
 ```js
 module.exports = {

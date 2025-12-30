@@ -101,8 +101,8 @@ You will be submitting exercises via the GitHub Classroom repos that will be pro
 **All of the exercises from this website must be submitted through GitHub.**
 You will also be expected to submit your progress for exercises regularly, even if it is not finished.
 
-Exercises are submitted **one part at a time**.
-Once you have submitted exercises for a part, you can no longer submit any more exercises for that part.
+Exercises are submitted according to **the marked canvas assignment**.
+Once you have submitted exercises for an assignment, you can no longer submit any more exercises for those sections.
 
 A system for detecting plagiarism is used to check exercises submitted to GitHub.
 If code is found from model answers or multiple students hand in the same code,

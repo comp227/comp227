@@ -312,10 +312,17 @@ You can write the code into the same project since you have been committing your
 >>  }
 >>  ```
 
+Also remember to keep using the empty commits from the previous exercises to mark when you have finished an exercise:
+
+```bash
+git commit --allow-empty -m "Completed Exercise #.##"
+```
+
 #### 1.3: handheld arcade info Step 3
 
-Let's move forward to using objects in our application.
-Modify the variable definitions of the `App` component as follows and also refactor the application so that it still works:
+Let's move forward to integrate objects into our existing application.
+Modify the variable definitions of the `App` component as follows and also refactor the application so that it still works with the components we made earlier
+(*which you may need to modify*):
 
 ```js
 const App = () => {

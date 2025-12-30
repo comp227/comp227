@@ -18,7 +18,7 @@ While some people disagree, I believe that *if you take the time to learn to use
 
 #### WebStorm
 
-To use the WebStorm debugger, you'll need to tell WebStorm where node is.
+To use WebStorm to ***debug the backend***, you'll need to tell WebStorm where *node* is.
 You can start this by going to ***Run->Debug*** in the top menu.
 You'll then see a tiny Debug window in the middle of the screen that looks like this:
 
@@ -42,15 +42,18 @@ The output in red is similar to the `npm start` output from the terminal, with s
 
 ![WebStorm process console](../../images/3/custom/process_console.png)
 
-Remember that the application shouldn't be running in another console, otherwise the port will already be in use.
+> **Remember:** the application shouldn't be running in another console, otherwise the port will already be in use.
 
 Below you can see a screenshot where the code execution has been paused in the middle of saving a new task:
 
 ![WebStorm screenshot of execution at a breakpoint](../../images/3/36x.png)
 
 The execution stopped at the **breakpoint** in line 81.
-On the line itself and in the code, you see in light gray some of the values of different variables, like the value of the task variable.
-In the window below you can see the value of the `tasks` variable, as well as the value of all of the variables and objects that you can inspect.
+On the line itself and in the code, you can see some of the values of different variables.
+For example, at the end of line 77 in light gray, you can see the value of `body.important` is *`false`*.
+On line 81 you can also see the value of `task`.
+To see the current values of all of the pertinent variables and objects at the point of executing line 81, you want to look in the Debugger Pane at the bottom of WebStorm.
+For example, you can see what the value of `tasks` is just before it changes.
 
 In the Debugger Console, you can type in values just like you did before in the developer tools console.
 The Debugger Console is great as you can type out code to see what values would be as you are writing the code.
@@ -58,8 +61,14 @@ See here my example of checking to see if I am parsing a string correctly.
 
 ![WebStorm screenshot of debugger console](../../images/3/custom/webstorm_debugger_console.png)
 
-The arrows at the top of the debugger window can be used for controlling the flow of control.
-For example, step over, executes one line of the code, while step into if you are on say a function, will jump into that function to start executing inside.
+The arrows at the top of the debugger window control the program's flow and execute a single line of code when they get pressed.
+Their behavior differs though when the lines contain a function.
+When on a line that contains a function:
+
+- **step into** will jump into the body of the function and execute the first line.
+- **step over** will execute the entire function's body and just give the result
+- **step out** will finish executing the body of a function and return back to the function that called it.
+
 Finally, the inspector is similar to the debugger console that I showed.
 However, this particular feature is available across all JetBrains IDEs for evaluating expressions while debugging during the state of control.
 
@@ -68,9 +77,9 @@ Lastly, look at some of the icons on the right.
 - The play button resumes execution of the program
 - The red square stop sign will stop debugging
 - the red octagon stop signs allow you to see all breakpoints or to pause breakpoints from executing for a while.
-- the lightning bolt allows your program to break on an exception, which can be very handy when trying to find out why an exception is being thrown.
+- the lightning bolt allows your program to break on an exception, which can be very handy when trying to find out when an exception is being thrown.
 
-I encourage you to learn to use the debugger as it can be quite useful!
+Invest time into learning to use a debugger properly...it can save you a lot of time in the future and increase your understanding of a language as well!
 
 #### Chrome dev tools
 
@@ -90,7 +99,7 @@ You can access the debugger by clicking the green icon - the node logo - that ap
 
 ![dev tools with green node logo icon](../../images/3/37.png)
 
-The debugging view works the same way as it did with React applications.
+The *Debugging View* works the same way as it did with React applications.
 The ***Sources*** tab can be used for setting breakpoints where the execution of the code will be paused.
 
 ![dev tools sources tab breakpoint and watch variables](../../images/3/38eb.png)
@@ -102,21 +111,21 @@ You can also inspect the values of variables and execute your JavaScript code.
 
 #### Question everything
 
-Debugging Full Stack applications may seem tricky at first.
 Soon our application will also have a database in addition to the frontend and backend,
-and there will be many potential areas for bugs in the application.
+so there will be many potential areas for bugs in the application.
+With so many areas, debugging Full-Stack applications may seem tricky at first.
 
 When the application "does not work", we have to first figure out where the problem occurs.
 It's very common for the problem to exist in a place where you didn't expect it to,
 and it can take minutes, hours, or even days before you find the source of the problem.
 
-The key is to be systematic so that you can divide and conquer.
+The key is to ***be systematic*** so that you can divide and conquer.
 Since the problem can exist anywhere, *you must question everything*, and eliminate all possibilities one by one.
-Logging to the console, Postman, debuggers, and experience will help.
+Logging to the console, REST Client/Postman, debuggers, and experience will help.
 
 When bugs occur, ***the worst of all possible strategies*** is to continue writing code.
 It will guarantee that your code will soon have even more bugs, and debugging them will be even more difficult.
-The [stop and fix](https://leanscape.io/principles-of-lean-13-jidoka/) principle
+The [*stop and fix* principle](https://leanscape.io/principles-of-lean-13-jidoka/)
 from Toyota Production Systems is very effective in this situation as well.
 
 ### MongoDB
@@ -146,7 +155,7 @@ These are the options to choose.
 After clicking ***Finish***, you're given a choice for a deployment option.
 Choose the shared option.
 
-![MongoDB deploy a cloud database free shared](../../images/3/mongo1.png)
+![MongoDB's deploy a cloud database free shared](../../images/3/mongo1.png)
 
 Pick the cloud provider and location and create the cluster:
 
@@ -158,7 +167,7 @@ This may take some minutes, but for me, it was pretty quick.
 Now let's answer the questions from the Security Quickstart.
 Because you are handling data, you need to create a user and password that can connect and access your database.
 ***These are not the same credentials that you use for logging into MongoDB Atlas.***
-For me, I used comp227 as the user, and then clicked ***Autogenerate the password*** and clicked ***Copy***.
+For me, I used *`comp227`* as the user, and then clicked ***Autogenerate the password*** and clicked ***Copy***.
 Store that password somewhere that you can access it, as you'll need it in files we'll modify soon.
 Finally, once you've stored the password in a secure location, click ***Create User***.
 
@@ -207,7 +216,7 @@ npm i mongoose
 ```
 
 Let's not add any code dealing with Mongo to our backend just yet.
-Instead, let's make a practice application by creating a new file, *mongo.js* in the root of the tasks backend application:
+Instead, let's make a practice application by creating a new file, *mongo.js* in the root of the *`tasks` backend* application:
 
 ```js
 const mongoose = require('mongoose').set('strictQuery', true)
@@ -219,7 +228,7 @@ if (process.argv.length < 3) {
 
 const password = process.argv[2]
 
-const url = `mongodb+srv://comp227:${password}@cluster0.gb6u3el.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`
+const url = `mongodb+srv://comp227:${password}@cluster0.gb6u3el.mongodb.net/taskApp?retryWrites=true&w=majority`
 
 const taskSchema = new mongoose.Schema({
   content: String,
@@ -261,8 +270,8 @@ const password = process.argv[2]
 
 When the code is run with the command `node mongo.js YOUR_PASSWORD_HERE`, Mongo will add a new document to the database.
 
-**Remember** the password needed is the password created for the database user, not your MongoDB Atlas password.
-Also, if you created a password with special characters,
+> **Remember:** Replace `YOUR_PASSWORD_HERE` with the *password created for the database user*, not your MongoDB Atlas password.
+> Also, if you created a password with special characters,
 then you'll need to [URL encode that password](https://docs.atlas.mongodb.com/troubleshoot-connection/#special-characters-in-connection-string-password).
 
 We can view the current state of the database from the MongoDB Atlas from ***Browse collections***, in the Database tab.
@@ -289,8 +298,8 @@ Creating a database like this is not necessary, since MongoDB Atlas automaticall
 
 ### Schema
 
-After establishing the connection to the database, we define the [schema](http://mongoosejs.com/docs/guide.html)
-for a task and the matching [model](http://mongoosejs.com/docs/models.html):
+After establishing the connection to the database, we define the [**schema**](http://mongoosejs.com/docs/guide.html)
+for a task and the matching [**model**](http://mongoosejs.com/docs/models.html):
 
 ```js
 const taskSchema = new mongoose.Schema({
@@ -305,7 +314,7 @@ const Task = mongoose.model('Task', taskSchema)
 First, we define the [schema](http://mongoosejs.com/docs/guide.html) of a task that is stored in the `taskSchema` variable.
 The schema tells Mongoose how the task objects are to be stored in the database.
 
-In the `Task` model definition, the first `'Task'` parameter is the singular name of the model.
+In the `Task` model definition, the first `'Task'` parameter is the *singular name of the model*.
 The name of the collection will be the lowercase plural `tasks`, because the [Mongoose convention](http://mongoosejs.com/docs/models.html)
 is to automatically name collections as the plural (e.g. `tasks`) when the schema refers to them in the singular (e.g. `Task`).
 
@@ -327,7 +336,8 @@ const task = new Task({
 ```
 
 Models are so-called **constructor functions** that create new JavaScript objects based on the provided parameters.
-Since the objects are created with the model's constructor function,
+
+> **Pertinent:** Since the objects are created with the model's constructor function,
 they have all the properties of the model, which include methods for saving the object to the database.
 
 Saving the object to the database happens with the appropriately named `save` method, which can be provided with an event handler with the `then` method:
@@ -343,7 +353,7 @@ When the object is saved to the database, the event handler provided to `then` g
 The event handler closes the database connection with the command `mongoose.connection.close()`.
 If the connection is not closed, the program will never finish its execution.
 
-The result of the save operation is in the `result` parameter of the event handler.
+The event handler's **`result`** parameter stores the *result of the save* operation.
 The result is not that interesting when we're storing one object in the database.
 You can print the object to the console if you want to take a closer look at it while implementing your application or during debugging.
 
@@ -352,11 +362,11 @@ Let's also save a few more tasks by modifying the data in the code and by execut
 > **Pertinent:** Unfortunately the Mongoose documentation is not very consistent,
 with parts of it using callbacks in its examples and other parts, other styles,
 so it is not recommended to copy and paste code directly from there.
-Mixing promises with old-school callbacks in the same code is not recommended.
+***Mixing promises with old-school callbacks in the same code is not recommended***.
 
 ### Fetching objects from the database
 
-Let's comment out the code for generating new tasks and replace it with the following:
+Let's comment out the code in *mongo.js* that creates and saves the `task` and replace it with the following:
 
 ```js
 Task.find({}).then(result => {
@@ -371,13 +381,13 @@ When the code is executed, the program prints all the tasks stored in the databa
 
 ![node mongo.js outputs tasks as JSON](../../images/3/70ea.png)
 
-The objects are retrieved from the database with the [find](https://mongoosejs.com/docs/api/model.html#model_Model-find) method of the `Task` model.
-The parameter of the method is an object expressing search conditions.
+The objects are retrieved from the database with the [`find` method](https://mongoosejs.com/docs/api/model.html#model_Model-find) of the `Task` model.
+The parameter for `find` is an object expressing search conditions.
 Since the parameter is an empty object`{}`, we get all of the tasks stored in the ***tasks*** collection.
 
-The search conditions adhere to the Mongo search query [syntax](https://docs.mongodb.com/manual/reference/operator/).
+The search conditions adhere to the [Mongo search query syntax](https://docs.mongodb.com/manual/reference/operator/).
 
-We could restrict our search to only include important tasks like this:
+As an example of that syntax, we could restrict our search to only include important tasks like this:
 
 ```js
 Task.find({ important: true }).then(result => {
@@ -393,11 +403,13 @@ Task.find({ important: true }).then(result => {
 
 #### 3.12: Command-line database
 
-Create a cloud-based MongoDB database for the communities application with MongoDB Atlas.
+Create a cloud-based MongoDB database for the *communities* application with MongoDB Atlas.
 
-Create a *mongo.js* file in the project directory, that can be used for adding a community, and for listing all of the communities.
+Create a *mongo.js* file in the *communities* project directory, that can be used for adding a community, and for listing all of the communities.
 
-> ***Do not include the password in the file that you commit and push to GitHub!***
+> ***Do not include or paste in the password in any of the files in your repo!***
+> We have auto-commit turned on, so any change will get saved.
+> If this does happen, please send me a discord message.
 
 The application should work as follows.
 You use the program by passing three command-line arguments (the first is the password), e.g.:
@@ -435,7 +447,7 @@ MeditationMind https://discord.com/invite/XT9xqwv9
 PySlackers https://pythondev.slack.com
 ```
 
-You can get the command-line parameters from the [process.argv](https://nodejs.org/docs/latest-v8.x/api/process.html#process_process_argv) variable.
+You can get the command-line parameters from the [`process.argv`](https://nodejs.org/docs/latest-v8.x/api/process.html#process_process_argv) variable.
 
 > **Pertinent: do not close the connection in the wrong place**.
 > E.g. the following code will not work:
@@ -471,7 +483,7 @@ and the execution will never get to the point where `Group.find` operation finis
 
 ### Connecting the backend to a database
 
-Now we have enough knowledge to start using Mongo in our tasks application backend.
+Now we have enough knowledge to start using Mongo in our tasks application backend. 🥳
 
 Let's get a quick start by copy-pasting the Mongoose definitions to the backend's *index.js* file:
 
@@ -479,9 +491,9 @@ Let's get a quick start by copy-pasting the Mongoose definitions to the backend'
 const mongoose = require('mongoose').set('strictQuery', true)
 const password = process.argv[2]
 
-// DO NOT SAVE YOUR PASSWORD ANYWHERE THAT WOULD UPLOAD IT TO GITHUB
+// DO NOT SAVE OR EVEN PASTE YOUR PASSWORD ANYWHERE IN THE REPO
 const url = `mongodb+srv://comp227:${password}@cluster0.gb6u3el.mongodb.net/taskApp?retryWrites=true&w=majority`
-// LET ME REPEAT - DO NOT SAVE YOUR PASSWORD IN YOUR CODE!
+// LET ME REPEAT - DO NOT SAVE YOUR PASSWORD IN YOUR REPO!
 
 mongoose.connect(url)
 
@@ -649,7 +661,11 @@ You can install the library with the command:
 npm i dotenv
 ```
 
-To use the library, we create a *.env* file at the root of the project.
+To use the library, we will create a *.env* file at the root of the project.
+Please make sure that *.env* is added to your github folder.
+You should ***close WebStorm*** so that your file watchers are not active currently.
+After that, you can make a .env file and type `git status` to verify that git does not see the .env file as something that was added.
+If it was or if it says it was updated, please send me a message to help you get the commands to remove the *.env* file and to verify it's in your *.gitignore* file.
 The environment variables are defined inside of the file, and it can look like this:
 
 ```bash
@@ -659,8 +675,10 @@ PORT=3001
 
 We also added the hardcoded port of the server into the `PORT` environment variable.
 
-Our repos already ignore the *.env* file by default.
+Our repos have been setup to already ignore the *.env* file by default.
 If you ever make a new repo, **make sure that you immediately add `.env` so you do not publish any confidential information publicly online!**
+
+Once you verify that *.env* is correctly being ignored by git, ***open up WebStorm again***.
 
 The environment variables defined in the *.env* file can be taken into use with the expression `require('dotenv').config()`
 and you can reference them in your code just like you would reference normal environment variables, with the familiar `process.env.MONGODB_URI` syntax.
@@ -671,6 +689,8 @@ Let's change the *index.js* file in the following way:
 require('dotenv').config() // highlight-line
 const express = require('express')
 const app = express()
+const cors = requires('cors')
+
 const Task = require('./models/task') // highlight-line
 
 // ..
@@ -681,19 +701,21 @@ app.listen(PORT, () => {
 })
 ```
 
-Observe how `dotenv` must be imported before the `task` model.
+> You can also take out the pre-filled contents inside the `tasks` variable and just leave it as an empty array *[]*.
+
+Notice how `dotenv` must be imported before the `task` model.
 This ensures that the environment variables from the *.env* file are available globally before the code from the other modules is imported.
 
-Once the file *.env* has been gitignored, Render does not get the database URL from the repository, so you have to set it yourself.
-
-That can be done by visiting the [Render dashboard](http://dashboard.render.com).
-Once you are there, click on your web service and then select ***Environment*** from the left-hand nav menu.
-Scroll down until you can click on ***Add Secret File.**
-From there, name the file .env and then click the contents section.
-There you will paste all of the contents of your .env file, making sure you put your DB password from mongo in there.
-Next click ***Done*** and then Finally ***Save Changes***.
-
-![Heroku dashboard showing config vars](../../images/3/cloudConfig.png)
+> **Pertinent:** Once the file *.env* has been gitignored, Render does not get the database URL from the repository, so ***you have to set the DB URL yourself***.
+>
+> That can be done by visiting the [Render dashboard](http://dashboard.render.com).
+> Once you are there, click on your web service and then select ***Environment*** from the left-hand nav menu.
+> Scroll down until you can click on ***Add Secret File.**
+> From there, name the file .env and then click the contents section.
+> There you will paste all of the contents of your .env file, making sure you put your DB password from mongo in there.
+> Next click ***Done*** and then Finally ***Save Changes***.
+>
+> ![Heroku dashboard showing config vars](../../images/3/cloudConfig.png)
 
 ### Using database in route handlers
 
@@ -711,7 +733,7 @@ app.post('/api/tasks', (request, response) => {
 
   const task = new Task({
     content: body.content,
-    important: body.important || false,
+    important: Boolean(body.important) || false,
     date: new Date().toISOString(),
   })
 
@@ -733,7 +755,7 @@ The data sent back in the response is the formatted version created with the `to
 response.json(savedTask)
 ```
 
-Using Mongoose's [findById](https://mongoosejs.com/docs/api/model.html#model_Model-findById) method, fetching an individual task gets changed into the following:
+Using Mongoose's [`findById` method](https://mongoosejs.com/docs/api/model.html#model_Model-findById), fetching an individual task gets changed to the following:
 
 ```js
 app.get('/api/tasks/:id', (request, response) => {
@@ -750,7 +772,8 @@ Next, let's try creating a new task after taking the database into use:
 
 ![WebStorm rest client doing a post](../../images/3/46e.png)
 
-Only once everything has been verified to work in the backend, is it a good idea to test that the frontend works with the backend.
+***Verify first*** that the backend completely works.
+Then you can test that the frontend works with the backend.
 ***It is highly inefficient to test things exclusively through the frontend.***
 
 It's probably a good idea to integrate the frontend and backend one functionality at a time.
@@ -758,11 +781,10 @@ First, we could implement fetching all of the tasks from the database and test i
 After this, we could verify that the frontend works with the new backend.
 Once everything seems to be working, we would move on to the next feature.
 
-Once we introduce a database into the mix, it is useful to inspect the state persisted in the database, e.g. from the control panel in MongoDB Atlas.
-Quite often little Node helper programs like the *mongo.js* program we wrote earlier can be very helpful during development.
+Once we introduce a database into the mix, it is useful to inspect the saved state in the database, e.g. from the control panel in MongoDB Atlas.
+Quite often small Node programs (like the *mongo.js* program we wrote earlier) can be very helpful for testing during development.
 
-You can find the code for our current application in its entirety in the *part3-4* branch of
-[this GitHub repository](https://github.com/comp227/part3-tasks-backend/tree/part3-4).
+You can find the code for our current application in its entirety in the [*part3-4* branch of our backend repo](https://github.com/comp227/part3-tasks-backend/tree/part3-4).
 
 </div>
 
@@ -831,7 +853,7 @@ The console displays more detailed information about the error.
 On top of the non-existing task, there's one more error situation that needs to be handled.
 In this situation, we are trying to fetch a task with the wrong kind of `id`, meaning an `id` that doesn't match the mongo identifier format.
 
-If we make the following request, we will get the error message like the one shown below:
+If we make a request like `GET http://localhost:3001/api/tasks/someInvalidId`, we will get an error message like the one shown below:
 
 ```shell
 Method: GET
@@ -861,7 +883,7 @@ app.get('/api/tasks/:id', (request, response) => {
     })
     .catch(error => {
       console.log(error)
-      response.status(400).send({ error: 'malformatted id' }) // highlight-line
+      response.status(400).send({error: 'malformatted id'}) // highlight-line
     })
 })
 ```
@@ -874,12 +896,12 @@ because the situation fits the description perfectly:
 > *The request could not be understood by the server due to malformed syntax.
   The client SHOULD NOT repeat the request without modifications.*
 
-We have also added some data to the response to shed some light on the cause of the error.
+We have also added some information to the response to shed some light on the cause of the error.
 
 When dealing with Promises, it's almost always a good idea to add error and exception handling.
 Otherwise, you will find yourself dealing with strange bugs.
 
-It's never a bad idea to print the object that caused the exception to the console in the error handler:
+You can always print the object that caused the exception to the console in the error handler:
 
 ```js
 .catch(error => {
@@ -898,9 +920,10 @@ Any error messages will catch your attention even when the console is far back i
 
 ![sample screenshot showing tiny slice of output](../../images/3/15b.png)
 
-You can do this even if you are using the WebStorm terminal by changing the terminal to a window instead of a dock by right-clicking on the terminal's tab.
-
-![changing the terminal to be a window](../../images/3/custom/changing_terminal_to_window.png)
+> **FYI:** You can keep the terminal in the background even if you are using the WebStorm terminal.
+> All you need to do is change the terminal to the window view mode instead of as a dock by right-clicking on WebStorm's *Terminal* tab.
+>
+> ![changing the terminal to be a window](../../images/3/custom/changing_terminal_to_window.png)
 
 ### Moving error handling into middleware
 
@@ -926,7 +949,7 @@ app.get('/api/tasks/:id', (request, response, next) => { // highlight-line
 ```
 
 The error that is passed forward is given to the `next` function as a parameter.
-If `next` was called without a parameter, then the execution would simply move onto the next route or middleware.
+If `next` was called without a parameter, then the *execution would simply move onto the next route or middleware*.
 If the `next` function is called with a parameter, then the execution will continue to the **error handler middleware**.
 
 Express [error handlers](https://expressjs.com/en/guide/error-handling.html)
@@ -952,7 +975,7 @@ After printing the error message, the error handler checks if the error is a `Ca
 In this situation, the error handler will send a response to the browser with the response object passed as a parameter.
 In all other error situations, the middleware passes the error forward to the default Express error handler.
 
-Notice that the error-handling middleware has to be the last loaded middleware!
+> **Remember:** *the error-handling middleware has to be the last loaded middleware!*
 
 ### The order of middleware loading
 
@@ -964,55 +987,61 @@ The correct order is the following:
 ```js
 app.use(express.static('dist'))
 app.use(express.json())
+app.use(cors())
+
+// ...
+
 app.use(requestLogger)
 
-app.post('/api/tasks', (request, response) => {
-  const body = request.body
-  // ...
-})
+// ...
 
 const unknownEndpoint = (request, response) => {
-  response.status(404).send({ error: 'unknown endpoint' })
+    response.status(404).send({ error: 'unknown endpoint' })
 }
 
 // handler of requests with unknown endpoint
 app.use(unknownEndpoint)
 
 const errorHandler = (error, request, response, next) => {
-  // ...
+    // ...
 }
 
 // handler of requests with result to errors
 app.use(errorHandler)
+
+app.post('/api/tasks', (request, response) => {
+    const body = request.body
+    // ...
+})
 ```
 
 The json-parser middleware should be among the very first middleware loaded into Express.
-If the order was the following:
+If the order was the following: 🐞
 
 ```js
-app.use(requestLogger) // request.body is undefined!
+app.use(requestLogger) // request.body is undefined! 🐞
 
 app.post('/api/tasks', (request, response) => {
-  // request.body is undefined!
+  // request.body is undefined! 
   const body = request.body
   // ...
 })
 
-app.use(express.json())
+app.use(express.json()) // needs to be before! 🐞
 ```
 
 Then the JSON data sent with the HTTP requests would not be available for the logger middleware or the POST route handler, since the `request.body` would be `undefined` at that point.
 
 It's also important that the middleware for handling unsupported routes is next to the last middleware that is loaded into Express, just before the error handler.
 
-For example, the following loading order would cause an issue:
+For example, the following loading order would cause an issue: 🐞
 
 ```js
 const unknownEndpoint = (request, response) => {
   response.status(404).send({ error: 'unknown endpoint' })
 }
 
-// handler of requests with unknown endpoint
+// handling all requests that get to this line with 'unknown endpoint' 🐞
 app.use(unknownEndpoint)
 
 app.get('/api/tasks', (request, response) => {
@@ -1029,7 +1058,7 @@ The only exception to this is the error handler which needs to come at the very 
 
 Let's add some missing functionality to our application, including deleting and updating an individual task.
 
-The easiest way to delete a task from the database is with the [findByIdAndDelete](https://mongoosejs.com/docs/api/model.html#Model.findByIdAndDelete()) method:
+The easiest way to delete a task from the database is with the [`findByIdAndDelete` method](https://mongoosejs.com/docs/api/model.html#Model.findByIdAndDelete()):
 
 ```js
 app.delete('/api/tasks/:id', (request, response, next) => {
@@ -1047,7 +1076,7 @@ The `result` callback parameter could be used for checking if a resource was del
 and we could use that information for returning different status codes for the two cases if we deemed it necessary.
 Any exception that occurs is passed onto the error handler.
 
-The toggling of the importance of a task can be easily accomplished with the [findByIdAndUpdate](https://mongoosejs.com/docs/api/model.html#model_Model-findByIdAndUpdate) method.
+The toggling of the importance of a task can be easily accomplished with the [`findByIdAndUpdate` method](https://mongoosejs.com/docs/api/model.html#model_Model-findByIdAndUpdate).
 
 ```js
 app.put('/api/tasks/:id', (request, response, next) => {
@@ -1066,22 +1095,22 @@ app.put('/api/tasks/:id', (request, response, next) => {
 })
 ```
 
-In the code above, we also allow the content of the task to be edited.
-However, we will not support changing the creation date for obvious reasons.
+In the code above, we also allow the content of the `task` to be edited.
+
+> *However, we will not support changing the creation date for obvious reasons.*
 
 Notice that the `findByIdAndUpdate` method receives a regular JavaScript object as its parameter,
-and not a new task object created with the `Task` constructor function.
+and not a new `task` object created with the `Task` constructor function.
 
 There is one important detail regarding the use of the `findByIdAndUpdate` method.
 By default, the `updatedTask` parameter of the event handler receives the original document
 [without the modifications](https://mongoosejs.com/docs/api/model.html#model_Model-findByIdAndUpdate).
-We added the optional `{ new: true }` parameter, which will cause our event handler to be called with the new modified document instead of the original.
+We added the optional `{ new: true }` parameter, which will cause our event handler to be called ***with the new modified document instead of the original***.
 
 After testing the backend directly with Postman and the WebStorm REST client, we can verify that it seems to work.
 The frontend also appears to work with the backend using the database.
 
-You can find the code for our current application in its entirety in the *part3-5* branch of
-[this GitHub repository](https://github.com/comp227/part3-tasks-backend/tree/part3-5).
+You can find the code for our current application in its entirety in the [*part3-5* branch of our backend repo](https://github.com/comp227/part3-tasks-backend/tree/part3-5).
 
 ### Web developers pledge v3
 
@@ -1112,7 +1141,7 @@ Move the error handling of the application to a new error handler middleware.
 #### 3.17*: Communities database, Step 5
 
 If the user tries to create a new community for one whose name is already in the communities application,
-the frontend will try to update the community's invite location by making an HTTP PUT request to the entry's unique backend URL.
+the frontend will try to update the community's invite location by making an *`HTTP PUT`* request to the entry's unique backend URL.
 
 Modify the backend to support this request.
 
@@ -1121,7 +1150,7 @@ Verify that the frontend works after making your changes.
 #### 3.18*: Communities database Step 6
 
 Also, update the handling of the ***api/groups/:id*** and ***info*** routes to use the database,
-and verify that they work directly with the browser, Postman, or VS Code REST client.
+and verify that they work directly with the browser, Postman, or WebStorm REST client.
 
 Inspecting an individual community from the browser should look like this:
 

@@ -134,30 +134,26 @@ Remember that as we mentioned before, the goal should not just be to read the ma
 
 Remember how we used the File Watchers previously?
 We're going to make sure that process is working,
-as any time that we add files or `create@vite-latest` app,
-we are going to get into the habit of adding the files to our git repository via the terminal
-**Not following these directions may impact your grade**.
+as any time that we add files or use `create@vite-latest` app,
+we need to make sure that the files we created continue to change back to being white in WebStorm's Project Explorer Window.
+This should happen automatically when we edit our code.
 
-With the changes above and the files deleted, you're going to open your terminal in WebStorm, type the command:
+Please open up *main.jsx*, if it's not open already, and ensure that all of the text is white and that you see a git repo in the upper left.
 
-```bash
-git add .
-```
-
-Once you do, you should see all of the files turn green in WebStorm.
-This means that we are about to add these files to our git repository.
-Depending on your configuration, you may get warnings about the line endings.
-This is safe to ignore.
+> *If you see that all of the files have green or blue text in WebStorm, for a long time,
+This means that our file watcher may be working correctly.
+> Depending on your configuration, you may get warnings about the line endings.
+This is safe to ignore.*
 
 ![WebStorm showing files added as green](../../images/1/custom/git_add_green.png)
 
-Once they are in green, let's go ahead and commit by following this command:
+If the files do not change back to white and you feel as though your file watchers are working, if you type
 
 ```bash
-git commit -m "Setting up reading for grading"
+git status
 ```
 
-Once you do that, you'll see that the files have turned white again.
+If your file watcher is working correctly, you'll see that the files have turned white again.
 
 ![WebStorm showing files added as white](../../images/1/custom/git_commit_white.png)
 
@@ -169,12 +165,26 @@ When you do this, you may notice that *App.jsx* turns blue which means that ther
 
 However, the file will not stay blue for long, and our workflow automation will be triggered, which will cause the file to be white again.
 
-The last thing I wanted to point your attention to is the fact that there is a green arrow near our main branch at the top.
+The last thing I wanted to point your attention to is to be aware of a green arrow near our main branch at the top.
+You should not have one at this moment.
+If you do, then you may not have setup file watchers correctly.
+You can create that arrow by going to terminal, and creating an empty commit message, which I'll have you do everytime you complete the exercises.
+
+We'll use the empty commits to give us a non-standard way of leaving notes in our code.
+Go to terminal and write this line.
+
+```bash
+git commit --allow-empty -m "Practicing an empty commit while reading part 1a"
+```
+
+After typing that line, do not make any changes in your JSX file, and go back to webstorm, and if you type another git status, you should now see this green arrow appear.
 
 ![WebStorm showing main needs to push changes](../../images/1/custom/git_commit_needs_push.png)
 
-This means that you have made changes locally that we want to sync with GitHub.
-To do this, we'll **push** them, which we can do via the terminal or WebStorm.
+Webstorm uses the arrows to let you know that your github repo and local computer are out of sync.
+The green arrow can also happen if you add new files to your project.
+
+To make the arrow go away, we'll **push** the empty commit, which we can do via the terminal or WebStorm.
 In Terminal, you can just type:
 
 ```bash
@@ -182,7 +192,7 @@ git push
 ```
 
 Once you complete this command, you'll notice that the *main* branch no longer has the green arrow next to it.
-You can also ensure that your changes are on GitHub.
+You can also ensure that your changes are on GitHub (including your empty commit message)
 To ensure that you are working through the material correctly, you will message me directly once you finish this to confirm that you are following the steps.
 
 > ***If you use more than one computer, you'll need to make sure that you pull at the beginning of the session and push at the end***.
@@ -489,7 +499,7 @@ If you have set everything up correctly you will receive the following error mes
 
 It's not an actual error, but a warning caused by the [ESLint](https://eslint.org/) tool.
 You can silence the warning [`react/prop-types`](https://github.com/jsx-eslint/eslint-plugin-react/blob/master/docs/rules/prop-types.md)
-by adding to the file *.estlintrc.cjs* the next line
+by adding to the file *.eslintrc.cjs* the next line
 
 ```js
 module.exports = {
@@ -501,7 +511,7 @@ module.exports = {
      'plugin:react/jsx-runtime',
      'plugin:react-hooks/recommended',
    ],
-   ignorePatterns: ['dist', '.estlintrc.cjs'],
+   ignorePatterns: ['dist', '.eslintrc.cjs'],
    parserOptions: { ecmaVersion: 'latest', sourceType: 'module' },
    settings: { react: { version: '18.2' } },
    plugins: ['react-refresh'],
@@ -775,14 +785,27 @@ In this part, it is not even worth trying to use the direct rendering of the tab
 
 The exercises are submitted through GitHub and marking them as done on Canvas.
 
-To submit via GitHub, you will **push** your code anytime that you decide to stop for a while.
-Also, you will ***amend your commits when you finish an exercise***.
+To submit an exercise as completed in GitHub, you will need to manually write this command in your terminal.
+
+```bash
+git commit --allow-empty -m "Completed Exercise X.Y"
+```
+
+Because we are using file watchers, all changes are uploaded automatically.
+So, any time that the reading says to *commit your changes*, **you can use the `--allow-empty` flag to make an empty commit with the desired message**.
+
+Where *`X`* and *`Y`* stand for the part number ane exercise number.
+You will know that it is complete because it will parrot it back to you.
+**Consider this part of the submission system**.
+If you want to be sure that it uploads, you should also do a `git push`, though if you edit your JSX files afterwards, they should be fine.
+
 *This is something that should happen at all times and you are responsible for verifying your changes show up in github.*
 
 You should submit the exercises in each part with the corresponding repo that is mentioned.
 In this case, you will use the repo that was generated from <http://go.djosv.com/227lab1>.
 
-We will use the following file structure for our submission repository:
+We will use Vite in each of the exercises to create the following file structure for our submission repository,
+(**do not do this now; you should already have a *reading* rolder from our previous exercises**):
 
 ```text
 lab1
@@ -810,10 +833,17 @@ Notice that in this part, there are more exercises besides those found below.
 This exercise will start the ongoing development of a small application that will be further developed in a few of the following exercises.
 Please make sure to commit often and that you do not have any files in your project that are any color other than white.
 
-Use *Vite* in the base folder of *lab1* to initialize a new application called **arcadeinfo**.
+**Use *Vite* in the base folder of *lab1* to initialize a new application called *arcadeinfo***.
+
+> **FYI:** If you don't know how to do this, then you need to [go back and re-read the initial portion where you first setup the reading folder](#starting-development).
+> This is something that you will have to do from time to time in the course to get those necessary refreshers, and that's OK!
+
 Commit and add all of the files needed.
-Make sure that when you type `ls`, you see both the *reading* and *arcadeinfo* folders.
-Modify *index.jsx* to match the following
+**Make sure that when you type `ls`, you see both the *reading* and *arcadeinfo* folders**.
+Now, since you have your *reading* folder already,
+you'll make changes in your reading folder, and for the exercises, you'll make changes in the named exercise folder (in this case, *arcadeinfo*)
+
+Modify *arcadeinfo/src/main.jsx* to match the following.
 
 ```js
 import ReactDOM from 'react-dom/client'
@@ -860,8 +890,8 @@ and remove extra files (*App.css*, *index.css*, *logo.svg*)).
 Unfortunately, the entire application is in the same component.
 Refactor the code so that it consists of three new components: `Header`, `Content`, and `Total`.
 All data still resides in the `App` component, which passes the necessary data to each component using `props`.
-`Header` takes care of rendering the name of the course,
-`Content` renders the parts and their number of exercises and `Total` renders the total number of exercises.
+`Header` takes care of rendering the name of the company,
+`Content` renders the handhelds and their number of games and `Total` renders the total number of games.
 
 Define the new components in *App.jsx*.
 
@@ -888,6 +918,8 @@ const App = () => {
 > Also, do not try to program all the components at the same time.
 > You need to go in small steps, like first make the component *Header* and when that works, **commit** the change and then ***then*** proceed to the next component.
 
+***Make sure to type `git commit --allow-empty -m "Completed Exercise 1.1"` in the terminal before moving onto 1.2***
+
 #### 1.2: handheld arcade info, Step 2
 
 Refactor the `Content` component so that it does not render any names of handhelds or their number of games by itself.
@@ -906,6 +938,10 @@ const Content = ... {
 ```
 
 Our application passes on information in quite a primitive way at the moment, since it is based on individual variables.
+
+***Make sure to type `git commit --allow-empty -m "Completed Exercise 1.2"` in the terminal before moving on.***
+You will not get anymore regular reminders to do this.
+
 We shall fix that in [part 2](/part2).
 
 </div>

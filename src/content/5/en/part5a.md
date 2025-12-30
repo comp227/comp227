@@ -22,12 +22,12 @@ Throughout this part, we will assume that new users will not be added from the f
 
 Let's add a login form to the top of the page.
 That code will be shown below.
-**Let's also move the form for adding tasks above the form.**
-We'll task you with doing this.
+**Let's also move the form for adding tasks, so that it sits just below the login form**
+We'll task you with doing this, which you can continue on from the previous *reading* frontend located in your *lab2*.
 
 ![browser showing user login for tasks](../../images/5/1e.png)
 
-Our new code for *App* is below:
+Our new code for *App.jsx* in our *reading* folder is below:
 
 ```js
 const App = () => {
@@ -87,7 +87,7 @@ const App = () => {
       <hr/>
     // highlight-end
 
-      // ...
+      <!--- add form and other tasks code here --->
     </div>
   )
 }
@@ -127,7 +127,7 @@ and they destructure the field `target` from the object and save its value to th
 The method `handleLogin`, which is responsible for handling the data in the form, is yet to be implemented.
 
 Logging in is done by sending an HTTP POST request to the server address ***api/login***.
-Let's separate the code responsible for this request into its own module, to file *services/login.js*.
+Let's separate the code responsible for this request on the frontend into its own module, to the file *services/login.js*.
 
 We'll use `async`/`await` syntax instead of promises for the HTTP request:
 
@@ -143,7 +143,7 @@ const login = async credentials => {
 export default { login }
 ```
 
-The `handleLogin` function and the other parts of *App.js* can be changed as follows:
+The `handleLogin` function and the other parts of *App.jsx* can be changed as follows:
 
 ```js
 import loginService from './services/login' // highlight-line
@@ -313,10 +313,8 @@ return (
 )
 ```
 
-If `user === null` is
-[**truthy**](https://developer.mozilla.org/en-US/docs/Glossary/Truthy),
-`loginForm()` is executed.
-If not, `taskForm()` is.
+If `user === null` evaluates to true, the code calls `loginForm()`.
+Otherwise, it calls `taskForm()`.
 
 Let's do one more modification.
 If the user is logged in, their name is shown on the screen:
@@ -346,8 +344,8 @@ return (
 
 The solution isn't perfect, but we'll leave it for now.
 
-Our main component `App` is at the moment way too large.
-The changes we did now are a clear sign that the forms should be refactored into their own components.
+Our main component `App` is at the moment ***way too large***.
+The changes we just made can make us realize that the forms should be refactored into separate components.
 However, we will leave that for an optional exercise.
 
 The current application code can be found on
@@ -355,7 +353,10 @@ The current application code can be found on
 
 ### Creating new tasks
 
-The token returned with a successful login is saved to the application's state - the `user`'s field `token`:
+Let's fix creating new tasks so it works with the backend.
+This means we'll need to include a user's token when adding tasks.
+
+Currently, the token returned with a successful login is saved to the application's state - the `user`'s field `token`:
 
 ```js
 const handleLogin = async (event) => {
@@ -374,10 +375,9 @@ const handleLogin = async (event) => {
 }
 ```
 
-Let's fix creating new tasks so it works with the backend.
-This means adding the token of the logged-in user to the Authorization header of the HTTP request.
+We'll then need to access and include this user's token in the *Authorization* header of the HTTP request.
 
-The *taskService* module changes like so:
+To include the token, we'll modify *services/tasks.js*:
 
 ```js
 import axios from 'axios'
@@ -401,11 +401,11 @@ const create = async newObject => {
   const config = {
     headers: { Authorization: token },
   }
-// highlight-end
 
-  const response = await axios.post(baseUrl, newObject, config) // highlight-line
+  const response = await axios.post(baseUrl, newObject, config)
   return response.data
 }
+// highlight-end
 
 const update = (id, newObject) => {
   const request = axios.put(`${ baseUrl }/${id}`, newObject)
@@ -415,12 +415,13 @@ const update = (id, newObject) => {
 export default { getAll, create, update, setToken } // highlight-line
 ```
 
-The taskService module contains a private variable `token`.
+This *taskService* module contains a private variable `token`.
 Its value can be changed with a function `setToken`, which is exported by the module.
 `create`, now with `async`/`await` syntax, sets the token to the `Authorization` header.
-The header is given to axios as the third parameter of the `post` method.
+The header is given to *`axios`* as the third parameter of the `post` method.
 
-The event handler responsible for login must be changed to call the method `taskService.setToken(user.token)` with a successful login:
+In addition to the changes in *`taskService`*,
+we'll need to change *App.jsx*'s `handleLogin` so that it saves the user's token (`taskService.setToken(user.token)`) with a successful login:
 
 ```js
 const handleLogin = async (event) => {
@@ -444,8 +445,13 @@ And now adding new tasks works again!
 
 ### Saving the token to the browser's local storage
 
-Our application has a flaw: if we refresh the page (***F5***), the user's login information disappears.
-This flaw also slows down development, since when we test creating new tasks, we have to keep logging in.
+While we should celebrate our progress, you may also notice that our application has a bug.
+
+Don't see the bug yet?
+Try to refresh the page (***F5***).
+
+Notice how ***the user's login information disappeared after refreshing the page**.
+This bug also slows down development, because we have to keep logging in everytime...even when testing task creation.
 
 This problem is easily solved by saving the login details to [**local storage**](https://developer.mozilla.org/en-US/docs/Web/API/Storage).
 Local Storage is a [key-value](https://en.wikipedia.org/wiki/Key-value_database) database in the browser.
@@ -460,16 +466,16 @@ window.localStorage.setItem('name', 'slim shady')
 
 saves the string given as the second parameter as the value of the key `name`.
 
-The value of a key can be found with the method [getItem](https://developer.mozilla.org/en-US/docs/Web/API/Storage/getItem):
+The value of a key can be found with the method [`getItem`](https://developer.mozilla.org/en-US/docs/Web/API/Storage/getItem):
 
 ```js
 window.localStorage.getItem('name')
 ```
 
-and [removeItem](https://developer.mozilla.org/en-US/docs/Web/API/Storage/removeItem) removes a key.
+and [`removeItem`](https://developer.mozilla.org/en-US/docs/Web/API/Storage/removeItem) removes a key.
 
 Values in the local storage are persisted even when the page is re-rendered.
-The storage is [origin](https://developer.mozilla.org/en-US/docs/Glossary/Origin)-specific so each web application has its own storage.
+The storage is [origin-specific](https://developer.mozilla.org/en-US/docs/Glossary/Origin) so each web application has its separate storage.
 
 Let's extend our application so that it saves the details of a logged-in user to local storage.
 
@@ -478,7 +484,7 @@ so we cannot save a JavaScript object as it is.
 The object has to be parsed to JSON first, with the method `JSON.stringify`.
 Correspondingly, when a JSON object is read from the local storage, *it has to be parsed back to JavaScript with `JSON.parse`*.
 
-Changes to the login method are as follows:
+Our `handleLogin` method now adds code to set the local storage:
 
 ```js
   const handleLogin = async (event) => {
@@ -491,7 +497,7 @@ Changes to the login method are as follows:
       // highlight-start
       window.localStorage.setItem(
         'loggedTaskappUser', JSON.stringify(user)
-      ) 
+      )
       // highlight-end
       taskService.setToken(user.token)
       setUser(user)
@@ -509,8 +515,8 @@ The details of a logged-in user are now saved to the local storage, and they can
 
 You can also inspect the local storage using the developer tools.
 On Chrome, go to the ***Application*** tab and select ***Local Storage***
-(more details [here](https://developers.google.com/web/tools/chrome-devtools/storage/localstorage)).
-On Firefox go to the ***Storage*** tab and select ***Local Storage*** (details [here](https://developer.mozilla.org/en-US/docs/Tools/Storage_Inspector)).
+([details here](https://developers.google.com/web/tools/chrome-devtools/storage/localstorage)).
+On Firefox go to the ***Storage*** tab and select ***Local Storage*** ([details here](https://developer.mozilla.org/en-US/docs/Tools/Storage_Inspector)).
 
 We still have to modify our application so that when we enter the page,
 the application checks if local storage has details for a logged-in user.
@@ -520,7 +526,7 @@ The right way to do this is with an [*effect hook*](https://react.dev/reference/
 a mechanism we first encountered in [part 2](/part2/getting_data_from_server#effect-hooks),
 and used to fetch tasks from the server.
 
-We can have multiple effect hooks, so let's create a second one to handle the first loading of the page:
+We can have multiple effect hooks, so let's create an additional hook to handle the initial loading of the page:
 
 ```js
 const App = () => {
@@ -558,21 +564,22 @@ The empty array `[]` as the parameter of the effect ensures that the effect is e
 [for the first time](https://react.dev/reference/react/useEffect#parameters).
 
 Now a user stays logged in to the application forever.
-We should probably add a ***logout*** functionality, which removes the login details from the local storage.
-*We will leave it as an exercise, as it uhhhh "builds character"* 🧐.
 
-***It's possible to log out a user using the console***, and that is enough for now.
-You can log out with the command:
-
-```js
-window.localStorage.removeItem('loggedTaskappUser')
-```
-
-or with the command which empties `localStorage`:
-
-```js
-window.localStorage.clear()
-```
+> **Pertinent:** We should probably add a way to ***logout***, which can be done by removing the login details from the local storage.
+>> *We will leave that as an exercise, as it uhhhh... "builds character"* 🧐.
+>
+> ***It's possible to log out a user using the console***, and that is enough for now.
+> You can log out with the command:
+>
+> ```js
+> window.localStorage.removeItem('loggedTaskappUser')
+> ```
+>
+> or with the command which empties `localStorage`:
+>
+> ```js
+> window.localStorage.clear()
+> ```
 
 The current application code can be found on
 [GitHub](https://github.com/comp227/part2-tasks/tree/part5-3), branch *part5-3*.
@@ -583,10 +590,10 @@ The current application code can be found on
 
 ### Exercises 5.1-5.4
 
-We will now create a frontend for the watchlist backend we created in the previous section.
-You will be using a new repo for this part that you will be able to obtain by vising the URL below.
+***We will now create a frontend for the watchlist backend we created in the previous section.***
+You will be using a new repo for this part that you will be able to obtain by visiting the URL below.
 This new repo/application has a small amount of code to get you started.
-The application expects your backend to be running on port 3003.
+**The application expects your backend to be running on port 3003.**
 
 Visit <http://go.djosv.com/227lab5> to start the process of cloning the frontend repo into WebStorm.
 
@@ -597,8 +604,9 @@ npm i
 npm run dev
 ```
 
-Following what we have mentioned before about committing regularly, your commits should be providing context on the small changes that you are doing as you write your code.
-This way you think about your code as you move through, which has an [increasing following](https://conventionalcommits.org).
+Following what we have mentioned before, you will need to ensure that your file watchers are turned on and that you are making empty commits when you complete an exercise.
+Normally, without file watchers, you would be making small commits and describing your changes as you go along.
+Having a general and standard description of what is happening has gotten an [increasing following](https://conventionalcommits.org), but we will stick to our methods for this course.
 
 The first few exercises revise everything we have learned about React so far.
 They can be challenging, especially if your backend is incomplete.
@@ -606,8 +614,8 @@ Please **ensure part4 is working first** before moving onto this.
 
 While doing the exercises, remember all of the debugging methods we have talked about, especially keeping an eye on the console.
 
-**Warning:** If you notice you are mixing in the functions `async`/`await` and `then` commands, it's 99.9%  certain you are doing something wrong.
-Use either or, never both.
+> **Warning:** If you notice you are mixing in the functions `async`/`await` and `then` commands, it's 99.9%  certain you are doing something wrong.
+> Use either or, never both.
 
 #### 5.1: watchlist frontend, Step 1
 
@@ -618,13 +626,13 @@ If a user is not logged in, ***only*** the login form is visible.
 
 ![browser showing visible login form only](../../images/5/4e.png)
 
-If the user is logged in, the name of the user and a list of blogs is shown.
+If the user is logged in, the name of the user and a list of shows is shown.
 
 ![browser showing tasks and who is logged in](../../images/5/5e.png)
 
 User details of the logged-in user do not have to be saved to the local storage yet.
 
-> **NB** You can implement the conditional rendering of the login form like this for example:
+> **Pertinent:** You can implement the conditional rendering of the login form like this for example:
 >
 > ```js
 >   if (user === null) {
@@ -662,7 +670,7 @@ Ensure the browser does not remember the details of the user after logging out.
 
 Expand your application to allow a logged-in user to add new shows:
 
-![browser showing new blog form](../../images/5/7e.png)
+![browser showing new show form](../../images/5/7e.png)
 
 #### 5.4: watchlist frontend, Step 4
 
@@ -696,11 +704,11 @@ This solution is often called a **server-side session**.
 No matter how the validity of tokens is checked and ensured,
 saving a token in the local storage might contain a security risk if the application has a security vulnerability that allows
 [Cross-Site Scripting (XSS)](https://owasp.org/www-community/attacks/xss/) attacks.
-An XSS attack is possible if the application would allow a user to inject arbitrary JavaScript code (e.g. using a form) that the app would then execute.
+An XSS attack is possible if the application allows a user to inject arbitrary JavaScript code (e.g. using a form) that the app would then execute.
 When using React sensibly it should not be possible since [React sanitizes](https://legacy.reactjs.org/docs/introducing-jsx.html#jsx-prevents-injection-attacks)
 all text that it renders, meaning that it is not executing the rendered content as JavaScript.
 
-If one wants to play safe, the best option is to not store a token in local storage.
+If one wants to play it safe, ***the best option is to not store a token in local storage***.
 This might be an option in situations where leaking a token might have tragic consequences.
 
 It has been suggested that the identity of a signed-in user should be saved as [**httpOnly cookies**](https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies#restrict_access_to_cookies),

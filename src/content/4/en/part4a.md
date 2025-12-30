@@ -8,34 +8,36 @@ lang: en
 <div class="content">
 
 Let's continue our work on the backend of the tasks application we started in [part 3](/part3).
+*This means that you can continue editing the repo that you have from **lab3** for continuing to edit the reading.*
 
 ### Project structure
 
 Before we move into the topic of testing, we will modify the structure of our project to adhere to Node.js best practices.
 
 The following section will be devoted to walking us through restructuring our project.
-By the time we reach the [recap section](#directory-structure-recap), the directory structure of our project will look like this:
 
-```bash
-├── index.js
-├── app.js
-├── dist
-│   └── ...
-├── controllers
-│   └── tasks.js
-├── models
-│   └── task.js
-├── package-lock.json
-├── package.json
-├── utils
-│   ├── config.js
-│   ├── logger.js
-│   └── middleware.js  
-```
+> **FYI:** By the time we reach the [recap section](#directory-structure-recap), *the directory structure of our project will look like this*:
+>
+> ```bash
+> ├── index.js
+> ├── app.js
+> ├── dist
+> │   └── ...
+> ├── controllers
+> │   └── tasks.js
+> ├── models
+> │   └── task.js
+> ├── package-lock.json
+> ├── package.json
+> ├── utils
+> │   ├── config.js
+> │   ├── logger.js
+> │   └── middleware.js  
+> ```
 
-Before we get started, know that when you ask WebStorm to make a file, and if type *`dir/file`*, WebStorm will automatically create the directory if it doesn't exist.
+Before we get started, know that when you ask WebStorm to make a file, and you type *`dir/file`*, WebStorm will automatically create the directory if it doesn't exist.
 You just need to make sure the correct directory is selected before you begin.
-Let's get started
+Let's get started!
 
 #### utils/logger.js
 
@@ -45,19 +47,19 @@ Let's go one step closer to best practices and **separate all console printing t
 
 ```js
 const info = (...params) => {
-  console.log(...params)
-}
+  console.log(...params);
+};
 
 const error = (...params) => {
-  console.error(...params)
-}
+  console.error(...params);
+};
 
 module.exports = {
   info, error
-}
+};
 ```
 
-The logger has two functions, **info** for printing normal log messages, and **error** for all error messages.
+The logger has two functions, **`info`** for printing normal log messages, and **`error`** for all error messages.
 
 Extracting logging into its own module is a good idea in more ways than one.
 If we wanted to start writing logs to a file or send them to an external logging service like [graylog](https://www.graylog.org/)
@@ -68,16 +70,16 @@ or [papertrail](https://papertrailapp.com) we would only have to make changes in
 The contents of the *index.js* file used for starting the application gets simplified as follows:
 
 ```js
-const app = require('./app') // the actual Express application
-const http = require('http')
-const config = require('./utils/config')
-const logger = require('./utils/logger')
+const app = require("./app"); // the actual Express application
+const http = require("http");
+const config = require("./utils/config");
+const logger = require("./utils/logger");
 
-const server = http.createServer(app)
+const server = http.createServer(app);
 
 server.listen(config.PORT, () => {
-  logger.info(`Server running on port ${config.PORT}`)
-})
+  logger.info(`Server running on port ${config.PORT}`);
+});
 ```
 
 The *index.js* file only imports the actual application from the *app.js* file and then starts the application.
@@ -97,95 +99,93 @@ All of the routes related to tasks are now in the *tasks.js* module under the *c
 The handling of environment variables is extracted into a separate *utils/config.js* file:
 
 ```js
-require('dotenv').config()
+require("dotenv").config();
 
-const PORT = process.env.PORT
-const MONGODB_URI = process.env.MONGODB_URI
+const PORT = process.env.PORT;
+const MONGODB_URI = process.env.MONGODB_URI;
 
 module.exports = {
   MONGODB_URI,
   PORT
-}
+};
 ```
 
 The other parts of the application can access the environment variables by importing the configuration module:
 
 ```js
-const config = require('./utils/config')
+const config = require("./utils/config");
 
-logger.info(`Server running on port ${config.PORT}`)
+logger.info(`Server running on port ${config.PORT}`);
 ```
 
 #### controllers/tasks.js
 
 The route handlers have also been moved into a dedicated module.
 The event handlers of routes are commonly referred to as **controllers**, and for this reason, we have created a new *controllers* directory.
-All of the routes related to tasks are now in the *tasks.js* module under the *controllers* directory.
-
-The contents of the *tasks.js* module are the following:
+All of the routes related to tasks are now in the *controllers/tasks.js* module:
 
 ```js
-const tasksRouter = require('express').Router()
-const Task = require('../models/task')
+const tasksRouter = require("express").Router();
+const Task = require("../models/task");
 
-tasksRouter.get('/', (request, response) => {
+tasksRouter.get("/", (request, response) => {
   Task.find({}).then(tasks => {
-    response.json(tasks)
-  })
-})
+    response.json(tasks);
+  });
+});
 
-tasksRouter.get('/:id', (request, response, next) => {
+tasksRouter.get("/:id", (request, response, next) => {
   Task.findById(request.params.id)
     .then(task => {
       if (task) {
-        response.json(task)
+        response.json(task);
       } else {
-        response.status(404).end()
+        response.status(404).end();
       }
     })
-    .catch(error => next(error))
-})
+    .catch(error => next(error));
+});
 
-tasksRouter.post('/', (request, response, next) => {
-  const body = request.body
+tasksRouter.post("/", (request, response, next) => {
+  const body = request.body;
 
   const task = new Task({
     content: body.content,
-    important: body.important || false,
+    important: Boolean(body.important) || false,
     date: new Date()
-  })
+  });
 
   task.save()
     .then(savedTask => {
-      response.status(201).json(savedTask)
+      response.json(savedTask);
     })
-    .catch(error => next(error))
-})
+    .catch(error => next(error));
+});
 
-tasksRouter.delete('/:id', (request, response, next) => {
+tasksRouter.delete("/:id", (request, response, next) => {
   Task.findByIdAndDelete(request.params.id)
     .then(() => {
-      response.status(204).end()
+      response.status(204).end();
     })
-    .catch(error => next(error))
-})
+    .catch(error => next(error));
+});
 
-tasksRouter.put('/:id', (request, response, next) => {
-  const body = request.body
+tasksRouter.put("/:id", (request, response, next) => {
+  const body = request.body;
 
   const task = {
     content: body.content,
-    important: body.important,
-  }
+    important: Boolean(body.important),
+  };
 
   Task.findByIdAndUpdate(request.params.id, task, { new: true })
     .then(updatedTask => {
-      response.json(updatedTask)
+      response.json(updatedTask);
     })
-    .catch(error => next(error))
-})
+    .catch(error => next(error));
+});
 
-module.exports = tasksRouter
+module.exports = tasksRouter;
 ```
 
 This is almost an exact copy-paste of our previous *index.js* file.
@@ -194,11 +194,11 @@ However, there are a few significant changes.
 At the very beginning of the file, we create a new [router](http://expressjs.com/en/api.html#router) object:
 
 ```js
-const tasksRouter = require('express').Router()
+const tasksRouter = require("express").Router();
 
 //...
 
-module.exports = tasksRouter
+module.exports = tasksRouter;
 ```
 
 The module exports the router to be available for all consumers of the module.
@@ -209,20 +209,20 @@ It's worth noting that the paths in the route handlers have shortened.
 In the previous version, we had:
 
 ```js
-app.delete('/api/tasks/:id', (request, response) => {
+app.delete("/api/tasks/:id", (request, response) => {
 ```
 
-And in the current version, we have:
+Now in the current version, we have:
 
 ```js
-tasksRouter.delete('/:id', (request, response) => {
+tasksRouter.delete("/:id", (request, response) => {
 ```
 
 So what are these router objects exactly?
 The Express manual provides the following explanation:
 
 > *A router object is an isolated instance of middleware and routes.
-  You can think of it as a “mini-application,” capable only of performing middleware and routing functions.
+  You can think of it as a "mini-application," capable only of performing middleware and routing functions.
   Every Express application has a built-in app router.*
 
 The router *is a* **middleware**, that can be used for defining "related routes" in a single place, which is typically placed in its own module.
@@ -232,8 +232,8 @@ The router *is a* **middleware**, that can be used for defining "related routes"
 The *app.js* file that creates the actual application takes the router into use as shown in this code snippet:
 
 ```js
-const tasksRouter = require('./controllers/tasks')
-app.use('/api/tasks', tasksRouter)
+const tasksRouter = require("./controllers/tasks");
+app.use("/api/tasks", tasksRouter);
 ```
 
 The router we defined earlier is used *if* the URL of the request starts with ***/api/tasks***.
@@ -242,38 +242,38 @@ For this reason, the tasksRouter object must only define the relative parts of t
 After making these changes, our *app.js* file looks like this:
 
 ```js
-const config = require('./utils/config')
-const express = require('express')
-const app = express()
-const cors = require('cors')
-const tasksRouter = require('./controllers/tasks')
-const middleware = require('./utils/middleware')
-const logger = require('./utils/logger')
-const mongoose = require('mongoose').set('strictQuery', true)
+const config = require("./utils/config");
+const express = require("express");
+const app = express();
+const cors = require("cors");
+const tasksRouter = require("./controllers/tasks");
+const middleware = require("./utils/middleware");
+const logger = require("./utils/logger");
+const mongoose = require("mongoose").set("strictQuery", true);
 
-mongoose.set('strictQuery', false)
+mongoose.set("strictQuery", false);
 
-logger.info('connecting to', config.MONGODB_URI)
+logger.info("connecting to", config.MONGODB_URI);
 
 mongoose.connect(config.MONGODB_URI)
   .then(() => {
-    logger.info('connected to MongoDB')
+    logger.info("connected to MongoDB");
   })
   .catch((error) => {
-    logger.error('error connecting to MongoDB:', error.message)
-  })
+    logger.error("error connecting to MongoDB:", error.message);
+  });
 
-app.use(cors())
-app.use(express.static('dist'))
-app.use(express.json())
-app.use(middleware.requestLogger)
+app.use(cors());
+app.use(express.static("dist"));
+app.use(express.json());
+app.use(middleware.requestLogger);
 
-app.use('/api/tasks', tasksRouter)
+app.use("/api/tasks", tasksRouter);
 
-app.use(middleware.unknownEndpoint)
-app.use(middleware.errorHandler)
+app.use(middleware.unknownEndpoint);
+app.use(middleware.errorHandler);
 
-module.exports = app
+module.exports = app;
 ```
 
 The file takes different middleware into use, and one of these is the `tasksRouter` that is attached to the `/api/tasks` route.
@@ -283,47 +283,47 @@ The file takes different middleware into use, and one of these is the `tasksRout
 Our custom middleware has been moved to a new *utils/middleware.js* module:
 
 ```js
-const logger = require('./logger')
+const logger = require("./logger");
 
 const requestLogger = (request, response, next) => {
-  logger.info('Method:', request.method)
-  logger.info('Path:  ', request.path)
-  logger.info('Body:  ', request.body)
-  logger.info('---')
-  next()
-}
+  logger.info("Method:", request.method);
+  logger.info("Path:  ", request.path);
+  logger.info("Body:  ", request.body);
+  logger.info("---");
+  next();
+};
 
 const unknownEndpoint = (request, response) => {
-  response.status(404).send({ error: 'unknown endpoint' })
-}
+    response.status(404).send({ error: "unknown endpoint" });
+};
 
 const errorHandler = (error, request, response, next) => {
-  logger.error(error.message)
+  logger.error(error.message);
 
-  if (error.name === 'CastError') {
-    return response.status(400).send({ error: 'malformatted id' })
-  } else if (error.name === 'ValidationError') {
-    return response.status(400).json({ error: error.message })
+  if (error.name === "CastError") {
+    return response.status(400).send({ error: "malformatted id" });
+  } else if (error.name === "ValidationError") {
+    return response.status(400).json({ error: error.message });
   }
 
-  next(error)
-}
+  next(error);
+};
 
 module.exports = {
   requestLogger,
   unknownEndpoint,
   errorHandler
-}
+};
 ```
 
 The responsibility of establishing the connection to the database has been given to the *app.js* module.
 
 #### models/task.js
 
-The *task.js* file under the *models* directory only defines the Mongoose schema for tasks.
+The *models/task.js* only defines the Mongoose schema for tasks.
 
 ```js
-const mongoose = require('mongoose')
+const mongoose = require("mongoose");
 
 const taskSchema = new mongoose.Schema({
   content: {
@@ -336,17 +336,17 @@ const taskSchema = new mongoose.Schema({
     required: true,
   },
   important: Boolean,
-})
+});
 
-taskSchema.set('toJSON', {
+taskSchema.set("toJSON", {
   transform: (document, returnedObject) => {
-    returnedObject.id = returnedObject._id.toString()
-    delete returnedObject._id
-    delete returnedObject.__v
+    returnedObject.id = returnedObject._id.toString();
+    delete returnedObject._id;
+    delete returnedObject.__v;
   }
-})
+});
 
-module.exports = mongoose.model('Task', taskSchema)
+module.exports = mongoose.model("Task", taskSchema);
 ```
 
 ### Directory Structure Recap
@@ -371,8 +371,8 @@ To recap, the directory structure looks like this after the changes have been ma
 ```
 
 For smaller applications, the structure does not matter that much.
-Once the application starts to grow in size, you must establish a structure
-and separate the different responsibilities of the application into separate modules.
+Once the application starts to grow in size, ***you must establish a structure
+and separate the different responsibilities of the application into separate modules***.
 This will make developing the application much easier.
 
 There is no strict directory structure or file naming convention that is required for Express applications.
@@ -391,80 +391,81 @@ Firstly, e.g. the file *utils/logger.js* does the export as follows:
 
 ```js
 const info = (...params) => {
-  console.log(...params)
-}
+  console.log(...params);
+};
 
 const error = (...params) => {
-  console.error(...params)
-}
+  console.error(...params);
+};
 
 // highlight-start
 module.exports = {
   info, error
-}
+};
 // highlight-end
 ```
 
 #### Exporting a bundled object
 
-The file exports ***an object*** that has two fields, both of which are functions.
+*utils/logger.js* `exports` an object that has two fields, both of which are functions.
 The functions can be used in two different ways.
-The first option is to require the whole object and refer to functions through the object using the dot notation:
+The first option is to *require the whole object* and refer to functions through the object using the dot notation:
 
 ```js
-const logger = require('./utils/logger')
+const logger = require("./utils/logger");
 
-logger.info('message')
+logger.info("message");
 
-logger.error('error message')
+logger.error("error message");
 ```
 
-The other option is to destructure the functions to their own variables in the *`require`* statement:
+The second option is to *destructure the functions* to variables in the *`require`* statement:
 
 ```js
-const { info, error } = require('./utils/logger')
+const { info, error } = require("./utils/logger");
 
-info('message')
-error('error message')
+info("message");
+error("error message");
 ```
 
-I would recommend using the latter option when only a small portion of those exported functions would be needed.
+I would recommend destructuring when only a small portion of those exported functions would be needed.
 
 #### Exporting a single value
 
-The second way of exporting may be preferable if only a small portion of the exported functions are used in a file.
-As an example, in the file *controller/tasks.js*, exporting happens differently:
+While *utils/logger.js* exports multiple functions, it is also common to export a single object.
+As an example, let's revisit *controller/tasks.js*:
 
 ```js
-const tasksRouter = require('express').Router()
-const Task = require('../models/task')
+const tasksRouter = require("express").Router();
+const Task = require("../models/task");
 
 // ...
 
-module.exports = tasksRouter // highlight-line
+module.exports = tasksRouter; // highlight-line
 ```
 
-In this case, there is just one *thing* exported, so the only way to use it is the following:
+Since there is just one object exported, we must import the entire object to use it:
 
 ```js
-const tasksRouter = require('./controllers/tasks')
+const tasksRouter = require("./controllers/tasks");
 
 // ...
 
-app.use('/api/tasks', tasksRouter)
+app.use("/api/tasks", tasksRouter);
 ```
 
-Now the exported *thing* (in this case a router object) is assigned to a variable and used as such.
+Now the exported object is assigned to the variable `tasksRouter` and used as such.
 
 #### Finding the usages of your files with WebStorm
 
-WebStorm has some handy features that allow you to search for usages in your code.
+***WebStorm allows you to search for usages in your code.***
 This can be very helpful for refactoring.
 For example, if you decide to split a function into two separate functions, your code could break if you don't modify all the usages.
-This is difficult if you don't know where they are.
+This is difficult if you don't know where all of those usages are.
 
 To find usages for any functions or variables, you can go to *Edit->Find Usages->Find Usages in File*
 and then search based on a variety of criteria.
+***Try this in your code before moving on!***
 
 </div>
 
@@ -474,6 +475,7 @@ and then search based on a variety of criteria.
 
 In the exercises for this part, we will be ***building the backend*** for a **Streaming Watchlist application**,
 which allows users to save information about interesting shows they have stumbled across on the internet.
+Please create this new folder in your *lab3* repo.
 For each listed show we will save the title, genre, Streaming Service URL, and amount of upvotes from users of the application.
 From here on, I will refer to a streaming show as a **show**.
 
@@ -490,48 +492,48 @@ From here on, I will refer to a streaming show as a **show**.
 Let's imagine a situation, where you receive an email that contains the following application body:
 
 ```js
-const express = require('express')
-const app = express()
-const cors = require('cors')
-const mongoose = require('mongoose')
+const express = require("express");
+const app = express();
+const cors = require("cors");
+const mongoose = require("mongoose");
 
 const showSchema = new mongoose.Schema({
   title: String,
   genre: String,
   url: String,
   likes: Number
-})
+});
 
-const Show = mongoose.model('Show', showSchema)
+const Show = mongoose.model("Show", showSchema);
 
-const mongoUrl = 'mongodb://localhost/watchlist'
-mongoose.connect(mongoUrl)
+const mongoUrl = "mongodb://localhost/watchlist";
+mongoose.connect(mongoUrl);
 
-app.use(cors())
-app.use(express.json())
+app.use(cors());
+app.use(express.json());
 
-app.get('/api/shows', (request, response) => {
+app.get("/api/shows", (request, response) => {
   Show
     .find({})
     .then(shows => {
-      response.json(shows)
-    })
-})
+      response.json(shows);
+    });
+});
 
-app.post('/api/shows', (request, response) => {
-  const show = new Show(request.body)
+app.post("/api/shows", (request, response) => {
+  const show = new Show(request.body);
 
   show
     .save()
     .then(result => {
-      response.status(201).json(result)
-    })
-})
+      response.status(201).json(result);
+    });
+});
 
-const PORT = 3003
+const PORT = 3003;
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`)
-})
+  console.log(`Server running on port ${PORT}`);
+});
 ```
 
 Turn the application into a functioning ***npm*** project.
@@ -545,14 +547,15 @@ and that the application returns the added shows at the correct endpoint.
 
 Refactor the application into separate modules as shown earlier in this part of the course material.
 
-> **NB** refactor your application in baby steps and verify that the application works after every change you make.
+> **Remember:** refactor your application in baby steps and verify that the application works after every change you make.
 If you try to take a "shortcut" by refactoring many things at once, then [Murphy's law](https://en.wikipedia.org/wiki/Murphy%27s_law)
 will kick in and it is almost certain that something will break in your application.
 The "shortcut" will end up taking more time than moving forward slowly and systematically.
 >
-> This is part of why I keep enforcing you all to commit your code every time it is in a stable state.
-It makes it easier to find what error caused your mistake.
+> This is part of why we have setup file watchers to commit your code in parts.
+> In the future you would replace this with making commits in small steps.
 This makes it easy to rollback to a situation where the application still works.
+> Having small commits makes it easier to find what error caused your mistake.
 
 If you're having issues with `content.body` being *`undefined`* for seemingly no reason, make sure you didn't forget to add *`app.use(express.json())`* near the top of the file.
 
@@ -562,40 +565,39 @@ If you're having issues with `content.body` being *`undefined`* for seemingly no
 
 ### Testing Node applications
 
-We have completely neglected one essential area of software development, and that is automated testing.
+We have completely neglected one essential area of software development, and that is **automated testing**.
 
-Let's start our testing journey by looking at unit tests.
-The logic of our application is so simple, that there is not much that makes sense to test with unit tests.
-Let's create a new file *utils/for_testing.js* and write a couple of simple functions that we can use for test writing practice:
+Let's start our testing journey by looking at unit tests using some unrelated code.
+Create a new file *utils/for_testing.js* and write a couple of simple functions that we can use for test writing practice:
 
 ```js
 const reverse = (string) => {
   return string
-    .split('')
+    .split("")
     .reverse()
-    .join('')
-}
+    .join("");
+};
 
 const average = (array) => {
   const reducer = (sum, item) => {
-    return sum + item
-  }
+    return sum + item;
+  };
 
-  return array.reduce(reducer, 0) / array.length
-}
+  return array.reduce(reducer, 0) / array.length;
+};
 
 module.exports = {
   reverse,
   average,
-}
+};
 ```
 
-> The `average` function uses the array [reduce](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/Reduce) method.
-  If the method is not familiar to you yet, then now is a good time to watch the first three videos from the
+> The `average` function uses the [`array.reduce` method](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/Reduce).
+  If that method is not familiar to you yet, then now is a good time to watch the first three videos from the
   [Functional Javascript](https://www.youtube.com/watch?v=BMUiFMZr7vk&list=PL0zVEGEvSaeEd9hlmCXrk5yUyqUag-n84) series on Youtube.
 
 There are many different testing libraries or **test runners** available for JavaScript.
-In this course we will be using a testing library developed and used internally by Facebook called [jest](https://jestjs.io/),
+In this course, we will be using a testing library developed and used internally by Facebook called [**jest**](https://jestjs.io/),
 which resembles the previous king of JavaScript testing libraries [Mocha](https://mochajs.org/).
 
 Jest is a natural choice for this course, as it works well for testing backends, and it shines when it comes to testing React applications.
@@ -617,7 +619,7 @@ Let's define the *npm script `test`* to execute tests with Jest and to report ab
     "start": "node index.js",
     "dev": "nodemon index.js",
     "test": "jest --verbose", // highlight-line
-    "build:ui": "rm -rf dist && cd ../part2-tasks/ && npm run build && cp -r dist ../part3-tasks-backend",
+    "build:ui": "rm -rf dist && cd ../reading/ && npm run build && cp -r dist ../backend-reading",
     "deploy": "npm run build:ui && git add . && git commit -m npm_generated_rebuild_of_the_UI && git push",
     "lint": "eslint .",
     "fixlint": "eslint . --fix"
@@ -642,64 +644,66 @@ Alternatively, Jest can look for a configuration file with the default name *jes
 
 ```js
 module.exports = {
-  testEnvironment: 'node',
+  testEnvironment: "node",
 }
 ```
 
 Let's create a new file called *tests/reverse.test.js* with the following contents:
 
 ```js
-const reverse = require('../utils/for_testing').reverse
+const reverse = require("../utils/for_testing").reverse;
 
-test('reverse of a', () => {
-  const result = reverse('a')
+test("reverse of a", () => {
+  const result = reverse("a");
 
-  expect(result).toBe('a')
-})
+  expect(result).toBe("a");
+});
 
-test('reverse of react', () => {
-  const result = reverse('react')
+test("reverse of react", () => {
+  const result = reverse("react");
 
-  expect(result).toBe('tcaer')
-})
+  expect(result).toBe("tcaer");
+});
 
-test('reverse of releveler', () => {
-  const result = reverse('releveler')
+test("reverse of releveler", () => {
+  const result = reverse("releveler");
 
-  expect(result).toBe('releveler')
-})
+  expect(result).toBe("releveler");
+});
 ```
 
 #### Handling complaints about jest
 
 The ESLint configuration we added to the project in the previous part complains about the `test` and `expect` commands in our test file
 since the configuration does not allow *globals*.
-Let's get rid of the complaints by adding `"jest": true` to the `env` property in the *.estlintrc.cjs* file.
+Let's get rid of the complaints by adding `"jest": true` to the `env` property in the *.estlintrc.js* file.
 
 ```js
 module.exports = {
-  'env': {
-    'commonjs': true,
-    'es2021': true,
-    'browser': true,
-    'node': true,
-    'jest': true, // highlight-line
+  "env": {
+    "node": true,
+    "browser": true,
+    "commonjs": true,
+    "es2021": true,
+    "jest": true, // highlight-line
   },
   // ...
 }
 ```
 
-WebStorm also seems to complain with warnings for not knowing about test and expect.
-To get rid of these errors, you can simply type this command so that your project is also aware of the jest's types.
+WebStorm also seems to complain with warnings for not knowing about `test` and `expect`.
+To get rid of these errors, you can type this command in *Terminal* so that your project is also aware of the jest's types.
 
 ```bash
 npm i -D @types/jest
 ```
 
-In the first row, the test file imports the function to be tested and assigns it to a variable called `reverse`:
+This should now clear all warnings when you click back into *reverse.test.js* in WebStorm.
+Let's now examine the file.
+The first line imports the function to be tested and assigns it to a variable called `reverse`:
 
 ```js
-const reverse = require('../utils/for_testing').reverse
+const reverse = require("../utils/for_testing").reverse;
 ```
 
 Individual test cases are defined with the `test` function.
@@ -709,16 +713,16 @@ The functionality for the second test case looks like this:
 
 ```js
 () => {
-  const result = reverse('react')
+  const result = reverse("react");
 
-  expect(result).toBe('tcaer')
-}
+  expect(result).toBe("tcaer");
+};
 ```
 
 First, we execute the code to be tested, meaning that we generate a reverse for the string `react`.
-Next, we verify the results with the [expect](https://jestjs.io/docs/expect#expectvalue) function.
-Expect wraps the resulting value into an object that offers a collection of **matcher** functions, that can be used for verifying the correctness of the result.
-Since in this test case we are comparing two strings, we can use the [toBe](https://jestjs.io/docs/expect#tobevalue) matcher.
+Next, we verify the results with the [`expect` function](https://jestjs.io/docs/expect#expectvalue).
+`expect` wraps the resulting value into an object that offers a collection of **matcher** functions, that can be used for verifying the correctness of the result.
+Since in this test case we are comparing two strings, we can use the [`toBe` matcher](https://jestjs.io/docs/expect#tobevalue).
 
 As expected, all of the tests pass:
 
@@ -730,7 +734,7 @@ In this course, we will follow the convention of naming our test files with the 
 Jest has excellent error messages, let's break our `reverse of react` test to demonstrate this by changing the expected result from `tcaer` to the incorrect `8caer` (line 12).
 
 ```js
-  expect(result).toBe('8caer')
+  expect(result).toBe("8caer");
 ```
 
 Running the tests above results in the following error message:
@@ -742,50 +746,50 @@ Change the test back.
 Let's add a few tests for the `average` function, into a new file *tests/average.test.js*.
 
 ```js
-const average = require('../utils/for_testing').average
+const average = require("../utils/for_testing").average;
 
-describe('average', () => {
-  test('of one value is the value itself', () => {
-    expect(average([1])).toBe(1)
-  })
+describe("average", () => {
+  test("of one value is the value itself", () => {
+    expect(average([1])).toBe(1);
+  });
 
-  test('of many is calculated right', () => {
-    expect(average([1, 2, 3, 4, 5, 6])).toBe(3.5)
-  })
+  test("of many is calculated right", () => {
+    expect(average([1, 2, 3, 4, 5, 6])).toBe(3.5);
+  });
 
-  test('of empty array is zero', () => {
-    expect(average([])).toBe(0)
-  })
-})
+  test("of empty array is zero", () => {
+    expect(average([])).toBe(0);
+  });
+});
 ```
 
 The test reveals that the function does not work correctly with an empty array (this is because in JavaScript dividing by zero results in `NaN`):
 
 ![terminal output showing that an empty array fails with jest](../../images/4/3.png)
 
-Fixing the function is quite easy:
+Fixing the function in *utils/for_testing.js* requires one change:
 
 ```js
 const average = array => {
   const reducer = (sum, item) => {
-    return sum + item
+    return sum + item;
   }
 
   return array.length === 0
     ? 0
-    : array.reduce(reducer, 0) / array.length
-}
+    : array.reduce(reducer, 0) / array.length;
+};
 ```
 
 If the length of the array is `0` then we *`return 0`*, and in all other cases, we use the `reduce` method to calculate the average.
 
 There are a few things to notice about the tests that we just wrote.
-We defined a `describe` block around the tests that were given the name `average`:
+We defined a **`describe`** block around the tests that were given the name `average`:
 
 ```js
-describe('average', () => {
+describe("average", () => {
   // tests
-})
+});
 ```
 
 Describe blocks can be used for grouping tests into logical collections.
@@ -799,8 +803,8 @@ Another thing to notice is that we wrote the tests in quite a compact way,
 without assigning the output of the function being tested to a variable:
 
 ```js
-test('of empty array is zero', () => {
-  expect(average([])).toBe(0)
+test("of empty array is zero", () => {
+  expect(average([])).toBe(0);
 })
 ```
 
@@ -822,24 +826,24 @@ The contents of the *list_helper.js* file at this point should be the following:
 ```js
 const dummy = (shows) => {
   // ...
-}
+};
 
 module.exports = {
   dummy
-}
+};
 ```
 
 Verify that your test configuration works with the following test:
 
 ```js
-const listHelper = require('../utils/list_helper')
+const listHelper = require("../utils/list_helper");
 
-test('dummy returns one', () => {
-  const shows = []
+test("dummy returns one", () => {
+  const shows = [];
 
-  const result = listHelper.dummy(shows)
-  expect(result).toBe(1)
-})
+  const result = listHelper.dummy(shows);
+  expect(result).toBe(1);
+});
 ```
 
 #### 4.4: helper functions and unit tests, Step 2
@@ -855,23 +859,23 @@ It's recommended to put the tests inside of a `describe` block so that the test 
 Defining test inputs for the function can be done like this:
 
 ```js
-describe('total likes', () => {
+describe("total likes", () => {
   const listWithOneShow = [
     {
-      _id: '5a422aa71b54a676234d17f8',
-      title: 'Arrested Development',
-      genre: 'Comedy',
-      url: 'https://www.netflix.com/title/70140358',
+      _id: "5a422aa71b54a676234d17f8",
+      title: "Arrested Development",
+      genre: "Comedy",
+      url: "https://www.netflix.com/title/70140358",
       likes: 5,
       __v: 0
     }
-  ]
+  ];
 
-  test('when list has only one show, equals the likes of that', () => {
-    const result = listHelper.totalLikes(listWithOneShow)
-    expect(result).toBe(5)
-  })
-})
+  test("when list has only one show, equals the likes of that", () => {
+    const result = listHelper.totalLikes(listWithOneShow);
+    expect(result).toBe(5);
+  });
+});
 ```
 
 If defining your own test input list of shows is too much work,
@@ -907,7 +911,7 @@ The value returned by the function could be in the following format:
 }
 ```
 
-> **NB** when you are comparing objects, the [toEqual](https://jestjs.io/docs/en/expect#toequalvalue) method is probably what you want to use,
+> **Pertinent** when you are comparing objects, the [`toEqual` method](https://jestjs.io/docs/en/expect#toequalvalue) is probably what you want to use,
 since the [toBe](https://jestjs.io/docs/en/expect#tobevalue) tries to verify that the two values are the same value, and not just that they contain the same properties.
 
 Write the tests for this exercise inside of a new `describe` block.

@@ -634,7 +634,7 @@ const App = () => {
 }
 ```
 
-> **NB**: You might run into problems in this exercise if you define your components "in the wrong place".
+> **Pertinent:**: You might run into problems in this exercise if you define your components "in the wrong place".
 > Now would be a good time to rehearse the section
 > [do not define a component in another component](/part1/a_more_complex_state_debugging_react_apps#do-not-define-components-within-components)
 > from the last part.

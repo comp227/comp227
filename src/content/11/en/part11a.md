@@ -7,7 +7,7 @@ lang: en
 
 <div class="content">
 
-During this part, you will build a robust <i>deployment pipeline</i> to a ready made [example project](https://github.com/smartlyio/full-stack-open-pokedex) starting in [exercise 11.2](/en/part11/getting_started_with_git_hub_actions#exercise-11-2). You will [fork](https://docs.github.com/en/free-pro-team@latest/github/getting-started-with-github/fork-a-repo) the example project and that will create you a personal copy of the repository. In the [last two](/en/part11/expanding_further#exercises-11-20-22) exercises, you will build another deployment pipeline for some of <i>your own</i> previously created apps!
+During this part, you will build a robust <i>deployment pipeline</i> to a ready made [example project](https://github.com/fullstack-hy2020/full-stack-open-pokedex) starting in [exercise 11.2](/en/part11/getting_started_with_git_hub_actions#exercise-11-2). You will [fork](https://docs.github.com/en/free-pro-team@latest/github/getting-started-with-github/fork-a-repo) the example project and that will create you a personal copy of the repository. In the [last two](/en/part11/expanding_further#exercises-11-20-22) exercises, you will build another deployment pipeline for some of <i>your own</i> previously created apps!
 
 There are 21 exercises in this part, and you need to complete <i>each</i> exercise for completing the course. Exercises are submitted via [the submissions system](https://studies.cs.helsinki.fi/stats/courses/fs-cicd) just like in the previous parts, but unlike parts 0 to 7, the submission goes to a different "course instance". 
 
@@ -33,7 +33,7 @@ In this part we'll be using some terms you may not be familiar with or you may n
 
 #### Branches
 
-Git allows multiple copies, streams, or versions of the code to co-exist without overwriting each other. When you first create a repository, you will be looking at the main branch (usually in Git, we call this <i>master</i> or <i>main</i>, but that does vary in older projects). This is fine if there's only one developer for a project and that developer only works on one feature at a time.
+Git allows multiple copies, streams, or versions of the code to co-exist without overwriting each other. When you first create a repository, you will be looking at the main branch (usually in Git, we call this <i>main</i> or <i>master</i>, but that does vary in older projects). This is fine if there's only one developer for a project and that developer only works on one feature at a time.
 
 Branches are useful when this environment becomes more complex. In this context, each developer can have one or more branches. Each branch is effectively a copy of the main branch with some changes that make it diverge from it. Once the feature or change in the branch is ready it can be <i>merged</i> back into the main branch, effectively making that feature or change part of the main software. In this way, each developer can work on their own set of changes and not affect any other developer until the changes are ready. 
 
@@ -74,7 +74,7 @@ The strict definition of CI (Continuous Integration) and the way the term is use
 Strictly speaking, CI refers to <a href='https://www.atlassian.com/continuous-delivery/principles/continuous-integration-vs-delivery-vs-deployment'>merging developer changes to the main branch</a> often, Wikipedia even helpfully suggests: "several times a day". This is usually true but when we refer to CI in industry, we're quite often talking about what happens after the actual merge happens.
 
 We'd likely want to do some of these steps:
- - Lint: to keep our code clean and maintainable
+ - Lint: to keep our code clean, maintainable, and merge compatible
  - Build: put all of our code together into runnable software bundle
  - Test: to ensure we don't break existing features
  - Package: Put it all together in an easily movable batch
@@ -113,7 +113,7 @@ There are other advantages to extending this setup:
  - If we use CI/CD with deployment every time there is a merge to the main branch, then we know that it will always work in production
  - If we only allow merges when the branch is up to date with the main branch, then we can be sure that different developers don't overwrite each other's changes
 
-Note that in this part we are assuming that the main branch (named <i>master</i> or <i>main</i>) contains the code that is running in production. There are numerous different [workflows](https://www.atlassian.com/git/tutorials/comparing-workflows) one can use with Git, e.g. in some cases, it may be a specific <i>release branch</i> that contains the code which is running in production.
+Note that in this part we are assuming that the <i>main</i> branch contains the code that is running in production. There are numerous different [workflows](https://www.atlassian.com/git/tutorials/comparing-workflows) one can use with Git, e.g. in some cases, it may be a specific <i>release branch</i> that contains the code that is running in production.
 
 ### Important principles
 
@@ -126,7 +126,7 @@ To that end, CI should always be configured to the task at hand and the project 
  - How to make sure that the changes don't overwrite each other?
  - How to make deployments happen at the click of a button or automatically when one merges to the main branch?
 
-There even exists scientific evidence on the numerous benefits the usage of CI/CD has. According to a large study reported in the book [Accelerate: The Science of Lean Software and DevOps: Building and Scaling High Performing Technology Organizations](https://itrevolution.com/book/accelerate/), the use of CI/CD correlate heavily with organizational success (e.g. improves profitability and product quality, increases market share, shortens the time to market). CI/CD even makes developers happier by reducing their burnout rate. The results summarized in the book are also reported in scientific articles such as [this](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=2681909).
+There even exists scientific evidence on the numerous benefits the usage of CI/CD has. According to a large study reported in the book [Accelerate: The Science of Lean Software and DevOps: Building and Scaling High Performing Technology Organizations](https://itrevolution.com/product/accelerate/), the use of CI/CD correlate heavily with organizational success (e.g. improves profitability and product quality, increases market share, shortens the time to market). CI/CD even makes developers happier by reducing their burnout rate. The results summarized in the book are also reported in scientific articles such as [this](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=2681909).
 #### Documented behavior
 
 There's an old joke that a bug is just an "undocumented feature". We'd like to avoid that. We'd like to avoid any situations where we don't know the exact outcome. For example, if we depend on a label on a PR to define whether something is a "major", "minor" or "patch" release (we'll cover the meanings of those terms later), then it's important that we know what happens if a developer forgets to put a label on their PR. What if they put a label on after the build/test process has started? What happens if the developer changes the label mid-way through, which one is the one that actually releases?
@@ -213,8 +213,8 @@ Let us assume that the application is coded with some other language than JavaSc
 Write a short text, say 200-300 words, where you answer or discuss some of the points below. You can check the length with https://wordcounter.net/. Save your answer to the file named <i>exercise1.md</i> in the root of the repository that you shall create in [exercise 11.2](/en/part11/getting_started_with_git_hub_actions#exercise-11-2).
 
 The points to discuss:
-- Some common steps in a CI setup include <i>linting</i>, <i>testing</i>, and <i>building</i>. What are the specific tools for taking care of these steps in the ecosystem of the language you picked? You can search for the answers by google.
-- What alternatives are there to set up the CI besides Jenkins and GitHub Actions? Again, you can ask google!
+- Some common steps in a CI setup include <i>linting</i>, <i>testing</i>, and <i>building</i>. What are the specific tools for taking care of these steps in the ecosystem of the language you picked? You can search for the answers by Google.
+- What alternatives are there to set up the CI besides Jenkins and GitHub Actions? Again, you can ask Google!
 - Would this setup be better in a self-hosted or a cloud-based environment? Why? What information would you need to make that decision?
 
 Remember that there are no 'right' answers to the above! 

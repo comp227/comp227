@@ -67,7 +67,7 @@ The reason why the the previous sections of the course used MongoDB is precisely
 
 ### Application database
 
-For our application we need a relational database. There are many options, but we will be using the currently most popular Open Source solution [PostgreSQL](https://www.postgresql.org/). You can install Postgres (as the database is often called) on your machine, if you wish to do so. An easier option would be using Postgres as a cloud service, e.g. [ElephantSQL](https://www.elephantsql.com/).
+For our application we need a relational database. There are many options, but we will be using the currently most popular Open Source solution [PostgreSQL](https://www.postgresql.org/). You can install Postgres (as the database is often called) on your machine, if you wish to do so.
 
 However, we will be taking advantage of the fact that it is possible to create a Postgres database for the application on the Fly.io and Heroku cloud service platforms, which are familiar from the parts 3 and 4.
 
@@ -112,7 +112,7 @@ We can use the _heroku config_ command to get the <i>connect string</i>, which i
 ```bash
 heroku config -a <app-name>
 === cryptic-everglades-76708 Config Vars
-DATABASE_URL: postgres://<username>:<password>@<host-of-postgres-addon>:5432/<db-name>
+DATABASE_URL: postgres://<username>:thepasswordishere@<host-of-postgres-addon>:5432/<db-name>
 ```
 
 The database can be accessed by running _psql_ command on the Heroku server as follows (note that the command parameters depend on the connection url of the Heroku database):
@@ -317,7 +317,7 @@ If Heroku is used, the connect string can be seen by using the command _heroku c
 
 ```bash
 $ cat .env
-DATABASE_URL=postgres://<username>:<password>@ec2-54-83-137-206.compute-1.amazonaws.com:5432/<databasename>
+DATABASE_URL=postgres://<username>:thepasswordishere@ec2-54-83-137-206.compute-1.amazonaws.com:5432/<databasename>
 ```
 
 When using Fly.io, the local connection to the database should first be enabled by [tunneling](https://fly.io/docs/reference/postgres/#connecting-to-postgres-from-outside-fly) 
@@ -339,7 +339,7 @@ The Fly.io connect-string is of the form
 
 ```bash
 $ cat .env
-DATABASE_URL=postgres://postgres:<password>@127.0.0.1:5432/postgres
+DATABASE_URL=postgres://postgres:thepasswordishere@127.0.0.1:5432/postgres
 ```
 
 Password was shown when the database was created, so hopefully you have not lost it!
@@ -594,17 +594,17 @@ app.post('/api/notes', async (req, res) => {
 
 <div class="tasks">
 
-### Tasks 13.1.-13.3.
+### Exercises 13.1.-13.3.
 
 In the tasks of this section, we will build a blog application backend similar to the tasks in [section 4](/en/part4), which should be compatible with the frontend in [section 5](/en/part5) except for error handling. We will also add various features to the backend that the frontend in section 5 will not know how to use.
 
-#### Task 13.1.
+#### Exercise 13.1.
 
-Create a GitHub repository for the application and create a new Fly.io or Heroku application for it, as well as a Postgres database. As mentioned [here](/en/part13/using_relational_databases_with_sequelize#application-database) you might set up your database also somewhere else, and in that case the Fly.io of Heroku app is not needed.
+Create a GitHub repository for the application and create a new Fly.io or Heroku application for it, as well as a Postgres database. As mentioned [here](/en/part13/using_relational_databases_with_sequelize#application-database) you might set up your database also somewhere else, and in that case the Fly.io or Heroku app is not needed.
 
 Make sure you are able to establish a connection to the application database.
 
-#### Task 13.2.
+#### Exercise 13.2.
 
 On the command-line, create a <i>blogs</i> table for the application with the following columns:
 - id (unique, incrementing id)
@@ -615,11 +615,11 @@ On the command-line, create a <i>blogs</i> table for the application with the fo
 
 Add at least two blogs to the database.
 
-Save the SQL-commands you used at the root of the application repository in the file called <i>commands.sql</i>
+Save the SQL-commands you used at the root of the application repository in a file called <i>commands.sql</i>
 
 #### Exercise 13.3.
 
-Create functionality in your application, which prints the blogs in the database on the command-line, e.g. as follows:
+Create a functionality in your application which prints the blogs in the database on the command-line, e.g. as follows:
 
 ```bash
 $ node cli.js
@@ -846,9 +846,9 @@ The print looks like the following:
 
 <div class="tasks">
 
-### Task 13.4.
+### Exercise 13.4.
 
-#### Task 13.4.
+#### Exercise 13.4.
 
 Transform your application into a web application that supports the following operations
 

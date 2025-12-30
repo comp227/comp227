@@ -45,11 +45,8 @@ lang: zh
 <!-- In parts 1-4 you are expected to do <i>at least</i> all of the exercises that are not marked with an asterisk(*). Exercises marked with an asterisk count towards your final grade, but skipping them does not prevent you from doing the compulsory exercises in the next parts. Parts 5- do not have asterisk marked exercises since there is no similar dependency on previous parts.-->
 在第 1-4 章中，你应该<i>至少</i>做完所有没有标有星号（*）的练习。标有星号的练习虽然计入你的最终成绩，但跳过这些练习并不妨碍你做下一章节的必修练习。第5章节没有标有星号的练习，因为与前几章节没有类似的依赖关系。
 
-<!-- The speed of completing the course is flexible, and exercises can be submitted until 23:59 [EET](https://en.wikipedia.org/wiki/Eastern_European_Time) on 1 March 2023.-->
-完成课程的速度是灵活的，练习可以提交到2023年3月1日23:59 [东欧时间EET](https://en.wikipedia.org/wiki/Eastern_European_Time)。
-
-<!-- However, note that the deadline for taking exam for University of Helsinki credits is 10.1.2023.-->
-然而，请注意参加赫尔辛基大学学分考试的最后期限是2023年1月10日。
+<!-- The speed of completing the course is flexible.-->
+完成课程的速度是灵活的。
 
 <!-- Exercise completion time statistics can be found via the [submission system](https://studies.cs.helsinki.fi/stats/courses/fullstackopen).-->
 练习完成时间的统计可以通过[提交系统](https://studies.cs.helsinki.fi/stats/courses/fullstackopen)找到。
@@ -396,7 +393,7 @@ lang: zh
 ### Interview promise
 
 <!-- Our collaborators, [Houston Inc.](https://houston-inc.com/), [Terveystalo](https://www.terveystalo.com/en/) and [Smartly.io](https://www.smartly.io/), have given the <i>promise of a job interview</i> for everyone who completes the course and the project work with maximum credits (14 + 10). The parts 12 and 13 that were released during 2021 are not required if you finish the project by 15.3.2022.-->
-我们的合作者，[Houston Inc.](https://houston-inc.com/)，[Terveystalo](https://www.terveystalo.com/en/)和[Smartly.io](https://www.smartly.io/)，已经给了每个完成课程和项目工作并获得最高学分（14+10）的人一个工作面试的<i>承诺</i>。如果你在2022年3月15日之前完成项目，那么2021年发布的第12和13章节就不需要了。
+我们的合作者，[Houston Inc.](https://houston-inc.com/)，[Terveystalo](https://www.terveystalo.com/en/)和[Smartly.io](https://www.smartly.io/)，已经给了每个完成课程和项目工作并获得最高学分（14+10）的人一个工作面试的<i> promise </i>。如果你在2022年3月15日之前完成项目，那么2021年发布的第12和13章节就不需要了。
 
 <!-- This means that the student can, if they so choose, sign up for a job interview with a collaborator who has given the promise. The teacher of the course, Matti Luukkainen, will send instructions to the student after the courses have been completed with maximum credits.-->
 这意味着，如果学生选择，报名参加合作方的工作面试。课程的老师Matti Luukkainen会给课程完成后并获得最大的学分的学生发送指引。

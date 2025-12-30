@@ -11,7 +11,7 @@ In this part, our focus shifts towards the backend: that is, towards implementin
 
 We will be building our backend on top of [NodeJS](https://nodejs.org/en/), which is a JavaScript runtime based on Google's [Chrome V8](https://developers.google.com/v8/) JavaScript engine.
 
-This course material was written with version <i>v18.13.0</i> of Node.js. Please make sure that your version of Node is at least as new as the version used in the material (you can check the version by running _node -v_ in the command line).
+This course material was written with version <i>v22.3.0</i> of Node.js. Please make sure that your version of Node is at least as new as the version used in the material (you can check the version by running _node -v_ in the command line).
 
 As mentioned in [part 1](/en/part1/java_script), browsers don't yet support the newest features of JavaScript, and that is why the code running in the browser must be <i>transpiled</i> with e.g. [babel](https://babeljs.io/). The situation with JavaScript running in the backend is different. The newest version of Node supports a large majority of the latest features of JavaScript, so we can use the latest features without having to transpile our code.
 
@@ -39,9 +39,9 @@ Let's navigate to an appropriate directory, and create a new template for our ap
 
 The file defines, for instance, that the entry point of the application is the <i>index.js</i> file.
 
-Let's make a small change to the <i>scripts</i> object:
+Let's make a small change to the <i>scripts</i> object by adding a new script command.
 
-```bash
+```json
 {
   // ...
   "scripts": {
@@ -72,7 +72,7 @@ npm start
 
 The <i>start</i> npm script works because we defined it in the <i>package.json</i> file:
 
-```bash
+```json
 {
   // ...
   "scripts": {
@@ -93,7 +93,7 @@ echo "Error: no test specified" && exit 1
 
 ### Simple web server
 
-Let's change the application into a web server by editing the _index.js_ file as follow:
+Let's change the application into a web server by editing the _index.js_ file as follows:
 
 ```js
 const http = require('http')
@@ -120,7 +120,7 @@ We can open our humble application in the browser by visiting the address <http:
 
 The server works the same way regardless of the latter part of the URL. Also the address <http://localhost:3001/foo/bar> will display the same content.
 
-**NB** if port 3001 is already in use by some other application, then starting the server will result in the following error message:
+**NB** If port 3001 is already in use by some other application, then starting the server will result in the following error message:
 
 ```bash
 ➜  hello npm start
@@ -138,7 +138,7 @@ Error: listen EADDRINUSE :::3001
     at listenInCluster (net.js:1378:12)
 ```
 
-You have two options. Either shut down the application using port 3001 (the json-server in the last part of the material was using port 3001), or use a different port for this application.
+You have two options. Either shut down the application using port 3001 (the JSON Server in the last part of the material was using port 3001), or use a different port for this application.
 
 Let's take a closer look at the first line of the code:
 
@@ -146,15 +146,15 @@ Let's take a closer look at the first line of the code:
 const http = require('http')
 ```
 
-In the first row, the application imports Node's built-in [web server](https://nodejs.org/docs/latest-v8.x/api/http.html) module. This is practically what we have already been doing in our browser-side code, but with a slightly different syntax:
+In the first row, the application imports Node's built-in [web server](https://nodejs.org/docs/latest-v18.x/api/http.html) module. This is practically what we have already been doing in our browser-side code, but with a slightly different syntax:
 
 ```js
 import http from 'http'
 ```
 
-These days, code that runs in the browser uses ES6 modules. Modules are defined with an [export](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/export) and taken into use with an [import](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import).
+These days, code that runs in the browser uses ES6 modules. Modules are defined with an [export](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/export) and included in the current file with an [import](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import).
 
-However, Node.js uses so-called [CommonJS](https://en.wikipedia.org/wiki/CommonJS) modules. The reason for this is that the Node ecosystem had a need for modules long before JavaScript supported them in the language specification. Node supports now also the use of ES6 modules, but since the support is [not quite perfect](https://nodejs.org/api/esm.html#modules-ecmascript-modules) yet, we'll stick to CommonJS modules.
+Node.js uses [CommonJS](https://en.wikipedia.org/wiki/CommonJS) modules. The reason for this is that the Node ecosystem needed modules long before JavaScript supported them in the language specification. Currently, Node also supports the use of ES6 modules, but since the support is not quite perfect yet, we'll stick to CommonJS modules.
 
 CommonJS modules function almost exactly like ES6 modules, at least as far as our needs in this course are concerned.
 
@@ -167,7 +167,7 @@ const app = http.createServer((request, response) => {
 })
 ```
 
-The code uses the _createServer_ method of the [http](https://nodejs.org/docs/latest-v8.x/api/http.html) module to create a new web server. An <i>event handler</i> is registered to the server that is called <i>every time</i> an HTTP request is made to the server's address <http://localhost:3001>.
+The code uses the _createServer_ method of the [http](https://nodejs.org/docs/latest-v18.x/api/http.html) module to create a new web server. An <i>event handler</i> is registered to the server that is called <i>every time</i> an HTTP request is made to the server's address <http://localhost:3001>.
 
 The request is responded to with the status code 200, with the <i>Content-Type</i> header set to <i>text/plain</i>, and the content of the site to be returned set to <i>Hello World</i>.
 
@@ -187,17 +187,17 @@ const http = require('http')
 // highlight-start
 let notes = [
   {
-    id: 1,
+    id: "1",
     content: "HTML is easy",
     important: true
   },
   {
-    id: 2,
+    id: "2",
     content: "Browser can execute only JavaScript",
     important: false
   },
   {
-    id: 3,
+    id: "3",
     content: "GET and POST are the most important methods of HTTP protocol",
     important: true
   }
@@ -216,7 +216,7 @@ console.log(`Server running on port ${PORT}`)
 
 Let's restart the server (you can shut the server down by pressing _Ctrl+C_ in the console) and let's refresh the browser.
 
-The <i>application/json</i> value in the <i>Content-Type</i> header informs the receiver that the data is in the JSON format. The _notes_ array gets transformed into JSON with the <em>JSON.stringify(notes)</em> method.
+The <i>application/json</i> value in the <i>Content-Type</i> header informs the receiver that the data is in the JSON format. The _notes_ array gets transformed into JSON formatted string with the <em>JSON.stringify(notes)</em> method. This is necessary because the response.end() method expects a string or a buffer to send as the response body.
 
 When we open the browser, the displayed format is exactly the same as in [part 2](/en/part2/getting_data_from_server/) where we used [json-server](https://github.com/typicode/json-server) to serve the list of notes:
 
@@ -224,11 +224,11 @@ When we open the browser, the displayed format is exactly the same as in [part 2
 
 ### Express
 
-Implementing our server code directly with Node's built-in [http](https://nodejs.org/docs/latest-v8.x/api/http.html) web server is possible. However, it is cumbersome, especially once the application grows in size.
+Implementing our server code directly with Node's built-in [http](https://nodejs.org/docs/latest-v18.x/api/http.html) web server is possible. However, it is cumbersome, especially once the application grows in size.
 
-Many libraries have been developed to ease server-side development with Node, by offering a more pleasing interface to work with the built-in http module. These libraries aim to provide a better abstraction for general use cases we usually require to build a backend server. By far the most popular library intended for this purpose is [express](http://expressjs.com).
+Many libraries have been developed to ease server-side development with Node, by offering a more pleasing interface to work with the built-in http module. These libraries aim to provide a better abstraction for general use cases we usually require to build a backend server. By far the most popular library intended for this purpose is [Express](http://expressjs.com).
 
-Let's take express into use by defining it as a project dependency with the command:
+Let's take Express into use by defining it as a project dependency with the command:
 
 ```bash
 npm install express
@@ -240,26 +240,26 @@ The dependency is also added to our <i>package.json</i> file:
 {
   // ...
   "dependencies": {
-    "express": "^4.18.2"
+    "express": "^5.1.0"
   }
 }
 ```
 
-The source code for the dependency is installed in the <i>node\_modules</i> directory located at the root of the project. In addition to express, you can find a great number of other dependencies in the directory:
+The source code for the dependency is installed in the <i>node\_modules</i> directory located at the root of the project. In addition to Express, you can find a great number of other dependencies in the directory:
 
-![ls listing of dependencies in directory](../../images/3/4.png)
+![ls command listing of dependencies in directory](../../images/3/4.png)
 
-These are the dependencies of the express library and the dependencies of all of its dependencies, and so forth. These are called the [transitive dependencies](https://lexi-lambda.github.io/blog/2016/08/24/understanding-the-npm-dependency-model/) of our project.
+These are the dependencies of the Express library and the dependencies of all of its dependencies, and so forth. These are called the [transitive dependencies](https://lexi-lambda.github.io/blog/2016/08/24/understanding-the-npm-dependency-model/) of our project.
 
-The version 4.18.2 of express was installed in our project. What does the caret in front of the version number in <i>package.json</i> mean?
+Version 5.1.0 of Express was installed in our project. What does the caret in front of the version number in <i>package.json</i> mean?
 
 ```json
-"express": "^4.18.2"
+"express": "^5.1.0"
 ```
 
-The versioning model used in npm is called [semantic versioning](https://docs.npmjs.com/getting-started/semantic-versioning).
+The versioning model used in npm is called [semantic versioning](https://docs.npmjs.com/about-semantic-versioning).
 
-The caret in the front of <i>^4.18.2</i> means that if and when the dependencies of a project are updated, the version of express that is installed will be at least <i>4.18.2</i>. However, the installed version of express can also have a larger <i>patch</i> number (the last number), or a larger <i>minor</i> number (the middle number). The major version of the library indicated by the first <i>major</i> number must be the same.
+The caret in the front of <i>^5.1.0</i> means that if and when the dependencies of a project are updated, the version of Express that is installed will be at least <i>5.1.0</i>. However, the installed version of Express can also have a larger <i>patch</i> number (the last number), or a larger <i>minor</i> number (the middle number). The major version of the library indicated by the first <i>major</i> number must be the same.
 
 We can update the dependencies of the project with the command:
 
@@ -273,9 +273,9 @@ Likewise, if we start working on the project on another computer, we can install
 npm install
 ```
 
-If the <i>major</i> number of a dependency does not change, then the newer versions should be [backwards compatible](https://en.wikipedia.org/wiki/Backward_compatibility). This means that if our application happened to use version 4.99.175 of express in the future, then all the code implemented in this part would still have to work without making changes to the code. In contrast, the future 5.0.0 version of express [may contain](https://expressjs.com/en/guide/migrating-5.html) changes that would cause our application to no longer work.
+If the <i>major</i> number of a dependency does not change, then the newer versions should be [backwards compatible](https://en.wikipedia.org/wiki/Backward_compatibility). This means that if our application happened to use version 5.99.175 of Express in the future, then all the code implemented in this part would still have to work without making changes to the code. In contrast, the future 6.0.0 version of Express may contain changes that would cause our application to no longer work.
 
-### Web and express
+### Web and Express
 
 Let's get back to our application and make the following changes:
 
@@ -301,9 +301,9 @@ app.listen(PORT, () => {
 })
 ```
 
-To get the new version of our application into use, we have to restart the application.
+To get the new version of our application into use, first we have to restart it.
 
-The application did not change a whole lot. Right at the beginning of our code, we're importing _express_, which this time is a <i>function</i> that is used to create an express application stored in the _app_ variable:
+The application did not change a whole lot. Right at the beginning of our code, we're importing _express_, which this time is a <i>function</i> that is used to create an Express application stored in the _app_ variable:
 
 ```js
 const express = require('express')
@@ -320,7 +320,7 @@ app.get('/', (request, response) => {
 
 The event handler function accepts two parameters. The first [request](http://expressjs.com/en/4x/api.html#req) parameter contains all of the information of the HTTP request, and the second [response](http://expressjs.com/en/4x/api.html#res) parameter is used to define how the request is responded to.
 
-In our code, the request is answered by using the [send](http://expressjs.com/en/4x/api.html#res.send) method of the _response_ object. Calling the method makes the server respond to the HTTP request by sending a response containing the string <code>\<h1>Hello World!\</h1></code> that was passed to the _send_ method. Since the parameter is a string, express automatically sets the value of the <i>Content-Type</i> header to be <i>text/html</i>. The status code of the response defaults to 200.
+In our code, the request is answered by using the [send](http://expressjs.com/en/4x/api.html#res.send) method of the _response_ object. Calling the method makes the server respond to the HTTP request by sending a response containing the string <code>\<h1>Hello World!\</h1></code> that was passed to the _send_ method. Since the parameter is a string, Express automatically sets the value of the <i>Content-Type</i> header to be <i>text/html</i>. The status code of the response defaults to 200.
 
 We can verify this from the <i>Network</i> tab in developer tools:
 
@@ -340,87 +340,55 @@ The request is responded to with the [json](http://expressjs.com/en/4x/api.html#
 
 Next, let's take a quick look at the data sent in JSON format.
 
-In the earlier version where we were only using Node, we had to transform the data into the JSON format with the _JSON.stringify_ method:
+In the earlier version where we were only using Node, we had to transform the data into the JSON formatted string with the _JSON.stringify_ method:
 
 ```js
 response.end(JSON.stringify(notes))
 ```
 
-With express, this is no longer required, because this transformation happens automatically.
+With Express, this is no longer required, because this transformation happens automatically.
 
-It's worth noting that [JSON](https://en.wikipedia.org/wiki/JSON) is a string and not a JavaScript object like the value assigned to _notes_.
+It's worth noting that [JSON](https://en.wikipedia.org/wiki/JSON) is a data format. However, it's often represented as a string and is not the same as a JavaScript object, like the value assigned to _notes_.
 
 The experiment shown below illustrates this point:
 
 ![node terminal demonstrating json is of type string](../../assets/3/5.png)
 
-The experiment above was done in the interactive [node-repl](https://nodejs.org/docs/latest-v8.x/api/repl.html). You can start the interactive node-repl by typing in _node_ in the command line. The repl is particularly useful for testing how commands work while you're writing application code. I highly recommend this!
+The experiment above was done in the interactive [node-repl](https://nodejs.org/docs/latest-v18.x/api/repl.html). You can start the interactive node-repl by typing in _node_ in the command line. The repl is particularly useful for testing how commands work while you're writing application code. I highly recommend this!
 
-### nodemon
+### Automatic Change Tracking
 
-If we make changes to the application's code we have to restart the application to see the changes. We restart the application by first shutting it down by typing _Ctrl+C_ and then restarting the application. Compared to the convenient workflow in React where the browser automatically reloaded after changes were made, this feels slightly cumbersome.
+If we change the application's code, we first need to stop the application from the console (_ctrl_ + _c_) and then restart it for the changes to take effect. Restarting feels cumbersome compared to React's smooth workflow, where the browser automatically updates when the code changes.
 
-The solution to this problem is [nodemon](https://github.com/remy/nodemon):
-
-> <i>nodemon will watch the files in the directory in which nodemon was started, and if any files change, nodemon will automatically restart your node application.</i>
-
-Let's install nodemon by defining it as a <i>development dependency</i> with the command:
+You can make the server track our changes by starting it with the _--watch_ option:
 
 ```bash
-npm install --save-dev nodemon
+node --watch index.js
 ```
 
-The contents of <i>package.json</i> have also changed:
+Now, changes to the application's code will cause the server to restart automatically. Note that although the server restarts automatically, you still need to refresh the browser. Unlike with React, we do not have, nor could we have, a hot reload functionality that updates the browser in this scenario (where we return JSON data).
+
+Let's define a custom <i>npm script</i> in the <i>package.json</i> file to start the development server:
 
 ```json
-{
-  //...
-  "dependencies": {
-    "express": "^4.18.2"
-  },
-  "devDependencies": {
-    "nodemon": "^2.0.20"
-  }
-}
-```
-
-If you accidentally used the wrong command and the nodemon dependency was added under "dependencies" instead of "devDependencies", then manually change the contents of <i>package.json</i> to match what is shown above.
-
-By development dependencies, we are referring to tools that are needed only during the development of the application, e.g. for testing or automatically restarting the application, like <i>nodemon</i>.
-
-These development dependencies are not needed when the application is run in production mode on the production server (e.g. Fly.io or Heroku).
-
-We can start our application with <i>nodemon</i> like this:
-
-```bash
-node_modules/.bin/nodemon index.js
-```
-
-Changes to the application code now cause the server to restart automatically. It's worth noting that even though the backend server restarts automatically, the browser still has to be manually refreshed. This is because unlike when working in React, we don't have the [hot reload](https://gaearon.github.io/react-hot-loader/getstarted/) functionality needed to automatically reload the browser.
-
-The command is long and quite unpleasant, so let's define a dedicated <i>npm script</i> for it in the <i>package.json</i> file:
-
-```bash
 {
   // ..
   "scripts": {
     "start": "node index.js",
-    "dev": "nodemon index.js",  // highlight-line
+    "dev": "node --watch index.js", // highlight-line
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   // ..
 }
 ```
 
-In the script there is no need to specify the <i>node\_modules/.bin/nodemon</i> path to nodemon, because _npm_ automatically knows to search for the file from that directory.
-
-We can now start the server in development mode with the command:
+We can now start the server in development mode with the command
 
 ```bash
 npm run dev
 ```
 
-Unlike with the <i>start</i> and <i>test</i> scripts, we also have to add <i>run</i> to the command because it is a non-native script.
+Unlike when running the <i>start</i> or <i>test</i> scripts, the command must include <i>run</i>. 
 
 ### REST
 
@@ -464,7 +432,7 @@ Let's expand our application so that it offers a REST interface for operating on
 
 The unique address we will use for an individual note is of the form <i>notes/10</i>, where the number at the end refers to the note's unique id number.
 
-We can define [parameters](http://expressjs.com/en/guide/routing.html#route-parameters) for routes in express by using the colon syntax:
+We can define [parameters](http://expressjs.com/en/guide/routing.html#route-parameters) for routes in Express by using the colon syntax:
 
 ```js
 app.get('/api/notes/:id', (request, response) => {
@@ -484,61 +452,8 @@ const id = request.params.id
 
 The now familiar _find_ method of arrays is used to find the note with an id that matches the parameter. The note is then returned to the sender of the request.
 
-When we test our application by going to <http://localhost:3001/api/notes/1> in our browser, we notice that it does not appear to work, as the browser displays an empty page. This comes as no surprise to us as software developers, and it's time to debug.
+We can now test our application by going to <http://localhost:3001/api/notes/1> in our browser:
 
-Adding _console.log_ commands into our code is a time-proven trick:
-
-```js
-app.get('/api/notes/:id', (request, response) => {
-  const id = request.params.id
-  console.log(id)
-  const note = notes.find(note => note.id === id)
-  console.log(note)
-  response.json(note)
-})
-```
-
-When we visit <http://localhost:3001/api/notes/1> again in the browser, the console - which is the terminal (in this case) - will display the following:
-
-![terminal displaying 1 then undefined](../../images/3/8.png)
-
-The id parameter from the route is passed to our application but the _find_ method does not find a matching note.
-
-To further our investigation, we also add a console log inside the comparison function passed to the _find_ method. To do this, we have to get rid of the compact arrow function syntax <em>note => note.id === id</em>, and use the syntax with an explicit return statement:
-
-```js
-app.get('/api/notes/:id', (request, response) => {
-  const id = request.params.id
-  const note = notes.find(note => {
-    console.log(note.id, typeof note.id, id, typeof id, note.id === id)
-    return note.id === id
-  })
-  console.log(note)
-  response.json(note)
-})
-```
-
-When we visit the URL again in the browser, each call to the comparison function prints a few different things to the console. The console output is the following:
-
-<pre>
-1 'number' '1' 'string' false
-2 'number' '1' 'string' false
-3 'number' '1' 'string' false
-</pre>
-
-The cause of the bug becomes clear. The _id_ variable contains a string '1', whereas the ids of notes are integers. In JavaScript, the "triple equals" comparison === considers all values of different types to not be equal by default, meaning that 1 is not '1'.
-
-Let's fix the issue by changing the id parameter from a string into a [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number):
-
-```js
-app.get('/api/notes/:id', (request, response) => {
-  const id = Number(request.params.id) // highlight-line
-  const note = notes.find(note => note.id === id)
-  response.json(note)
-})
-```
-
-Now fetching an individual resource works.
 
 ![api/notes/1 gives a single note as JSON](../../images/3/9new.png)
 
@@ -556,7 +471,7 @@ Let's make the following change to our code:
 
 ```js
 app.get('/api/notes/:id', (request, response) => {
-  const id = Number(request.params.id)
+  const id = request.params.id
   const note = notes.find(note => note.id === id)
   
   // highlight-start
@@ -583,7 +498,7 @@ Next, let's implement a route for deleting resources. Deletion happens by making
 
 ```js
 app.delete('/api/notes/:id', (request, response) => {
-  const id = Number(request.params.id)
+  const id = request.params.id
   notes = notes.filter(note => note.id !== id)
 
   response.status(204).end()
@@ -603,14 +518,14 @@ Many tools exist for making the testing of backends easier. One of these is a co
 Let's install the Postman desktop client [from here](https://www.postman.com/downloads/)  and try it out:
 
 ![postman screenshot on api/notes/2](../../images/3/11x.png)
-NB: Postman is also available on VS Code which can be dowloaded from the Extension tab on the left -> search for Postman -> First result (Verified Publisher) -> Install
-You will then see an extra icon added on the activity bar below the extensions tab. Once you login, you can follow from the steps below 
+NB: Postman is also available on VS Code which can be downloaded from the Extension tab on the left -> search for Postman -> First result (Verified Publisher) -> Install
+You will then see an extra icon added on the activity bar below the extensions tab. Once you log in, you can follow the steps below 
 
 Using Postman is quite easy in this situation. It's enough to define the URL and then select the correct request type (DELETE).
 
 The backend server appears to respond correctly. By making an HTTP GET request to <http://localhost:3001/api/notes> we see that the note with the id 2 is no longer in the list, which indicates that the deletion was successful.
 
-Because the notes in the application are only saved to memory, the list of notes will return to its original state when we restart the application.
+Currently, the notes in the application are hard-coded and not yet saved in a database, so the list of notes will reset to its original state when we restart the application.
 
 ### The Visual Studio Code REST client
 
@@ -632,9 +547,9 @@ If you use *IntelliJ WebStorm* instead, you can use a similar procedure with its
 
 ### Receiving data
 
-Next, let's make it possible to add new notes to the server. Adding a note happens by making an HTTP POST request to the address <http://localhost:3001/api/notes>, and by sending all the information for the new note in the request [body](https://www.w3.org/Protocols/rfc2616/rfc2616-sec7.html#sec7) in JSON format.
+Next, let's make it possible to add new notes to the server. Adding a note happens by making an HTTP POST request to the address <http://localhost:3001/api/notes>, and by sending all the information for the new note in the request [body](https://www.rfc-editor.org/rfc/rfc9112#name-message-body) in JSON format.
 
-To access the data easily, we need the help of the express [json-parser](https://expressjs.com/en/api.html) that we can use with the command _app.use(express.json())_.
+To access the data easily, we need the help of the Express [json-parser](https://expressjs.com/en/api.html) that we can use with the command _app.use(express.json())_.
 
 Let's activate the json-parser and implement an initial handler for dealing with the HTTP POST requests:
 
@@ -668,13 +583,13 @@ Before we implement the rest of the application logic, let's verify with Postman
 
 The application prints the data that we sent in the request to the console:
 
-![terminal printing content provided in postman](../../images/3/15new.png)
+![terminal printing content provided in postman](../../images/3/15c.png)
 
-**NB** <i>Keep the terminal running the application visible at all times</i> when you are working on the backend. Thanks to Nodemon any changes we make to the code will restart the application. If you pay attention to the console, you will immediately be able to pick up on errors that occur in the application:
+**NOTE:** When programming the backend, <i>keep the console running the application visible at all times</i>. The development server will restart if changes are made to the code, so by monitoring the console, you will immediately notice if there is an error in the application's code:
 
-![nodemon error as typing requre not defined](../../images/3/16.png)
+![console error about SyntaxError](../../images/3/16_25.png)
 
-Similarly, it is useful to check the console for making sure that the backend behaves as we expect it to in different situations, like when we send data with an HTTP POST request. Naturally, it's a good idea to add lots of <em>console.log</em> commands to the code while the application is still being developed.
+Similarly, it is useful to check the console to make sure that the backend behaves as we expect it to in different situations, like when we send data with an HTTP POST request. Naturally, it's a good idea to add lots of <em>console.log</em> commands to the code while the application is still being developed.
 
 A potential cause for issues is an incorrectly set <i>Content-Type</i> header in requests. This can happen with Postman if the type of body is not defined correctly:
 
@@ -686,7 +601,7 @@ The <i>Content-Type</i> header is set to <i>text/plain</i>:
 
 The server appears to only receive an empty object:
 
-![nodemon output showing empty curly braces](../../images/3/19.png)
+![console output showing empty curly braces](../../images/3/19_25.png)
 
 The server will not be able to parse the data correctly without the correct value in the header. It won't even try to guess the format of the data since there's a [massive amount](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types) of potential <i>Content-Types</i>.
 
@@ -727,11 +642,11 @@ Let's return to the application. Once we know that the application receives data
 ```js
 app.post('/api/notes', (request, response) => {
   const maxId = notes.length > 0
-    ? Math.max(...notes.map(n => n.id)) 
+    ? Math.max(...notes.map(n => Number(n.id))) 
     : 0
 
   const note = request.body
-  note.id = maxId + 1
+  note.id = String(maxId + 1)
 
   notes = notes.concat(note)
 
@@ -739,16 +654,16 @@ app.post('/api/notes', (request, response) => {
 })
 ```
 
-We need a unique id for the note. First, we find out the largest id number in the current list and assign it to the _maxId_ variable. The id of the new note is then defined as _maxId + 1_. This method is not recommended, but we will live with it for now as we will replace it soon enough.
+We need a unique id for the note. First, we find out the largest id number in the current list and assign it to the _maxId_ variable. The id of the new note is then defined as _maxId + 1_ as a string. This method is not recommended, but we will live with it for now as we will replace it soon enough.
 
-The current version still has the problem that the HTTP POST request can be used to add objects with arbitrary properties. Let's improve the application by defining that the <i>content</i> property may not be empty. The <i>important</i> property will be given default value false. All other properties are discarded:
+The current version still has the problem that the HTTP POST request can be used to add objects with arbitrary properties. Let's improve the application by defining that the <i>content</i> property may not be empty. The <i>important</i> property will be given a default value of false. All other properties are discarded:
 
 ```js
 const generateId = () => {
   const maxId = notes.length > 0
-    ? Math.max(...notes.map(n => n.id))
+    ? Math.max(...notes.map(n => Number(n.id)))
     : 0
-  return maxId + 1
+  return String(maxId + 1)
 }
 
 app.post('/api/notes', (request, response) => {
@@ -762,7 +677,7 @@ app.post('/api/notes', (request, response) => {
 
   const note = {
     content: body.content,
-    important: Boolean(body.important) || false,
+    important: body.important || false,
     id: generateId(),
   }
 
@@ -790,7 +705,7 @@ If the content property has a value, the note will be based on the received data
 If the <i>important</i> property is missing, we will default the value to <i>false</i>. The default value is currently generated in a rather odd-looking way:
 
 ```js
-important: Boolean(body.important) || false,
+important: body.important || false,
 ```
 
 If the data saved in the _body_ variable has the <i>important</i> property, the expression will evaluate its value and convert it to a boolean value. If the property does not exist, then the expression will evaluate to false which is defined on the right-hand side of the vertical lines.
@@ -798,8 +713,6 @@ If the data saved in the _body_ variable has the <i>important</i> property, the 
 > To be exact, when the <i>important</i> property is <i>false</i>, then the <em>body.important || false</em> expression will in fact return the <i>false</i> from the right-hand side...
 
 You can find the code for our current application in its entirety in the <i>part3-1</i> branch of [this GitHub repository](https://github.com/fullstack-hy2020/part3-notes-backend/tree/part3-1).
-
-The code for the current state of the application is specified in branch [part3-1](https://github.com/fullstack-hy2020/part3-notes-backend/tree/part3-1).
 
 ![GitHub screenshot of branch 3-1](../../images/3/21.png)
 
@@ -810,34 +723,33 @@ One more thing before we move on to the exercises. The function for generating I
 ```js
 const generateId = () => {
   const maxId = notes.length > 0
-    ? Math.max(...notes.map(n => n.id))
+    ? Math.max(...notes.map(n => Number(n.id)))
     : 0
-  return maxId + 1
+  return String(maxId + 1)
 }
 ```
 
 The function body contains a row that looks a bit intriguing:
 
 ```js
-Math.max(...notes.map(n => n.id))
+Math.max(...notes.map(n => Number(n.id)))
 ```
 
-What exactly is happening in that line of code? <em>notes.map(n => n.id)</em> creates a new array that contains all the ids of the notes. [Math.max](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/max) returns the maximum value of the numbers that are passed to it. However, <em>notes.map(n => n.id)</em> is an <i>array</i> so it can't directly be given as a parameter to _Math.max_. The array can be transformed into individual numbers by using the "three dot" [spread](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Spread_syntax) syntax <em>...</em>.
+What exactly is happening in that line of code? <em>notes.map(n => Number(n.id))</em> creates a new array that contains all the ids of the notes in number form. [Math.max](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/max) returns the maximum value of the numbers that are passed to it. However, <em>notes.map(n => Number(n.id))</em> is an <i>array</i> so it can't directly be given as a parameter to _Math.max_. The array can be transformed into individual numbers by using the "three dot" [spread](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Spread_syntax) syntax <em>...</em>.
 
 </div>
 
 <div class="tasks">
 
-
 ### Exercises 3.1.-3.6.
-
-**NB:** It's recommended to do all of the exercises from this part into a new dedicated git repository, and place your source code right at the root of the repository. Otherwise, you will run into problems in exercise 3.10.
 
 **NB:** Because this is not a frontend project and we are not working with React, the application <strong>is not created</strong> with create vite@latest -- --template react. You initialize this project with the <em>npm init</em> command that was demonstrated earlier in this part of the material.
 
+**NB:** Because the "node\_modules" is created using "npm init", it will not be excluded when you are trying to add your code to git using "git add .", therefore please create a file called ".gitignore" and write "node\_modules" so that git ignores it everytime you try to add, commit or push to a remote repo. 
+
 **Strong recommendation:** When you are working on backend code, always keep an eye on what's going on in the terminal that is running your application.
 
-#### 3.1: Phonebook backend step1
+#### 3.1: Phonebook backend step 1
 
 Implement a Node application that returns a hardcoded list of phonebook entries from the address <http://localhost:3001/api/persons>.
   
@@ -846,22 +758,22 @@ Data:
 ```js
 [
     { 
-      "id": 1,
+      "id": "1",
       "name": "Arto Hellas", 
       "number": "040-123456"
     },
     { 
-      "id": 2,
+      "id": "2",
       "name": "Ada Lovelace", 
       "number": "39-44-5323523"
     },
     { 
-      "id": 3,
+      "id": "3",
       "name": "Dan Abramov", 
       "number": "12-43-234345"
     },
     { 
-      "id": 4,
+      "id": "4",
       "name": "Mary Poppendieck", 
       "number": "39-23-6423122"
     }
@@ -878,37 +790,33 @@ The application must be started with the command _npm start_.
 
 The application must also offer an _npm run dev_ command that will run the application and restart the server whenever changes are made and saved to a file in the source code.
 
-#### 3.2: Phonebook backend step2
+#### 3.2: Phonebook backend step 2
 
 Implement a page at the address <http://localhost:3001/info> that looks roughly like this:
 
 ![Screenshot for 3.2](../../images/3/23x.png)
 
 The page has to show the time that the request was received and how many entries are in the phonebook at the time of processing the request.
-  
-There can only be one response.send() statement in an Express app route. Once you send a response to the client using response.send(), the request-response cycle is complete and no further response can be sent. 
-  
-To include a line space in the output, use `<br/>` tag, or wrap the statements in `<p>` tags.
 
-#### 3.3: Phonebook backend step3
+#### 3.3: Phonebook backend step 3
 
 Implement the functionality for displaying the information for a single phonebook entry. The url for getting the data for a person with the id 5 should be <http://localhost:3001/api/persons/5>
 
 If an entry for the given id is not found, the server has to respond with the appropriate status code.
 
-#### 3.4: Phonebook backend step4
+#### 3.4: Phonebook backend step 4
 
 Implement functionality that makes it possible to delete a single phonebook entry by making an HTTP DELETE request to the unique URL of that phonebook entry.
 
 Test that your functionality works with either Postman or the Visual Studio Code REST client.
 
-#### 3.5: Phonebook backend step5
+#### 3.5: Phonebook backend step 5
 
 Expand the backend so that new phonebook entries can be added by making HTTP POST requests to the address <http://localhost:3001/api/persons>.
 
 Generate a new id for the phonebook entry with the [Math.random](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random) function. Use a big enough range for your random values so that the likelihood of creating duplicate ids is small.
 
-#### 3.6: Phonebook backend step6
+#### 3.6: Phonebook backend step 6
 
 Implement error handling for creating new entries. The request is not allowed to succeed, if:
 
@@ -943,7 +851,7 @@ All HTTP requests except POST should be <i>idempotent</i>:
 
 > <i>Methods can also have the property of "idempotence" in that (aside from error or expiration issues) the side-effects of N > 0 identical requests is the same as for a single request. The methods GET, HEAD, PUT and DELETE share this property</i>
 
-This means that if a request does not generate side effects, then the result should be the same regardless of how many times the request is sent.
+This means that if a request does generate side effects, then the result should be the same regardless of how many times the request is sent.
 
 If we make an HTTP PUT request to the URL <i>/api/notes/10</i> and with the request we send the data <em>{ content: "no side effects!", important: true }</em>, the result is the same regardless of how many times the request is sent.
 
@@ -953,13 +861,13 @@ POST is the only HTTP request type that is neither <i>safe</i> nor <i>idempotent
 
 ### Middleware
 
-The express [json-parser](https://expressjs.com/en/api.html) we took into use earlier is a so-called [middleware](http://expressjs.com/en/guide/using-middleware.html).
+The Express [json-parser](https://expressjs.com/en/api.html) used earlier is a [middleware](http://expressjs.com/en/guide/using-middleware.html).
 
 Middleware are functions that can be used for handling _request_ and _response_ objects.
 
 The json-parser we used earlier takes the raw data from the requests that are stored in the _request_ object, parses it into a JavaScript object and assigns it to the _request_ object as a new property <i>body</i>.
 
-In practice, you can use several middlewares at the same time. When you have more than one, they're executed one by one in the order that they were taken into use in express.
+In practice, you can use several middlewares at the same time. When you have more than one, they're executed one by one in the order that they were listed in the application code.
 
 Let's implement our own middleware that prints information about every request that is sent to the server.
 
@@ -977,15 +885,15 @@ const requestLogger = (request, response, next) => {
 
 At the end of the function body, the _next_ function that was passed as a parameter is called. The _next_ function yields control to the next middleware.
 
-Middleware is taken into use like this:
+Middleware is used like this:
 
 ```js
 app.use(requestLogger)
 ```
 
-Middleware functions are called in the order that they're taken into use with the express server object's _use_ method. Notice that json-parser is taken into use before the _requestLogger_ middleware, because otherwise <i>request.body</i> will not be initialized when the logger is executed!
+Remember, middleware functions are called in the order that they're encountered by the JavaScript engine. Notice that _json-parser_ is listed before _requestLogger_ , because otherwise <i>request.body</i> will not be initialized when the logger is executed!
 
-Middleware functions have to be taken into use before routes if we want them to be executed before the route event handlers are called. There are also situations where we want to define middleware functions after routes. In practice, this means that we are defining middleware functions that are only called if no route handles the HTTP request.
+Middleware functions have to be used before routes when we want them to be executed by the route event handlers. Sometimes, we want to use middleware functions after routes. We do this when the middleware functions are only called if no route handler processes the HTTP request.
 
 Let's add the following middleware after our routes. This middleware will be used for catching requests made to non-existent routes. For these requests, the middleware will return an error message in the JSON format.
 
@@ -1005,7 +913,7 @@ You can find the code for our current application in its entirety in the <i>part
 
 ### Exercises 3.7.-3.8.
 
-#### 3.7: Phonebook backend step7
+#### 3.7: Phonebook backend step 7
 
 Add the [morgan](https://github.com/expressjs/morgan) middleware to your application for logging. Configure it to log messages to your console based on the <i>tiny</i> configuration.
 
@@ -1013,7 +921,7 @@ The documentation for Morgan is not the best, and you may have to spend some tim
 
 Morgan is installed just like all other libraries with the _npm install_ command. Taking morgan into use happens the same way as configuring any other middleware by using the _app.use_ command.
 
-#### 3.8*: Phonebook backend step8
+#### 3.8*: Phonebook backend step 8
 
 Configure morgan so that it also shows the data sent in HTTP POST requests:
 

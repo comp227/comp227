@@ -159,9 +159,9 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
 
 <div class="tasks">
 
-### Exercise 9.14
+### Exercise 9.15
 
-#### 9.14
+#### 9.15
 
 Create a new Vite app with TypeScript.
 
@@ -222,7 +222,7 @@ export default App;
 
 and remove the unnecessary files.
 
-The whole app is now in one component. That is not what we want, so refactor the code so that it consists of three components: *Header*,  *Content* and *Total*. All data is still kept in the *App* component, which passes all necessary data to each component as props. *Be sure to add type declarations for each component's props!*
+The whole app is now in one component. That is not what we want, so refactor the code so that it consists of three components: *Header*,  *Content* and *Total*. All data is still kept in the *App* component, which passes all necessary data to each component as props. <i>Be sure to add type declarations for each component's props!</i>
 
 The *Header* component should take care of rendering the name of the course. *Content* should render the names of the different parts and the number of exercises in each part, and *Total* should render the total sum of exercises in all parts.
 
@@ -356,7 +356,7 @@ const App = () => {
 
 Note that we have now added the attribute *kind* with a proper value to each element of the array.
 
-Our editor will automatically warn us if we use the wrong type for an attribute, use an extra attribute, or forget to set an expected attribute. If we eg. try to add the following to the array
+Our editor will automatically warn us if we use the wrong type for an attribute, use an extra attribute, or forget to set an expected attribute. If we e.g. try to add the following to the array
 
 ```js
 {
@@ -409,15 +409,15 @@ If we try to access the objects in the array *courseParts: CoursePart[]* we noti
 
 And indeed, the TypeScript [documentation](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#working-with-union-types) says this:
 
-> *TypeScript will only allow an operation (or attribute access) if it is valid for every member of the union.*
+> <i>TypeScript will only allow an operation (or attribute access) if it is valid for every member of the union.</i>
 
 The documentation also mentions the following:
 
-> *The solution is to narrow the union with code... Narrowing occurs when TypeScript can deduce a more specific type for a value based on the structure of the code.*
+> <i>The solution is to narrow the union with code... Narrowing occurs when TypeScript can deduce a more specific type for a value based on the structure of the code.</i>
 
 So once again the [type narrowing](https://www.typescriptlang.org/docs/handbook/2/narrowing.html) is the rescue!
 
-One handy way to narrow these kinds of types in TypeScript is to use *switch case* expressions. Once TypeScript has inferred that a variable is of union type and that each type in the union contain a certain literal attribute (in our case *kind*), we can use that as a type identifier. We can then build a switch case around that attribute and TypeScript will know which attributes are available within each case block:
+One handy way to narrow these kinds of types in TypeScript is to use *switch case* expressions. Once TypeScript has inferred that a variable is of union type and that each type in the union contains a certain literal attribute (in our case *kind*), we can use that as a type identifier. We can then build a switch case around that attribute and TypeScript will know which attributes are available within each case block:
 
 ![vscode showing part. and then the attributes](../../images/9/64new.png)
 
@@ -477,11 +477,11 @@ which tells us that we are using a variable somewhere where it should never be u
 
 <div class="tasks">
 
-### Exercise 9.15
+### Exercise 9.16
 
-#### 9.15
+#### 9.16
 
-Let us now continue extending the app created in exercise 9.14. First, add the type information and replace the variable *courseParts* with the one from the example below.
+Let us now continue extending the app created in exercise 9.15. First, add the type information and replace the variable *courseParts* with the one from the example below.
 
 ```js
 interface CoursePartBase {
@@ -616,24 +616,24 @@ The type of the returned array is the following:
 
 So the first element, assigned to *newNote* is a string and the second element that we assigned *setNewNote* has a slightly more complex type. We notice that there is a string mentioned there, so we know that it must be the type of a function that sets a valued data. See [here](https://codewithstyle.info/Using-React-useState-hook-with-TypeScript/) if you want to learn more about the types of useState function.
 
-From this all we see that TypeScript has indeed [inferred](https://www.typescriptlang.org/docs/handbook/type-inference.html#handbook-content) the type of the first useState quite right, it is creating a state with type string.
+From all this we see that TypeScript has indeed [inferred](https://www.typescriptlang.org/docs/handbook/type-inference.html#handbook-content) the type of the first useState correctly, a state with type string is created.
 
-When we look at the second useState that has the initial value *[]* the type looks quite different
+When we look at the second useState that has the initial value *[]* , the type looks quite different
 
 ```ts
 useState<never[]>(initialState: never[] | (() => never[])): 
   [never[], React.Dispatch<React.SetStateAction<never[]>>] 
 ```
 
-TypeScript can just infer that the state has type *never[]*, it is an array but it has no clue what are the elements stored to array, so we clearly need to help the compiler and provide the type explicitly.
+TypeScript can just infer that the state has type *never[]*, it is an array but it has no clue what the elements stored to the array are, so we clearly need to help the compiler and provide the type explicitly.
 
-One of the best sources for information about typing React is the [React TypeScript Cheatsheet](https://react-typescript-cheatsheet.netlify.app/). The Cheatsheet chapter about [useState](https://react-typescript-cheatsheet.netlify.app/docs/basic/getting-started/hooks#usestate) hook instructs to use a *type parameter* in situations where the compiler can not infer the type.
+One of the best sources for information about typing React is the [React TypeScript Cheatsheet](https://react-typescript-cheatsheet.netlify.app/). The Cheatsheet chapter about [useState](https://react-typescript-cheatsheet.netlify.app/docs/basic/getting-started/hooks#usestate) hook instructs us to use a *type parameter* in situations where the compiler can not infer the type.
 
 Let us now define a type for notes:
 
 ```js
 interface Note {
-  id: number,
+  id: string,
   content: string
 }
 ```
@@ -644,7 +644,7 @@ The solution is now simple:
 const [notes, setNotes] = useState<Note[]>([]);
 ```
 
-And indeed, the type is set quite right:
+And indeed, the type is set correctly:
 
 ```ts
 useState<Note[]>(initialState: Note[] | (() => Note[])):
@@ -657,7 +657,7 @@ Rendering the notes is now easy. Let us just add some data to the state so that 
 
 ```js
 interface Note {
-  id: number,
+  id: string,
   content: string
 }
 
@@ -665,7 +665,7 @@ import { useState } from "react";
 
 const App = () => {
   const [notes, setNotes] = useState<Note[]>([
-    { id: 1, content: 'testing' } // highlight-line
+    { id: '1', content: 'testing' } // highlight-line
   ]);
   const [newNote, setNewNote] = useState('');
 
@@ -713,7 +713,7 @@ const App = () => {
 }
 ```
 
-It just works, there are no complaints about types! When we hover over the *event.target.value*, we see that it is indeed a string, just what is the expected parameter of the *setNewNote*:
+It just works, there are no complaints about types! When we hover over the *event.target.value*, we see that it is indeed a string, just what is expected for the parameter of *setNewNote*:
 
 ![vscode showing variable is a string](../../images/9/67new.png)
 
@@ -749,14 +749,14 @@ It does not quite work, there is an Eslint error complaining about implicit any:
 
 ![vscode error event implicitly has any type](../../images/9/68new.png)
 
-TypeScript compiler has now no clue what is the type of the parameter, so that is why the type is the infamous implicit any that we want to [avoid](/en/part9/first_steps_with_type_script#the-horrors-of-any) at all costs. The React TypeScript cheatsheet comes again to rescue, the chapter about
+TypeScript compiler now has no clue what the type of the parameter is, this is why the type is the infamous implicit any that we want to [avoid](/en/part9/first_steps_with_type_script#the-horrors-of-any) at all costs. The React TypeScript cheatsheet comes to the rescue again, the chapter about
 [forms and events](https://react-typescript-cheatsheet.netlify.app/docs/basic/getting-started/forms_and_events) reveals that the right type of event handler is *React.SyntheticEvent*.
 
 The code becomes
 
 ```js
 interface Note {
-  id: number,
+  id: string,
   content: string
 }
 
@@ -769,7 +769,7 @@ const App = () => {
     event.preventDefault()
     const noteToAdd = {
       content: newNote,
-      id: notes.length + 1
+      id: String(notes.length + 1)
     }
     setNotes(notes.concat(noteToAdd));
 
@@ -821,7 +821,7 @@ When we hover over the *response.data* we see that it has the type *any*
 
 To set the data to the state with function *setNotes* we must type it properly.
 
-With a little [help from internet](https://upmostly.com/typescript/how-to-use-axios-in-your-typescript-apps), we find a clever trick:
+With a little [help from the internet](https://upmostly.com/typescript/how-to-use-axios-in-your-typescript-apps), we find a clever trick:
 
 ```js
   useEffect(() => {
@@ -845,11 +845,11 @@ We can now set the data in the state *notes* to get the code working:
   }, [])
 ```
 
-So just like with *useState*, we gave a type parameter to *axios.get* to instruct it on how the typing should be done. Just like *useState* also *axios.get* is a [generic function](https://www.typescriptlang.org/docs/handbook/2/generics.html#working-with-generic-type-variables). Unlike some generic functions, the type parameter of *axios.get* has a default value of *any* so, if the function is used without defining the type parameter, the type of the response data will be any.
+So just like with *useState*, we gave a type parameter to *axios.get* to instruct it on how the typing should be done. Just like *useState*, *axios.get* is also a [generic function](https://www.typescriptlang.org/docs/handbook/2/generics.html#working-with-generic-type-variables). Unlike some generic functions, the type parameter of *axios.get* has a default value of *any* so, if the function is used without defining the type parameter, the type of the response data will be any.
 
-The code works, compiler and Eslint are happy and remain quiet. However, giving a type parameter to *axios.get* is a potentially dangerous thing to do. The response body can contain data in an arbitrary form, and when giving a type parameter we are essentially just telling to TypeScript compiler to trust us that the data has type *Note[]*.
+The code works, compiler and Eslint are happy and remain quiet. However, giving a type parameter to *axios.get* is a potentially dangerous thing to do. The <i>response body can contain data in an arbitrary form</i>, and when giving a type parameter we are essentially just telling the TypeScript compiler to trust us that the data has type *Note[]*.
 
-So our code is essentially as safe as it would be if a [type assertion](/en/part9/first_steps_with_type_script#type-assertion) would be used:
+So our code is essentially as safe as it would be if a [type assertion](/en/part9/first_steps_with_type_script#type-assertion) would be used (not good):
 
 ```js
   useEffect(() => {
@@ -860,9 +860,9 @@ So our code is essentially as safe as it would be if a [type assertion](/en/part
   }, [])
 ```
 
-Since the TypeScript types do not even exist in runtime, our code does not give us any "safety" against situations where the request body contains data in a wrong form.
+Since the TypeScript types do not even exist in runtime, our code does not give us any safety against situations where the request body contains data in the wrong form.
 
-Giving a type parameter to *axios.get* might be ok if we are *absolutely sure* that the backend behaves correctly and returns always the data in the correct form. If we want to build a robust system we should prepare for surprises and parse the response data in the frontend, similarly to what we did [in the previous section](/en/part9/typing_an_express_app#proofing-requests) for the requests to the backend.
+Giving a type parameter to *axios.get* might be ok if we are <i>absolutely sure</i> that the backend behaves correctly and always returns the data in the correct form. If we want to build a robust system we should prepare for surprises and parse the response data (similar to what we did [in the previous section](/en/part9/typing_an_express_app#proofing-requests) for the requests to the backend).
 
 Let us now wrap up our app by implementing the new note addition:
 
@@ -886,7 +886,7 @@ Let us clean up the code a bit. For the type definitions, we create a file *type
 
 ```js
 export interface Note {
-  id: number,
+  id: string,
   content: string
 }
 
@@ -979,7 +979,7 @@ interface CoursePartBase {
 }
 ```
 
-We actually could have had the same effect by using a [type alias](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#type-aliases)
+We actually could have achieved the same effect by using a [type alias](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#type-aliases)
 
 ```js
 type DiaryEntry = {
@@ -1000,11 +1000,11 @@ TypeScript documentation [recommends using interfaces](https://www.typescriptlan
 
 <div class="tasks">
 
-### Exercises 9.16-9.19
+### Exercises 9.17-9.20
 
 Let us now build a frontend for the Ilari's flight diaries that was developed in [the previous section](/en/part9/typing_an_express_app). The source code of the backend can be found in [this GitHub repository](https://github.com/fullstack-hy2020/flight-diary).
 
-#### Exercise 9.16
+#### Exercise 9.17
 
 Create a TypeScript React app with similar configurations as the apps of this section. Fetch the diaries from the backend and render those to screen. Do all the required typing and ensure that there are no Eslint errors.
 
@@ -1012,11 +1012,11 @@ Remember to keep the network tab open. It might give you a valuable hint...
 
 You can decide how the diary entries are rendered. If you wish, you may take inspiration from the figure below. Note that the backend API does not return the diary comments, you may modify it to return also those on a GET request.
 
-#### Exercise 9.17
+#### Exercise 9.18
 
 Make it possible to add new diary entries from the frontend. In this exercise you may skip all validations and assume that the user just enters the data in a correct form.
 
-#### Exercise 9.18
+#### Exercise 9.19
 
 Notify the user if the the creation of a diary entry fails in the backend, show also the reason for the failure.
 
@@ -1026,7 +1026,7 @@ Your solution may look like this:
 
 ![browser showing error incorrect visibility best ever](../../images/9/71new.png)
 
-#### Exercise 9.19
+#### Exercise 9.20
 
 Addition of a diary entry is now very error prone since user can type anything to the input fields. The situation must be improved.
 

@@ -15,7 +15,7 @@ Code will conform to contemporary best practices from [part 1](/en/part1) onward
 
 Open the [example application](https://studies.cs.helsinki.fi/exampleapp) in your browser. Sometimes this takes a while.
 
-The course material is done with the Chrome browser.
+The course material was done with and adapted for the Chrome browser.
 
 **The 1st rule of web development**: Always keep the Developer Console open on your web browser. On macOS, open the console by pressing _fn_-_F12_ or _option-cmd-i_ simultaneously. On Windows or Linux, open the console by pressing _Fn_-_F12_ or _ctrl-shift-i_ simultaneously. The console can also be opened via the [context menu](https://en.wikipedia.org/wiki/Menu_key).
 
@@ -181,7 +181,7 @@ We can try going to the address <https://studies.cs.helsinki.fi/exampleapp/data.
 
 ![Raw JSON Data](../../images/0/10e.png)
 
-There we find the notes in [JSON](https://en.wikipedia.org/wiki/JSON) "raw data". By default, Chromium-based browsers are not too good at displaying JSON data. Plugins can be used to handle the formatting. Install, for example, [JSONVue](https://chrome.google.com/webstore/detail/jsonview/chklaanhfefbnpoihckbnefhakgolnmc) on Chrome, and reload the page. The data is now nicely formatted:
+There we find the notes in [JSON](https://en.wikipedia.org/wiki/JSON) "raw data". By default, Chromium-based browsers are not too good at displaying JSON data. Plugins can be used to handle the formatting. Install, for example, [JSONView](https://chromewebstore.google.com/detail/gmegofmjomhknnokphhckolhcffdaihd) on Chrome, and reload the page. The data is now nicely formatted:
 
 ![Formatted JSON output](../../images/0/11e.png)
 
@@ -274,13 +274,13 @@ xhttp.onreadystatechange = function() {
 }
 ```
 
-The mechanism of invoking event handlers is very common in JavaScript. Event handler functions are called [callback](https://developer.mozilla.org/en-US/docs/Glossary/Callback_function) functions. The application code does not invoke the functions itself, but the runtime environment - the browser, invokes the function at an appropriate time when the <i>event</i> has occurred.
+The mechanism of invoking event handlers is very common in JavaScript. Event handler functions are called [callback](https://developer.mozilla.org/en-US/docs/Glossary/Callback_function) functions. The application code does not invoke the functions itself, but the runtime environment - the browser - invokes the function at an appropriate time when the <i>event</i> has occurred.
 
 ### Document Object Model or DOM
 
 We can think of HTML pages as implicit tree structures.
 
-<pre>
+```
 html
   head
     link
@@ -296,9 +296,9 @@ html
       form
         input
         input
-</pre>
+```
 
-The same treelike structure can be seen on the console tab <i>Elements</i>.
+The same treelike structure can be seen on the console's <i>Elements</i> tab.
 
 ![A screenshot of the Elements tab of the developer console](../../images/0/14e.png)
 
@@ -308,7 +308,7 @@ Document Object Model, or [DOM](https://en.wikipedia.org/wiki/Document_Object_Mo
 
 The JavaScript code introduced in the previous chapter used the DOM-API to add a list of notes to the page.
 
-The following code creates a new node to the variable <em>ul</em>, and adds some child nodes to it:
+The following code creates a new node, assigns it to the variable <em>ul</em>, and adds some child nodes to it:
 
 ```js
 var ul = document.createElement('ul')
@@ -383,7 +383,7 @@ A class selector definition always starts with a period and contains the name of
 
 Classes are [attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/class), which can be added to HTML elements.
 
-CSS attributes can be examined on the <i>elements</i> tab of the console:
+CSS attributes can be examined in the <i>Elements</i> tab of the console:
 
 ![Screenshot of the Elements tab on the developer console](../../images/0/17e.png)
 
@@ -430,17 +430,15 @@ The first one is the form submit event. Let's zoom into it:
 
 ![Detailed view of the first request](../../images/0/22e.png)
 
-It is an [HTTP POST](https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/POST) request to the server address <i>new\_note</i>. The server responds with HTTP status code 302. This is a [URL redirect](https://en.wikipedia.org/wiki/URL\_redirection), with which the server asks the browser to do a new HTTP GET request to the address defined in the header's <i>Location</i> - the address <i>notes</i>.
+It is an [HTTP POST](https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/POST) request to the server address <i>new\_note</i>. The server responds with HTTP status code 302. This is a [URL redirect](https://en.wikipedia.org/wiki/URL\_redirection), with which the server asks the browser to perform a new HTTP GET request to the address defined in the header's <i>Location</i> - the address <i>notes</i>.
 
 So, the browser reloads the Notes page. The reload causes three more HTTP requests: fetching the style sheet (main.css), the JavaScript code (main.js), and the raw data of the notes (data.json).
 
-The network tab also shows the data submitted with the form:
+The Network tab also shows the data submitted with the form. You can view the data by first selecting the request name and then checking the Payload tab:
 
-NB: On newer Chrome, the Form Data dropdown is within the new Payload tab, located to the right of the Headers tab.
+![form data dropdown in developer tools](../../images/0/23g.png)
 
-![form data dropdown in developer tools](../../images/0/23e.png)
-
-The Form tag has attributes <i>action</i> and <i>method</i>, which define that submitting the form is done as an HTTP POST request to the address <i>new_note</i>.
+The Form tag has attributes <i>action</i> and <i>method</i>, which define that submitting the form is done as an HTTP POST request to the address <i>new\_note</i>.
 
 ![action and method highlight](../../images/0/24e.png)
 
@@ -549,7 +547,7 @@ form.onsubmit = function(e) {
 }
 ```
 
-The command <em>document.getElementById('notes_form')</em> instructs the code to fetch the form element from the page and to register an <i>event handler</i> to handle the form's submit event. The event handler immediately calls the method <em>e.preventDefault()</em> to prevent the default handling of form's submit. The default method would send the data to the server and cause a new GET request, which we don't want to happen.
+The command <em>document.getElementById('notes\_form')</em> instructs the code to fetch a reference to the HTML form element on the page that has the ID "notes\_form" and to register an <i>event handler</i> to handle the form's submit event. The event handler immediately calls the method <em>e.preventDefault()</em> to prevent the default handling of form's submit. The default method would send the data to the server and cause a new GET request, which we don't want to happen.
 
 Then the event handler creates a new note, adds it to the notes list with the command <em>notes.push(note)</em>, rerenders the note list on the page and sends the new note to the server.
 
@@ -581,7 +579,7 @@ jQuery was developed back when web applications mainly followed the traditional 
 
 The rise of the single-page app brought several more "modern" ways of web development than jQuery. The favorite of the first wave of developers was [BackboneJS](http://backbonejs.org/). After its [launch](https://github.com/angular/angular.js/blob/master/CHANGELOG.md#100rc1-moir%C3%A9-vision-2012-03-13) in 2012, Google's [AngularJS](https://angularjs.org/) quickly became almost the de facto standard of modern web development.
 
-However, the popularity of Angular plummeted in October 2014 after the [Angular team announced that support for version 1 will end](https://web.archive.org/web/20151208002550/https://jaxenter.com/angular-2-0-announcement-backfires-112127.html), and that Angular 2 will not be backwards compatible with the first version. Angular 2 and the newer versions have not gotten too warm of a welcome.
+However, the popularity of Angular plummeted in October 2014 after the [Angular team announced that support for version 1 will end](https://web.archive.org/web/20151208002550/https://jaxenter.com/angular-2-0-announcement-backfires-112127.html), and that Angular 2 will not be backwards compatible with the first version. Angular 2 and the newer versions have not received too warm of a welcome.
 
 Currently, the most popular tool for implementing the browser-side logic of web applications is Facebook's [React](https://react.dev/) library.
 During this course, we will get familiar with React and the [Redux](https://github.com/reactjs/redux) library, which are frequently used together.

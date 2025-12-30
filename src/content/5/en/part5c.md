@@ -9,41 +9,64 @@ lang: en
 
 There are many different ways of testing React applications. Let's take a look at them next.
 
-Tests will be implemented with the same [Jest](http://jestjs.io/) testing library developed by Facebook that was used in the previous part.
+The course previously used the [Jest](http://jestjs.io/) library developed by Facebook to test React components. We are now using the new generation of testing tools from Vite developers called [Vitest](https://vitest.dev/). Apart from the configurations, the libraries provide the same programming interface, so there is virtually no difference in the test code.
 
-In addition to Jest, we also need another testing library that will help us render components for testing purposes. The current best option for this is [react-testing-library](https://github.com/testing-library/react-testing-library) which has seen rapid growth in popularity in recent times.
+Let's start by installing Vitest and the [jsdom](https://github.com/jsdom/jsdom) library simulating a web browser:
 
-Let's install libraries with the command:
-
-```js
-npm install --save-dev @testing-library/react @testing-library/jest-dom jest jest-environment-jsdom @babel/preset-env @babel/preset-react
+```
+npm install --save-dev vitest jsdom
 ```
 
-The file <i>package.json</i> should be extended as follows:
+In addition to Vitest, we also need another testing library that will help us render components for testing purposes. The current best option for this is [react-testing-library](https://github.com/testing-library/react-testing-library) which has seen rapid growth in popularity in recent times. It is also worth extending the expressive power of the tests with the library [jest-dom](https://github.com/testing-library/jest-dom).
+
+Let's install the libraries with the command:
+
+```js
+npm install --save-dev @testing-library/react @testing-library/jest-dom
+```
+
+Before we can do the first test, we need some configurations.
+
+We add a script to the <i>package.json</i> file to run the tests:
 
 ```js 
 {
   "scripts": {
     // ...
-    "test": "jest"
+    "test": "vitest run"
   }
   // ...
-  "jest": {
-    "testEnvironment": "jsdom"
+}
+```
+
+Let's create a file _testSetup.js_ in the project root with the following content
+
+```js
+import { afterEach } from 'vitest'
+import { cleanup } from '@testing-library/react'
+import '@testing-library/jest-dom/vitest'
+
+afterEach(() => {
+  cleanup()
+})
+```
+
+Now, after each test, the function _cleanup_ is executed to reset jsdom, which is simulating the browser.
+
+Expand the _vite.config.js_ file as follows
+
+```js
+export default defineConfig({
+  // ...
+  test: {
+    environment: 'jsdom',
+    globals: true,
+    setupFiles: './testSetup.js', 
   }
-}
+})
 ```
 
-We also need the file <i>.babelrc</i> with following content:
-
-```js 
-{
-  "presets": [
-    "@babel/preset-env",
-    ["@babel/preset-react", { "runtime": "automatic" }]
-  ]
-}
-```
+With _globals: true_, there is no need to import keywords such as _describe_, _test_ and _expect_ into the tests.
 
 Let's first write tests for the component that is responsible for rendering a note:
 
@@ -62,17 +85,15 @@ const Note = ({ note, toggleImportance }) => {
 }
 ```
 
-Notice that the <i>li</i> element has the [CSS](https://react.dev/learn#adding-styles) classname <i>note</i>, that could be used to access the component in our tests.
+Notice that the <i>li</i> element has the value <i>note</i> for the [CSS](https://react.dev/learn#adding-styles) attribute className, that could be used to access the component in our tests.
 
 ### Rendering the component for tests
 
-We will write our test in the <i>src/components/Note.test.js</i> file, which is in the same directory as the component itself.
+We will write our test in the <i>src/components/Note.test.jsx</i> file, which is in the same directory as the component itself.
 
 The first test verifies that the component renders the contents of the note:
 
 ```js
-import React from 'react'
-import '@testing-library/jest-dom'
 import { render, screen } from '@testing-library/react'
 import Note from './Note'
 
@@ -95,7 +116,7 @@ After the initial configuration, the test renders the component with the [render
 render(<Note note={note} />)
 ```
 
-Normally React components are rendered to the <i>DOM</i>. The render method we used renders the components in a format that is suitable for tests without rendering them to the DOM.
+Normally React components are rendered to the [DOM](https://developer.mozilla.org/en-US/docs/Web/API/Document_Object_Model). The render method we used renders the components in a format that is suitable for tests without rendering them to the DOM.
 
 We can use the object [screen](https://testing-library.com/docs/queries/about#screen) to access the rendered component. We use screen's method [getByText](https://testing-library.com/docs/queries/bytext) to search for an element that has the note content and ensure that it exists:
 
@@ -104,28 +125,49 @@ We can use the object [screen](https://testing-library.com/docs/queries/about#sc
   expect(element).toBeDefined()
 ```
 
+The existence of an element is checked using Vitest's [expect](https://vitest.dev/api/expect.html#expect) command. Expect generates an assertion for its argument, the validity of which can be tested using various condition functions. Now we used [toBeDefined](https://vitest.dev/api/expect.html#tobedefined) which tests whether the _element_ argument of expect exists.
+
 Run the test with command _npm test_:
 
 ```js
 $ npm test
 
 > notes-frontend@0.0.0 test
-> jest
+> vitest run
 
- PASS  src/components/Note.test.js
-  ✓ renders content (15 ms)
 
-Test Suites: 1 passed, 1 total
-Tests:       1 passed, 1 total
-Snapshots:   0 total
-Time:        1.152 s
+ RUN  v3.2.3 /home/vejolkko/repot/fullstack-examples/notes-frontend
+
+ ✓ src/components/Note.test.jsx (1 test) 19ms
+   ✓ renders content 18ms
+
+ Test Files  1 passed (1)
+      Tests  1 passed (1)
+   Start at  14:31:54
+   Duration  874ms (transform 51ms, setup 169ms, collect 19ms, tests 19ms, environment 454ms, prepare 87ms)
 ```
 
-As expected, the test passes.
+Eslint complains about the keywords _test_ and _expect_ in the tests. The problem can be solved by adding the following configuration to the <i>eslint.config.js</i> file:
 
-**NB:** the console may issue a warning if you have not installed Watchman. Watchman is an application developed by Facebook that watches for changes that are made to files. The program speeds up the execution of tests and at least starting from macOS Sierra, running tests in watch mode issues some warnings to the console, that can be removed by installing Watchman.
+```js
+// ...
 
-Instructions for installing Watchman on different operating systems can be found on the official Watchman website: <https://facebook.github.io/watchman/>
+export default [
+  // ...
+  // highlight-start
+  {
+    files: ['**/*.test.{js,jsx}'],
+    languageOptions: {
+      globals: {
+        ...globals.vitest
+      }
+    }
+  }
+  // highlight-end
+]
+```
+
+This is how ESLint is informed that Vitest keywords are globally available in test files.
 
 ### Test file location
 
@@ -133,15 +175,13 @@ In React there are (at least) [two different conventions](https://medium.com/@Je
 
 The other convention is to store the test files "normally" in a separate _test_ directory. Whichever convention we choose, it is almost guaranteed to be wrong according to someone's opinion.
 
-I do not like this way of storing tests and application code in the same directory. The reason we choose to follow this convention is that it is configured by default in applications created by create-react-app.
+I do not like this way of storing tests and application code in the same directory. However, we will follow this approach for now, as it is the most common practice in small projects.
 
 ### Searching for content in a component
 
-The react-testing-library package offers many different ways of investigating the content of the component being tested. In reality, the _expect_ in our test is not needed at all
+The react-testing-library package offers many different ways of investigating the content of the component being tested. In reality, the _expect_ in our test is not needed at all:
 
 ```js
-import React from 'react'
-import '@testing-library/jest-dom'
 import { render, screen } from '@testing-library/react'
 import Note from './Note'
 
@@ -161,11 +201,80 @@ test('renders content', () => {
 
 Test fails if _getByText_ does not find the element it is looking for.
 
+The _getByText_ command, by default, searches for an element that contains only the **text provided as a parameter** and nothing else. Let us assume that a component would render text to an HTML element as follows:
+
+```js
+const Note = ({ note, toggleImportance }) => {
+  const label = note.important
+    ? 'make not important' : 'make important'
+
+  return (
+    <li className='note'>
+      Your awesome note: {note.content} // highlight-line
+      <button onClick={toggleImportance}>{label}</button>
+    </li>
+  )
+}
+
+export default Note
+```
+
+The _getByText_ method that the test uses does <i>not</i> find the element:
+
+```js
+test('renders content', () => {
+  const note = {
+    content: 'Does not work anymore :(',
+    important: true
+  }
+
+  render(<Note note={note} />)
+
+  const element = screen.getByText('Does not work anymore :(')
+
+  expect(element).toBeDefined()
+})
+```
+
+If we want to look for an element that <i>contains</i> the text, we could use an extra option:
+
+```js
+const element = screen.getByText(
+  'Does not work anymore :(', { exact: false }
+)
+```
+
+or we could use the _findByText_ method:
+
+```js
+const element = await screen.findByText('Does not work anymore :(')
+```
+
+It is important to notice that, unlike the other _ByText_ methods, _findByText_ returns a promise!
+
+There are situations where yet another form of the _queryByText_ method is useful. The method returns the element but <i>it does not cause an exception</i> if it is not found.
+
+We could eg. use the method to ensure that something <i>is not rendered</i> to the component:
+
+```js
+test('does not render this', () => {
+  const note = {
+    content: 'This is a reminder',
+    important: true
+  }
+
+  render(<Note note={note} />)
+
+  const element = screen.queryByText('do not want this thing to be rendered')
+  expect(element).toBeNull()
+})
+```
+
+Other methods also exist, such as [getByTestId](https://testing-library.com/docs/queries/bytestid/), which searches for elements based on id fields specifically created for testing purposes.
+
 We could also use [CSS-selectors](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Selectors) to find rendered elements by using the method [querySelector](https://developer.mozilla.org/en-US/docs/Web/API/Document/querySelector) of the object [container](https://testing-library.com/docs/react-testing-library/api/#container-1) that is one of the fields returned by the render:
 
 ```js
-import React from 'react'
-import '@testing-library/jest-dom'
 import { render, screen } from '@testing-library/react'
 import Note from './Note'
 
@@ -186,7 +295,7 @@ test('renders content', () => {
 })
 ```
 
-**NB:** A more consistent way of selecting elements is using a [data attribute](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/data-*) that is specifically defined for testing purposes. Using _react-testing-library_, we can leverage the [getByTestId](https://testing-library.com/docs/queries/bytestid/) method to select elements with a specified _data-testid_ attribute.
+It is, however, recommended to search for elements primarily using methods other than the <i>container</i> object and CSS selectors. CSS attributes can often be changed without affecting the application's functionality, and users are not aware of them. It is better to search for elements based on properties visible to the user, for example, by using the _getByText_ method. This way, the tests better simulate the actual nature of the component and how a user would find the element on the screen.
 
 ### Debugging tests
 
@@ -195,8 +304,6 @@ We typically run into many different kinds of problems when writing our tests.
 Object _screen_ has method [debug](https://testing-library.com/docs/dom-testing-library/api-debugging#screendebug) that can be used to print the HTML of a component to the terminal. If we change the test as follows:
 
 ```js
-import React from 'react'
-import '@testing-library/jest-dom'
 import { render, screen } from '@testing-library/react'
 import Note from './Note'
 
@@ -236,8 +343,6 @@ console.log
 It is also possible to use the same method to print a wanted element to console:
 
 ```js
-import React from 'react'
-import '@testing-library/jest-dom'
 import { render, screen } from '@testing-library/react'
 import Note from './Note'
 
@@ -283,8 +388,6 @@ npm install --save-dev @testing-library/user-event
 Testing this functionality can be accomplished like this:
 
 ```js
-import React from 'react'
-import '@testing-library/jest-dom'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event' // highlight-line
 import Note from './Note'
@@ -296,8 +399,8 @@ test('clicking the button calls event handler once', async () => {
     content: 'Component testing is done with react-testing-library',
     important: true
   }
-
-  const mockHandler = jest.fn()  // highlight-line
+  
+  const mockHandler = vi.fn()  // highlight-line
 
   render(
     <Note note={note} toggleImportance={mockHandler} />  // highlight-line
@@ -311,10 +414,10 @@ test('clicking the button calls event handler once', async () => {
 })
 ```
 
-There are a few interesting things related to this test. The event handler is a [mock](https://facebook.github.io/jest/docs/en/mock-functions.html) function defined with Jest:
+There are a few interesting things related to this test. The event handler is a [mock](https://vitest.dev/api/mock) function defined with Vitest:
 
 ```js
-const mockHandler = jest.fn()
+const mockHandler = vi.fn()
 ```
 
 A [session](https://testing-library.com/docs/user-event/setup/) is started to interact with the rendered component:
@@ -332,69 +435,43 @@ await user.click(button)
 
 Clicking happens with the method [click](https://testing-library.com/docs/user-event/convenience/#click) of the userEvent-library.
 
-The expectation of the test verifies that the <i>mock function</i> has been called exactly once.
+The expectation of the test uses [toHaveLength](https://vitest.dev/api/expect.html#tohavelength) to verify that the <i>mock function</i> has been called exactly once:
 
 ```js
 expect(mockHandler.mock.calls).toHaveLength(1)
 ```
 
-[Mock objects and functions](https://en.wikipedia.org/wiki/Mock_object) are commonly used stub components in testing that are used for replacing dependencies of the components being tested. Mocks make it possible to return hardcoded responses, and to verify the number of times the mock functions are called and with what parameters.
+The calls to the mock function are saved to the array [mock.calls](https://vitest.dev/api/mock#mock-calls) within the mock function object.
+
+[Mock objects and functions](https://en.wikipedia.org/wiki/Mock_object) are commonly used [stub](https://en.wikipedia.org/wiki/Method_stub) components in testing that are used for replacing dependencies of the components being tested. Mocks make it possible to return hardcoded responses, and to verify the number of times the mock functions are called and with what parameters.
 
 In our example, the mock function is a perfect choice since it can be easily used for verifying that the method gets called exactly once.
 
 ### Tests for the <i>Togglable</i> component
 
-Let's write a few tests for the <i>Togglable</i> component. Let's add the <i>togglableContent</i> CSS classname to the div that returns the child components.
+Let's write a few tests for the <i>Togglable</i> component. The tests are shown below:
 
 ```js
-const Togglable = forwardRef((props, ref) => {
-  // ...
-
-  return (
-    <div>
-      <div style={hideWhenVisible}>
-        <button onClick={toggleVisibility}>
-          {props.buttonLabel}
-        </button>
-      </div>
-      <div style={showWhenVisible} className="togglableContent"> // highlight-line
-        {props.children}
-        <button onClick={toggleVisibility}>cancel</button>
-      </div>
-    </div>
-  )
-})
-```
-
-The tests are shown below:
-
-```js
-import React from 'react'
-import '@testing-library/jest-dom'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import Togglable from './Togglable'
 
 describe('<Togglable />', () => {
-  let container
-
   beforeEach(() => {
-    container = render(
+    render(
       <Togglable buttonLabel="show...">
-        <div className="testDiv" >
-          togglable content
-        </div>
+        <div>togglable content</div>
       </Togglable>
-    ).container
+    )
   })
 
-  test('renders its children', async () => {
-    await screen.findAllByText('togglable content')
+  test('renders its children', () => {
+    screen.getByText('togglable content')
   })
 
   test('at start the children are not displayed', () => {
-    const div = container.querySelector('.togglableContent')
-    expect(div).toHaveStyle('display: none')
+    const element = screen.getByText('togglable content')
+    expect(element).not.toBeVisible()
   })
 
   test('after clicking the button, children are displayed', async () => {
@@ -402,23 +479,23 @@ describe('<Togglable />', () => {
     const button = screen.getByText('show...')
     await user.click(button)
 
-    const div = container.querySelector('.togglableContent')
-    expect(div).not.toHaveStyle('display: none')
+    const element = screen.getByText('togglable content')
+    expect(element).toBeVisible()
   })
 })
 ```
 
-The _beforeEach_ function gets called before each test, which then renders the <i>Togglable</i> component and saves the field _container_ of the return value.
+The _beforeEach_ function gets called before each test, which then renders the <i>Togglable</i> component.
 
 The first test verifies that the <i>Togglable</i> component renders its child component
 
 ```js
-<div className="testDiv">
+<div>
   togglable content
 </div>
 ```
 
-The remaining tests use the [toHaveStyle](https://www.npmjs.com/package/@testing-library/jest-dom#tohavestyle) method to verify that the child component of the <i>Togglable</i> component is not visible initially, by checking that the style of the <i>div</i> element contains _{ display: 'none' }_. Another test verifies that when the button is pressed the component is visible, meaning that the style for hiding the component <i>is no longer</i> assigned to the component.
+The remaining tests use the _toBeVisible_ method to verify that the child component of the <i>Togglable</i> component is not visible initially, i.e. that the style of the <i>div</i> element contains _{ display: 'none' }_. Another test verifies that when the button is pressed the component is visible, meaning that the style for hiding it <i>is no longer</i> assigned to the component.
 
 Let's also add a test that can be used to verify that the visible content can be hidden by clicking the second button of the component:
 
@@ -435,8 +512,8 @@ describe('<Togglable />', () => {
     const closeButton = screen.getByText('cancel')
     await user.click(closeButton)
 
-    const div = container.querySelector('.togglableContent')
-    expect(div).toHaveStyle('display: none')
+    const element = screen.getByText('togglable content')
+    expect(element).not.toBeVisible()
   })
 })
 ```
@@ -461,28 +538,24 @@ import { useState } from 'react'
 const NoteForm = ({ createNote }) => {
   const [newNote, setNewNote] = useState('')
 
-  const handleChange = (event) => {
-    setNewNote(event.target.value)
-  }
-
-  const addNote = (event) => {
+  const addNote = event => {
     event.preventDefault()
     createNote({
       content: newNote,
-      important: Math.random() > 0.5,
+      important: true
     })
 
     setNewNote('')
   }
 
   return (
-    <div className="formDiv">
+    <div>
       <h2>Create a new note</h2>
 
       <form onSubmit={addNote}>
         <input
           value={newNote}
-          onChange={handleChange}
+          onChange={event => setNewNote(event.target.value)}
         />
         <button type="submit">save</button>
       </form>
@@ -493,19 +566,17 @@ const NoteForm = ({ createNote }) => {
 export default NoteForm
 ```
 
-The form works by calling the _createNote_ function it received as props with the details of the new note.
+The form works by calling the function received as props _createNote_, with the details of the new note.
 
 The test is as follows:
 
 ```js
-import React from 'react'
 import { render, screen } from '@testing-library/react'
-import '@testing-library/jest-dom'
 import NoteForm from './NoteForm'
 import userEvent from '@testing-library/user-event'
 
 test('<NoteForm /> updates parent state and calls onSubmit', async () => {
-  const createNote = jest.fn()
+  const createNote = vi.fn()
   const user = userEvent.setup()
 
   render(<NoteForm createNote={createNote} />)
@@ -528,6 +599,31 @@ The method [type](https://testing-library.com/docs/user-event/utility#type) of t
 The first test expectation ensures that submitting the form calls the _createNote_ method.
 The second expectation checks that the event handler is called with the right parameters - that a note with the correct content is created when the form is filled.
 
+It's worth noting that the good old _console.log_ works as usual in the tests. For example, if you want to see what the calls stored by the mock-object look like, you can do the following
+
+```js
+test('<NoteForm /> updates parent state and calls onSubmit', async() => {
+  const user = userEvent.setup()
+  const createNote = vi.fn()
+
+  render(<NoteForm createNote={createNote} />)
+
+  const input = screen.getByRole('textbox')
+  const sendButton = screen.getByText('save')
+
+  await user.type(input, 'testing a form...')
+  await user.click(sendButton)
+
+  console.log(createNote.mock.calls) // highlight-line
+})
+```
+
+In the middle of running the tests, the following is printed in the console:
+
+```
+[ [ { content: 'testing a form...', important: true } ] ]
+```
+
 ### About finding the elements
 
 Let us assume that the form has two input fields
@@ -543,7 +639,7 @@ const NoteForm = ({ createNote }) => {
       <form onSubmit={addNote}>
         <input
           value={newNote}
-          onChange={handleChange}
+          onChange={event => setNewNote(event.target.value)}
         />
         // highlight-start
         <input
@@ -578,6 +674,40 @@ await user.type(inputs[0], 'testing a form...')
 
 Method <i>getAllByRole</i> now returns an array and the right input field is the first element of the array. However, this approach is a bit suspicious since it relies on the order of the input fields.
 
+If an <i>label</i> were defined for the input field, the input field could be located using it with the getByLabelText method. For example, if we added a label to the input field:
+
+```js
+  // ...
+  <label> // highlight-line
+    content // highlight-line
+    <input
+      value={newNote}
+      onChange={event => setNewNote(event.target.value)}
+    />
+  </label> // highlight-line
+  // ...
+```
+
+The test could locate the input field as follows:
+
+```js
+test('<NoteForm /> updates parent state and calls onSubmit', async () => {
+  const user = userEvent.setup()
+  const createNote = vi.fn()
+
+  render(<NoteForm createNote={createNote} />) 
+
+  const input = screen.getByLabelText('content') // highlight-line
+  const sendButton = screen.getByText('save')
+
+  await user.type(input, 'testing a form...')
+  await user.click(sendButton)
+
+  expect(createNote.mock.calls).toHaveLength(1)
+  expect(createNote.mock.calls[0][0].content).toBe('testing a form...')
+})
+```
+
 Quite often input fields have a <i>placeholder</i> text that hints user what kind of input is expected. Let us add a placeholder to our form:
 
 ```js
@@ -591,7 +721,7 @@ const NoteForm = ({ createNote }) => {
       <form onSubmit={addNote}>
         <input
           value={newNote}
-          onChange={handleChange}
+          onChange={event => setNewNote(event.target.value)}
           placeholder='write note content here' // highlight-line 
         />
         <input
@@ -608,23 +738,24 @@ const NoteForm = ({ createNote }) => {
 Now finding the right input field is easy with the method [getByPlaceholderText](https://testing-library.com/docs/queries/byplaceholdertext):
 
 ```js
-test('<NoteForm /> updates parent state and calls onSubmit', () => {
-  const createNote = jest.fn()
+test('<NoteForm /> updates parent state and calls onSubmit', async () => {
+  const user = userEvent.setup()
+  const createNote = vi.fn()
 
   render(<NoteForm createNote={createNote} />) 
 
   const input = screen.getByPlaceholderText('write note content here') // highlight-line 
   const sendButton = screen.getByText('save')
 
-  userEvent.type(input, 'testing a form...')
-  userEvent.click(sendButton)
+  await user.type(input, 'testing a form...')
+  await user.click(sendButton)
 
   expect(createNote.mock.calls).toHaveLength(1)
   expect(createNote.mock.calls[0][0].content).toBe('testing a form...')
 })
 ```
 
-The most flexible way of finding elements in tests is the method <i>querySelector</i> of the _container_ object, which is returned by _render_, as was mentioned [earlier in this part](/en/part5/testing_react_apps#searching-for-content-in-a-component). Any CSS selector can be used with this method for searching elements in tests.
+Sometimes, finding the correct element using the methods described above can be challenging. In such cases, an alternative is the method <i>querySelector</i> of the _container_ object, which is returned by _render_, as was mentioned [earlier in this part](/en/part5/testing_react_apps#searching-for-content-in-a-component). Any CSS selector can be used with this method for searching elements in tests.
 
 Consider eg. that we would define a unique _id_ to the input field:
 
@@ -639,7 +770,7 @@ const NoteForm = ({ createNote }) => {
       <form onSubmit={addNote}>
         <input
           value={newNote}
-          onChange={handleChange}
+          onChange={event => setNewNote(event.target.value)}
           id='note-input' // highlight-line 
         />
         <input
@@ -663,112 +794,54 @@ const input = container.querySelector('#note-input')
 
 However, we shall stick to the approach of using _getByPlaceholderText_ in the test.
 
-Let us look at a couple of details before moving on. Let us assume that a component would render text to an HTML element as follows:
-
-```js
-const Note = ({ note, toggleImportance }) => {
-  const label = note.important
-    ? 'make not important' : 'make important'
-
-  return (
-    <li className='note'>
-      Your awesome note: {note.content} // highlight-line
-      <button onClick={toggleImportance}>{label}</button>
-    </li>
-  )
-}
-
-export default Note
-```
-
-the _getByText_ command that the test uses does <i>not</i> find the element
-
-```js
-test('renders content', () => {
-  const note = {
-    content: 'Does not work anymore :(',
-    important: true
-  }
-
-  render(<Note note={note} />)
-
-  const element = screen.getByText('Does not work anymore :(')
-
-  expect(element).toBeDefined()
-})
-```
-
-Command _getByText_ looks for an element that has the **same text** that it has as a parameter, and nothing more. If we want to look for an element that <i>contains</i> the text, we could use an extra option:
-
-```js
-const element = screen.getByText(
-  'Does not work anymore :(', { exact: false }
-)
-```
-
-or we could use the command _findByText_:
-
-```js
-const element = await screen.findByText('Does not work anymore :(')
-```
-
-It is important to notice that, unlike the other _ByText_ commands, _findByText_ returns a promise!
-
-There are situations where yet another form of the command _queryByText_ is useful. The command returns the element but <i>it does not cause an exception</i> if the element is not found.
-
-We could eg. use the command to ensure that something <i>is not rendered</i> to the component:
-
-```js
-test('does not render this', () => {
-  const note = {
-    content: 'This is a reminder',
-    important: true
-  }
-
-  render(<Note note={note} />)
-
-  const element = screen.queryByText('do not want this thing to be rendered')
-  expect(element).toBeNull()
-})
-```
-
 ### Test coverage
 
-We can easily find out the [coverage](https://jestjs.io/blog/2020/01/21/jest-25#v8-code-coverage) of our tests by running them with the command.
+We can easily find out the [coverage](https://vitest.dev/guide/coverage.html#coverage) of our tests by running them with the command.
 
 ```js
-npm test -- --coverage --collectCoverageFrom='src/**/*.{jsx,js}'
+npm test -- --coverage
 ```
+
+The first time you run the command, Vitest will ask you if you want to install the required library _@vitest/coverage-v8_. Install it, and run the command again:
 
 ![terminal output of test coverage](../../images/5/18new.png)
 
-A quite primitive HTML report will be generated to the <i>coverage/lcov-report</i> directory.
+A HTML report will be generated to the <i>coverage</i> directory.
 The report will tell us the lines of untested code in each component:
 
-![HTML report of the test coverage](../../images/5/19new.png)
+![HTML report of the test coverage](../../images/5/19newer.png)
+
+Let's add the directory <i>coverage/</i> to the <i>.gitignore</i> file to exclude its contents from version control:
+
+```js
+//...
+
+coverage/
+```
 
 You can find the code for our current application in its entirety in the <i>part5-8</i> branch of [this GitHub repository](https://github.com/fullstack-hy2020/part2-notes-frontend/tree/part5-8).
+
 </div>
 
 <div class="tasks">
 
 ### Exercises 5.13.-5.16.
 
-#### 5.13: Blog list tests, step1
+#### 5.13: Blog List Tests, step 1
 
 Make a test, which checks that the component displaying a blog renders the blog's title and author, but does not render its URL or number of likes by default.
 
 Add CSS classes to the component to help the testing as necessary.
 
-#### 5.14: Blog list tests, step2
+#### 5.14: Blog List Tests, step 2
 
 Make a test, which checks that the blog's URL and number of likes are shown when the button controlling the shown details has been clicked.
 
-#### 5.15: Blog list tests, step3
+#### 5.15: Blog List Tests, step 3
 
 Make a test, which ensures that if the <i>like</i> button is clicked twice, the event handler the component received as props is called twice.
 
-#### 5.16: Blog list tests, step4
+#### 5.16: Blog List Tests, step 4
 
 Make a test for the new blog form. The test should check, that the form calls the event handler it received as props with the right details when a new blog is created.
 
@@ -787,10 +860,10 @@ We chose to concentrate on making end-to-end tests to test the whole application
 
 ### Snapshot testing
 
-Jest offers a completely different alternative to "traditional" testing called [snapshot](https://facebook.github.io/jest/docs/en/snapshot-testing.html) testing. The interesting feature of snapshot testing is that developers do not need to define any tests themselves, it is simple enough to adopt snapshot testing.
+Vitest offers a completely different alternative to "traditional" testing called [snapshot](https://vitest.dev/guide/snapshot) testing. The interesting feature of snapshot testing is that developers do not need to define any tests themselves, it is simple enough to adopt snapshot testing.
 
 The fundamental principle is to compare the HTML code defined by the component after it has changed to the HTML code that existed before it was changed.
 
-If the snapshot notices some change in the HTML defined by the component, then either it is new functionality or a "bug" caused by accident. Snapshot tests notify the developer if the HTML code of the component changes. The developer has to tell Jest if the change was desired or undesired. If the change to the HTML code is unexpected, it strongly implies a bug, and the developer can become aware of these potential issues easily thanks to snapshot testing.
+If the snapshot notices some change in the HTML defined by the component, then either it is new functionality or a "bug" caused by accident. Snapshot tests notify the developer if the HTML code of the component changes. The developer has to tell Vitest if the change was desired or undesired. If the change to the HTML code is unexpected, it strongly implies a bug, and the developer can become aware of these potential issues easily thanks to snapshot testing.
 
 </div>

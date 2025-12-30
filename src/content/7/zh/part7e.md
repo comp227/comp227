@@ -227,7 +227,7 @@ const App = () => {
 ### Changes on the server
 
 <!-- If there are changes in the state on the server, e.g. when new blogs are added by other users to the bloglist service, the React frontend we implemented during this course will not notice these changes until the page reloads. A similar situation arises when the frontend triggers a time-consuming computation in the backend. How do we reflect the results of the computation to the frontend?-->
- 如果服务器上的状态有变化，例如，当其他用户向博客列表服务添加新的博客时，我们在本课程中实现的React前端将不会注意到这些变化，直到页面重新加载。当前端触发了后台的一个耗时的计算时，也会出现类似的情况。我们如何将计算的结果反映到前端？
+ 如果服务器上的状态有变化，例如，当其他用户向博客列表服务添加新的博客时，我们在本课程中实现的React前端将不会注意到这些变化，直到页面重新加载。当前端触发了后端的一个耗时的计算时，也会出现类似的情况。我们如何将计算的结果反映到前端？
 
 <!-- One way is to execute [polling](<https://en.wikipedia.org/wiki/Polling_(computer_science)>) on the frontend, meaning repeated requests to the backend API e.g. using the [setInterval](https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/setInterval) command.-->
  一种方法是在前端执行[轮询](<https://en.wikipedia.org/wiki/Polling_(computer_science)>)，也就是重复请求后端API，比如使用[setInterval](https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/setInterval)命令。
@@ -244,7 +244,7 @@ const App = () => {
 与其直接使用WebSocket API，不如使用[Socket.io](https://socket.io/)库，它提供了各种<i>回落</i>选项，以防浏览器不完全支持WebSocket。
 
 <!-- In [part 8](/en/part8), our topic is GraphQL, which provides a nice mechanism for notifying clients when there are changes in the backend data.-->
- 在[第8章节](/en/part8)中，我们的主题是GraphQL，它提供了一个很好的机制，当后台数据有变化时，可以通知客户端。
+ 在[第8章节](/en/part8)中，我们的主题是GraphQL，它提供了一个很好的机制，当后端数据有变化时，可以通知客户端。
 
 ### Virtual DOM
 
@@ -284,11 +284,11 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 <!-- In small applications, data handled by the application is being stored in the state of the React components, so in this scenario the state of the components can be thought of as <i>models</i> of an MVC architecture.-->
 在小型应用中，应用所处理的数据被存储在React组件的状态中，所以在这种情况下，组件的状态可以被认为是MVC架构的<i>模型</i>。
 
-<!-- However, MVC architecture is not usually mentioned when talking about React applications. Furthermore, if we are using Redux, then the applications follow the [Flux](https://facebook.github.io/flux/docs/in-depth-overview) architecture and the role of React is even more focused on creating the views. The business logic of the application is handled using the Redux state and action creators. If we're using [redux thunk](/en/part6/communicating_with_server_in_a_redux_application#asynchronous-actions-and-redux-thunk) familiar from part 6, then the business logic can be almost completely separated from the React code.-->
- 然而，在谈论React应用时，通常不会提到MVC架构。此外，如果我们使用Redux，那么应用遵循[Flux](https://facebook.github.io/flux/docs/in-depth-overview)架构，React的作用甚至更侧重于创建视图。应用的业务逻辑是使用Redux的状态和动作创建器来处理的。如果我们使用第六章节中熟悉的[redux thunk](/en/part6/communicating_with_server_in_a_redux_application#asynchronous-actions-and-redux-thunk)，那么业务逻辑几乎可以与React代码完全分离。
+<!-- However, MVC architecture is not usually mentioned when talking about React applications. Furthermore, if we are using Redux, then the applications follow the [Flux](https://facebookarchive.github.io/flux/docs/in-depth-overview/) architecture and the role of React is even more focused on creating the views. The business logic of the application is handled using the Redux state and action creators. If we're using [redux thunk](/en/part6/communicating_with_server_in_a_redux_application#asynchronous-actions-and-redux-thunk) familiar from part 6, then the business logic can be almost completely separated from the React code.-->
+ 然而，在谈论React应用时，通常不会提到MVC架构。此外，如果我们使用Redux，那么应用遵循[Flux](https://facebookarchive.github.io/flux/docs/in-depth-overview/)架构，React的作用甚至更侧重于创建视图。应用的业务逻辑是使用Redux的状态和动作创建器来处理的。如果我们使用第六章节中熟悉的[redux thunk](/en/part6/communicating_with_server_in_a_redux_application#asynchronous-actions-and-redux-thunk)，那么业务逻辑几乎可以与React代码完全分离。
 
-<!-- Because both React and [Flux](https://facebook.github.io/flux/docs/in-depth-overview) were created at Facebook, one could say that using React only as a UI library is the intended use case. Following the Flux architecture adds some overhead to the application, and if we're talking about a small application or prototype, it might be a good idea to use React "wrong", since [over-engineering](https://en.wikipedia.org/wiki/Overengineering) rarely yields an optimal result.-->
- 因为React和[Flux](https://facebook.github.io/flux/docs/in-depth-overview)都是在Facebook创建的，可以说只把React作为一个UI库来使用是预期的使用情况。遵循Flux架构会给应用增加一些开销，如果我们谈论的是一个小的应用或原型，那么 "错误 "地使用React可能是一个好主意，因为[过度工程](https://en.wikipedia.org/wiki/Overengineering)很少会产生一个最佳结果。
+<!-- Because both React and [Flux](https://facebookarchive.github.io/flux/docs/in-depth-overview/) were created at Facebook, one could say that using React only as a UI library is the intended use case. Following the Flux architecture adds some overhead to the application, and if we're talking about a small application or prototype, it might be a good idea to use React "wrong", since [over-engineering](https://en.wikipedia.org/wiki/Overengineering) rarely yields an optimal result.-->
+ 因为React和[Flux](https://facebookarchive.github.io/flux/docs/in-depth-overview/)都是在Facebook创建的，可以说只把React作为一个UI库来使用是预期的使用情况。遵循Flux架构会给应用增加一些开销，如果我们谈论的是一个小的应用或原型，那么 "错误 "地使用React可能是一个好主意，因为[过度工程](https://en.wikipedia.org/wiki/Overengineering)很少会产生一个最佳结果。
 
 <!-- As I mentioned at the end of [part 6](/en/part6/connect#redux-and-the-component-state), the React [Context api](https://reactjs.org/docs/context.html) offers one alternative solution for centralized state management without the need for third-party libraries such as redux. You can read more about this [here](https://www.simplethread.com/cant-replace-redux-with-hooks/) and [here](https://hswolff.com/blog/how-to-usecontext-with-usereducer/).-->
  正如我在[第六章节](/en/part6/connect#redux-and-the-component-state)的结尾提到的，React的[Context api](https://reactjs.org/docs/context.html)为集中式状态管理提供了一种替代解决方案，而不需要redux之类的第三方库。你可以阅读更多关于这个[这里](https://www.simplethread.com/cant-replace-redux-with-hooks/)和[这里](https://hswolff.com/blog/how-to-usecontext-with-usereducer/)。
@@ -301,8 +301,8 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 <!-- We will, however, take a look at some things specific to this course.-->
 不过，我们会看一下这个课程的一些具体内容。
 
-<!-- The Open Web Application Security Project, otherwise known as [OWASP](https://www.owasp.org), publishes an annual list of the most common security risks in Web applications. The most recent list can be found [here](https://owasp.org/www-project-top-ten/). The same risks can be found from one year to another.-->
-开放网络应用安全项目，又称[OWASP](https://www.owasp.org)，每年发布一份网络应用中最常见的安全风险清单。最新的列表可以在[这里](https://owasp.org/www-project-top-ten/)找到。同样的风险可以从一年到另一年中找到。
+<!-- The Open Web Application Security Project, otherwise known as [OWASP](https://www.owasp.org), publishes an annual list of the most common security risks in Web applications. The most recent list can be found [here](https://owasp.org/Top10/). The same risks can be found from one year to another.-->
+开放网络应用安全项目，又称[OWASP](https://www.owasp.org)，每年发布一份网络应用中最常见的安全风险清单。最新的列表可以在[这里](https://owasp.org/Top10/)找到。同样的风险可以从一年到另一年中找到。
 
 <!-- At the top of the list we find <i>injection</i>, which means that e.g. text sent using a form in an application is interpreted completely differently than the software developer had intended. The most famous type of injection is probably the [SQL injection](https://stackoverflow.com/questions/332365/how-does-the-sql-injection-from-the-bobby-tables-xkcd-comic-work).-->
 在列表的顶部，我们发现<i>注入</i>，这意味着例如在应用中使用表格发送的文本被解释为与软件开发人员的意图完全不同。最有名的注入类型可能是[SQL注入](https://stackoverflow.com/questions/332365/how-does-the-sql-injection-from-the-bobby-tables-xkcd-comic-work)。
@@ -317,9 +317,9 @@ let query = "SELECT * FROM Users WHERE name = '" + userName + "';"
 <!-- Now let's assume that a malicious user <i>Arto Hellas</i> would define their name as-->
  现在我们假设一个恶意的用户<i>Arto Hellas</i>将他们的名字定义为
 
-<pre>
+```
 Arto Hell-as'; DROP TABLE Users; --
-</pre>
+```
 
 <!-- so that the name would contain a single quote <code>'</code>, which is the beginning- and end-character of a SQL-string. As a result of this, two SQL operations would be executed, the second of which would  destroy the database table <i>Users</i>:-->
  这样名字就包含一个单引号<code>''</code>，这是一个SQL字符串的开始和结束字符。这样做的结果是，两个SQL操作将被执行，其中第二个操作将破坏数据库表<i>Users</i>。
@@ -354,8 +354,8 @@ execute("SELECT * FROM Users WHERE name = ?", [userName])
 <!-- since React [takes care of sanitizing data in variables](https://reactjs.org/docs/introducing-jsx.html#jsx-prevents-injection-attacks). Some versions of React [have been vulnerable](https://medium.com/dailyjs/exploiting-script-injection-flaws-in-reactjs-883fb1fe36c1) to XSS attacks. The security holes have of course been patched, but there is no guarantee that there couldn't be any more.-->
 因为React[负责对变量中的数据进行消毒](https://reactjs.org/docs/introducing-jsx.html#jsx-prevents-injection-attacks)。一些版本的React[已经容易受到XSS攻击](https://medium.com/dailyjs/exploiting-script-injection-flaws-in-reactjs-883fb1fe36c1)。当然，这些安全漏洞已经被修补了，但不能保证不会有更多的漏洞。
 
-<!-- One needs to remain vigilant when using libraries; if there are security updates to those libraries, it is advisable to update those libraries in one's own applications. Security updates for Express are found in the [library's documentation](https://expressjs.com/en/advanced/security-updates.html) and the ones for Node are found in [this blog](https://nodejs.org/en/blog/).-->
- 在使用库的时候，人们需要保持警惕；如果这些库有安全更新，建议在自己的应用中更新这些库。Express的安全更新可以在[库的文档](https://expressjs.com/en/advanced/security-updates.html)找到，Node的安全更新可以在[这个博客](https://nodejs.org/en/blog/)找到。
+<!-- One needs to remain vigilant when using libraries; if there are security updates to those libraries, it is advisable to update those libraries in one's own applications. Security updates for Express are found in the [library's documentation](https://expressjs.com/en/advanced/security-updates.html) and the ones for Node are found in [this blog](https://nodejs.org/en/blog/vulnerability/).-->
+ 在使用库的时候，人们需要保持警惕；如果这些库有安全更新，建议在自己的应用中更新这些库。Express的安全更新可以在[库的文档](https://expressjs.com/en/advanced/security-updates.html)找到，Node的安全更新可以在[这个博客](https://nodejs.org/en/blog/vulnerability/)找到。
 
 <!-- You can check how up to date your dependencies are using the command-->
  你可以使用以下命令检查你的依赖关系的最新情况
@@ -547,7 +547,7 @@ Will install react-scripts@5.0.0, which is a breaking change
 ![](../../images/7/36.png)
 
 <!-- The role of the frontend (enclosed by a square in the picture) does not differ much between the two models. There is often a so-called [API gateway](http://microservices.io/patterns/apigateway) between the microservices and the frontend, which provides an illusion of a more traditional "everything on the same server" API. [Netflix](https://medium.com/netflix-techblog/optimizing-the-netflix-api-5c9ac715cf19), among others, uses this type of approach.-->
- 前台的作用（图片中用方块围起来）在这两种模式中没有太大的区别。在微服务和前端之间通常有一个所谓的[API网关](http://microservices.io/patterns/apigateway)，它提供了一个更传统的 "一切都在同一个服务器上 "的API的假象。[Netflix](https://medium.com/netflix-techblog/optimizing-the-netflix-api-5c9ac715cf19)，除其他外，采用了这种类型的方法。
+ 前端的作用（图片中用方块围起来）在这两种模式中没有太大的区别。在微服务和前端之间通常有一个所谓的[API网关](http://microservices.io/patterns/apigateway)，它提供了一个更传统的 "一切都在同一个服务器上 "的API的假象。[Netflix](https://medium.com/netflix-techblog/optimizing-the-netflix-api-5c9ac715cf19)，除其他外，采用了这种类型的方法。
 
 <!-- Microservice architectures emerged and evolved for the needs of large internet-scale applications. The trend was set by Amazon far before the appearance of the term microservice. The critical starting point was an email sent to all employees in 2002 by Amazon CEO Jeff Bezos:-->
  微服务架构的出现和发展是为了满足大型互联网规模应用的需要。在微服务这个词出现之前，亚马逊就已经确定了这个趋势。关键的起点是亚马逊CEO Jeff Bezos在2002年发给所有员工的一封电子邮件。
@@ -617,11 +617,11 @@ Will install react-scripts@5.0.0, which is a breaking change
 <!-- If you are handling times and dates, [date-fns](https://github.com/date-fns/date-fns) offers good tools for that.-->
  如果你要处理时间和日期，[date-fns](https://github.com/date-fns/date-fns)为此提供了良好的工具。
 
-<!-- Lomakkeiden käyttöä helpottavia kirjastoja ovat [Formik](https://www.npmjs.com/package/formik) ja [redux-form](https://redux-form.com/8.3.0/). Jos sovelluksessa tulee piirtää graafeja, on vaihtoehtoja lukuisia, sekä [recharts](http://recharts.org/en-US/) että [highcharts](https://github.com/highcharts/highcharts-react) ovat hyviksi havaittuja. -->
+<!-- Lomakkeiden käyttöä helpottavia kirjastoja ovat [Formik](https://www.npmjs.com/package/formik) ja [redux-form](https://redux-form.com/8.3.0/). Jos sovelluksessa tulee piirtää graafeja, on vaihtoehtoja lukuisia, sekä [recharts](https://recharts.org/en-US/) että [highcharts](https://github.com/highcharts/highcharts-react) ovat hyviksi havaittuja. -->
 <!-- [Formik](https://www.npmjs.com/package/formik) and [final-form](https://final-form.org/react/) can be used to handle forms more easily.-->
  [Formik](https://www.npmjs.com/package/formik)和[final-form](https://final-form.org/react/)可以用来更容易地处理表单。
-<!-- If your application displays graphs, there are multiple options to choose from. Both [recharts](http://recharts.org/en-US/) and [highcharts](https://github.com/highcharts/highcharts-react) are well-recommended.-->
- 如果你的应用显示图形，有多个选项可供选择。[recharts](http://recharts.org/en-US/)和[highcharts](https://github.com/highcharts/highcharts-react)都是很值得推荐的。
+<!-- If your application displays graphs, there are multiple options to choose from. Both [recharts](https://recharts.org/en-US/) and [highcharts](https://github.com/highcharts/highcharts-react) are well-recommended.-->
+ 如果你的应用显示图形，有多个选项可供选择。[recharts](https://recharts.org/en-US/)和[highcharts](https://github.com/highcharts/highcharts-react)都是很值得推荐的。
 
 <!-- The [immutable.js](https://github.com/facebook/immutable-js/) library maintained by Facebook provides, as the name suggests, immutable implementations of some data structures. The library could be of use when using Redux, since as we [remember](/en/part6/flux_architecture_and_redux#pure-functions-immutable) in part 6, reducers must be pure functions, meaning they must not modify the store's state but instead have to replace it with a new one when a change occurs. Over the past year, some of the popularity of Immutable.js has been taken over by [Immer](https://github.com/mweststrate/immer), which provides similar functionality but in a somewhat easier package.-->
  Facebook维护的[immutable.js](https://github.com/facebook/immutable-js/)库，顾名思义，提供了一些数据结构的不可改变的实现。这个库可以在使用Redux时使用，因为正如我们在第六章节[记得](/en/part6/flux_architecture_and_redux#pure-functions-immutable)，还原器必须是纯函数，这意味着它们不能修改存储的状态，而是要在发生变化时用一个新的状态来替换它。在过去的一年中，Immutable.js的一些人气被[Immer](https://github.com/mweststrate/immer)所取代，它提供了类似的功能，但在某种程度上更容易打包。
@@ -629,8 +629,8 @@ Will install react-scripts@5.0.0, which is a breaking change
 <!-- [Redux-saga](https://redux-saga.js.org/) provides an alternative way to make asynchronous actions for [redux thunk](/en/part6/communicating_with_server_in_a_redux_application#asynchronous-actions-and-redux-thunk) familiar from part 6. Some embrace the hype and like it. I don't.-->
  [Redux-saga](https://redux-saga.js.org/)提供了另一种方法，为第六章节中熟悉的[redux thunk](/en/part6/communicating_with_server_in_a_redux_application#asynchronous-actions and-redux-thunk)做异步操作。有些人接受了这种炒作，并喜欢它。我不喜欢。
 
-<!-- For single-page applications, the gathering of analytics data on the interaction between the users and the page is [more challenging](https://developers.google.com/analytics/devguides/collection/gtagjs/single-page-applications) than for traditional web applications where the entire page is loaded. The [React Google Analytics](https://github.com/react-ga/react-ga) library offers a solution.-->
- 对于单页应用，收集用户和页面之间的互动的分析数据比传统的网页应用（整个页面被加载）[更具挑战性](https://developers.google.com/analytics/devguides/collection/gtagjs/single-page-applications)。[React Google Analytics](https://github.com/react-ga/react-ga)库提供了一个解决方案。
+<!-- For single-page applications, the gathering of analytics data on the interaction between the users and the page is [more challenging](https://developers.google.com/analytics/devguides/collection/ga4/single-page-applications?implementation=browser-history) than for traditional web applications where the entire page is loaded. The [React Google Analytics 4](https://github.com/codler/react-ga4) library offers a solution.-->
+ 对于单页应用，收集用户和页面之间的互动的分析数据比传统的网页应用（整个页面被加载）[更具挑战性](https://developers.google.com/analytics/devguides/collection/ga4/single-page-applications?implementation=browser-history)。[React Google Analytics 4](https://github.com/codler/react-ga4)库提供了一个解决方案。
 
 <!-- You can take advantage of your React know-how when developing mobile applications using Facebook's extremely popular [React Native](https://facebook.github.io/react-native/) library, which is the topic of [part 10](/en/part10) of the course.-->
  在使用Facebook's极受欢迎的[React Native](https://facebook.github.io/react-native/)库开发移动应用时，你可以利用你的React知识，这也是本课程[第10部分](/en/part10)的主题。

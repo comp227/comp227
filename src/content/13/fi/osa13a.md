@@ -68,7 +68,7 @@ Syy sille miksi kurssin aiemmat osat käyttivät MongoDB:tä liittyvät juuri se
 
 ### Sovelluksen tietokanta
 
-Tarvitsemme sovellustamme varten relaatiotietokannan. Vaihtoehtoja on monia, käytämme kurssilla tämän hetken suosituinta Open Source ‑ratkaisua [PostgreSQL:ää](https://www.postgresql.org/). Voit halutessasi asentaa Postgresin (kuten tietokantaa usein kutsutaan) koneellesi. Helpommalla pääset käyttämällä jotain pilvipalveluna tarjottavaa Postgresia, esim. [ElephantSQL:ää](https://www.elephantsql.com/).
+Tarvitsemme sovellustamme varten relaatiotietokannan. Vaihtoehtoja on monia, käytämme kurssilla tämän hetken suosituinta Open Source ‑ratkaisua [PostgreSQL:ää](https://www.postgresql.org/). Voit halutessasi asentaa Postgresin (kuten tietokantaa usein kutsutaan) koneellesi.
 
 Käytämme nyt hyväksemme sitä, että osista 3 ja 4 tuttuille pilvipalvelualustoille Fly.io ja Heroku on mahdollista luoda sovellukselle Postgres-tietokanta.
 
@@ -108,7 +108,7 @@ heroku create
 heroku addons:create heroku-postgresql:hobby-dev
 heroku config
 === cryptic-everglades-76708 Config Vars
-DATABASE_URL: postgres://<username>:<password>@ec2-44-199-83-229.compute-1.amazonaws.com:5432/<db-name>
+DATABASE_URL: postgres://<username>:thepasswordishere@ec2-44-199-83-229.compute-1.amazonaws.com:5432/<db-name>
 ```
 
 Tietokantaan saadaan psql-konsoliyhteys suorittamalla _psql_ Herokun palvelimella seuraavasti (huomaa, että komennon parametrit riippuvat Heroku-sovelluksen connect urlista):
@@ -151,7 +151,7 @@ Type "help" for help.
 postgres=#
 ```
 
-Näin määriteltynä tietokantaan talletettu data sailyy ainoastaan niin kauan kontti on olemassa. Data saadaan säilymään määrittelemällä datan talletukseen
+Näin määriteltynä tietokantaan talletettu data säilyy ainoastaan niin kauan kontti on olemassa. Data saadaan säilymään määrittelemällä datan talletukseen
 [volume](/en/part12/building_and_configuring_environments#persisting-data-with-volumes), katso lisää 
 [täältä](https://github.com/docker-library/docs/blob/master/postgres/README.md#pgdata).
 
@@ -308,10 +308,10 @@ Herokua käyttäessäsi saat connect stringin selville komennolla _heroku config
 
 ```bash
 $ cat .env
-DATABASE_URL=postgres://<username>:<password>@ec2-54-83-137-206.compute-1.amazonaws.com:5432/<databasename>
+DATABASE_URL=postgres://<username>:thepasswordishere@ec2-54-83-137-206.compute-1.amazonaws.com:5432/<databasename>
 ```
 
-Fly.io:a käyttäessä paikallinen tietokantayhteys taytyy ensin tehdä mahdolliseksi [tunneloimalla](https://fly.io/docs/reference/postgres/#connecting-to-postgres-from-outside-fly) paikallisen koneen portti 5432 Fly.io:n tietokannan porttiin komennolla
+Fly.io:a käyttäessä paikallinen tietokantayhteys täytyy ensin tehdä mahdolliseksi [tunneloimalla](https://fly.io/docs/reference/postgres/#connecting-to-postgres-from-outside-fly) paikallisen koneen portti 5432 Fly.io:n tietokannan porttiin komennolla
 
 ```bash
 flyctl proxy 5432 -a <app-name>-db
@@ -329,10 +329,10 @@ Fly.io:n connect-string on seuraavaa muotoa:
 
 ```bash
 $ cat .env
-DATABASE_URL=postgres://postgres:<password>@localhost:5432/postgres
+DATABASE_URL=postgres://postgres:thepasswordishere@localhost:5432/postgres
 ```
 
-Salasana on se, jonka on otettu talteen tietokantaa luodessa.
+Salasana on se, joka on otettu talteen tietokantaa luodessa.
 
 Dockeria käytettäessä connect string on:
 
@@ -524,14 +524,14 @@ app.post('/api/notes', async (req, res) => {
 
 Uuden muistiinpanon luominen siis tapahtuu kutsumalla modelin <i>Note</i> metodia [create](https://sequelize.org/master/manual/model-querying-basics.html#simple-insert-queries) ja antamalla sille parametriksi sarakkeiden arvot määrittelevän olion.
 
-Metodin <i>create</i> sijaan tietokantaan tallentaminen [olisi mahdollista tehdä](https://sequelize.org/master/manual/model-instances.html#creating-an-instance) käyttäen ensin metodia [build](https://sequelize.org/master/class/lib/model.js~Model.html#static-method-build) luomaan halutusta datasta Model-olio, ja kutsumalla sille metodia [save](https://sequelize.org/master/class/lib/model.js~Model.html#instance-method-save):
+Metodin <i>create</i> sijaan tietokantaan tallentaminen [olisi mahdollista tehdä](https://sequelize.org/master/manual/model-instances.html#creating-an-instance) käyttäen ensin metodia [build](https://sequelize.org/api/v6/class/src/model.js~model#static-method-build) luomaan halutusta datasta Model-olio, ja kutsumalla sille metodia [save](https://sequelize.org/master/class/lib/model.js~Model.html#instance-method-save):
 
 ```js
 const note = Note.build(req.body)
 await note.save()
 ```
 
-Metodin <i>build</i> kutsuminen ei tallenna vielä olioata tietokantaan, joten olio on vielä mahdollista muokata ennen varsinaista talletustapahtumaa:
+Metodin <i>build</i> kutsuminen ei tallenna vielä oliota tietokantaan, joten olio on vielä mahdollista muokata ennen varsinaista talletustapahtumaa:
 
 ```js
 const note = Note.build(req.body)

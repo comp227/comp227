@@ -66,7 +66,7 @@ La razón por la que las secciones anteriores del curso usaron MongoDB es precis
 
 ### Base de datos de la aplicacion
 
-Para nuestra aplicación necesitamos una base de datos relacional. Hay muchas opciones, pero usaremos la solución de código abierto más popular actualmente [PostgreSQL] (https://www.postgresql.org/). Puede instalar Postgres (como suele llamarse a la base de datos) en su máquina, si así lo desea. Una opción más fácil sería usar Postgres como un servicio en la nube, p. [ElephantSQL](https://www.elephantsql.com/). También puede aprovechar las lecciones del curso [parte 12](/es/part12) y usar Postgres localmente usando Docker.
+Para nuestra aplicación necesitamos una base de datos relacional. Hay muchas opciones, pero usaremos la solución de código abierto más popular actualmente [PostgreSQL](https://www.postgresql.org/). Puede instalar Postgres (como suele llamarse a la base de datos) en su máquina, si así lo desea. Una opción más fácil sería usar. También puede aprovechar las lecciones del curso [parte 12](/es/part12) y usar Postgres localmente usando Docker.
 
 Sin embargo, aprovecharemos el hecho de que es posible crear una base de datos de Postgres para la aplicación en la plataforma de servicios en la nube de Heroku, que ya conocemos de las partes 3 y 4.
 
@@ -81,7 +81,7 @@ heroku create
 heroku addons:create heroku-postgresql:hobby-dev -a <app-name>
 heroku config -a <app-name>
 === cryptic-everglades-76708 Config Vars
-DATABASE_URL: postgres://<username>:<password>@<host-of-postgres-addon>:5432/<db-name>
+DATABASE_URL: postgres://<username>:thepasswordishere@<host-of-postgres-addon>:5432/<db-name>
 ```
 
 Particularmente cuando se utiliza una base de datos relacional, también es esencial acceder a la base de datos directamente. Hay muchas maneras de hacer esto, hay varias interfaces gráficas de usuario diferentes, como [pgAdmin](https://www.pgadmin.org/). Sin embargo, utilizaremos la herramienta de línea de comandos de Postgres [psql](https://www.postgresql.org/docs/current/app-psql.html).
@@ -236,7 +236,7 @@ La <i>cadena de conexión</i> de la base de datos, que es revelada por el comand
 
 ```bash
 $ cat .env
-DATABASE_URL=postgres://<username>:<password>@ec2-54-83-137-206.compute-1.amazonaws.com:5432/<databasename>
+DATABASE_URL=postgres://<username>:thepasswordishere@ec2-54-83-137-206.compute-1.amazonaws.com:5432/<databasename>
 ```
 
 Probemos una conexión exitosa:
@@ -406,7 +406,7 @@ Note.init({
 
 El nombre de la columna correspondiente en la base de datos sería <i>creation_year</i>. En el código, la referencia a la columna siempre tiene el mismo formato que en el modelo, es decir, en formato "camel case".
 
-También hemos definido <i>modelName: 'note'</i>, el "nombre del modelo" predeterminado sería <i>Note</i> en mayúsculas. Sin embargo, queremos tener una inicial en minúscula, hará que algunas cosas sean un poco más convenientes en el futuro.
+También hemos definido <i>modelName: 'note'</i>, el "nombre del modelo" predeterminado sería <i>Note</i> en mayúsculas. Sin embargo, queremos tener una inicial en minúscula, esto hará que algunas cosas sean un poco más convenientes en el futuro.
 
 La operación de la base de datos es fácil de hacer usando la [interfaz de consulta](https://sequelize.org/master/manual/model-querying-basics.html) proporcionada por los modelos, el método [findAll](https://sequelize.org/master/class/lib/model.js~Model.html#static-method-findAll) funciona exactamente como su nombre indica:
 

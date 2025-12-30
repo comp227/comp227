@@ -107,7 +107,6 @@ Tiedosto <i>main.jsx</i> on muuten samanlainen kuin se on ollut toistaiseksi kai
 
 ```js
 import ReactDOM from 'react-dom/client'
-
 import App from './App'
 
 const notes = [
@@ -178,7 +177,7 @@ const App = (props) => {
 
 Koska <i>li</i>-tagit generoiva koodi on JavaScriptia, se tulee sijoittaa JSX-templatessa aaltosulkujen sisälle muun JavaScript-koodin tapaan.
 
-Parannetaan koodin luetteloa vielä jakamalla nuolifunktion määrittely useammalle riville:
+Parannetaan koodin luettavuutta vielä jakamalla nuolifunktion määrittely useammalle riville:
 
 ```js
 const App = (props) => {
@@ -399,7 +398,6 @@ Koodissamme on käytetty koko ajan moduuleja. Tiedoston <i>main.jsx</i> ensimmä
 
 ```js
 import ReactDOM from "react-dom/client"
-
 import App from "./App"
 ```
 
@@ -413,9 +411,7 @@ Tehdään nyt sovellukseen hakemisto <i>components</i> ja sinne tiedosto <i>Note
 
 ```js
 const Note = ({ note }) => {
-  return (
-    <li>{note.content}</li>
-  )
+  return <li>{note.content}</li>
 }
 
 export default Note
@@ -451,7 +447,7 @@ Huomaa, että repositorion main-haarassa on myöhemmän vaiheen koodi. Tämän h
 
 ![](../../images/2/2b.png)
 
-Jos kloonaat projektin itsellesi, suorita komento _npm install_ ennen käynnistämistä eli komentoa _npm start_.
+Jos kloonaat projektin itsellesi, suorita komento _npm install_ ennen käynnistämistä eli komentoa _npm run dev_.
 
 ### Kun sovellus hajoaa
 
@@ -491,7 +487,7 @@ const App = () => {
     // ...
   }
 
-  console.log('App toimii...') // highlight-line
+  console.log('app works...') // highlight-line
 
   return (
     // ..
@@ -554,7 +550,7 @@ Ohjelmointi on hankalaa, ja sen takia lupaan hyödyntää kaikkia ohjelmointia h
 - etenen pienin askelin
 - käytän koodissani runsaasti _console.log_-komentoja sekä varmistamaan sen, että varmasti ymmärrän jokaisen kirjoittamani koodirivin, että etsiessäni koodistani mahdollisia bugin aiheuttajia
 - jos koodini ei toimi, en kirjoita enää yhtään lisää koodia, vaan alan poistaa toiminnan rikkoneita rivejä tai palaan suosiolla tilanteeseen, missä koodini vielä toimi
-- kun kysyn apua kurssin Discord- tai Telegram-kanavalla, tai muualla internetissä, muotoilen kysymyksen järkevästi, esim. [täällä](/en/part0/general_info#how-to-get-help-in-discord-telegram) esiteltyyn tapaan
+- kun kysyn apua kurssin Discord-kanavalla, tai muualla internetissä, muotoilen kysymyksen järkevästi, esim. [täällä](/en/part0/general_info#how-to-get-help-in-discord) esiteltyyn tapaan
 
 </div>
 
@@ -616,7 +612,7 @@ Määrittele sovellukseen yksittäisen kurssin muotoilusta huolehtiva komponentt
 
 Sovelluksen komponenttirakenne voi olla esim. seuraava:
 
-<pre>
+```
 App
   Course
     Header
@@ -624,7 +620,7 @@ App
       Part
       Part
       ...
-</pre>
+```
 
 Eli komponentti <i>Course</i> sisältää edellisessä osassa määritellyt komponentit, joiden vastuulle tulee kurssin nimen ja osien renderöinti.
 

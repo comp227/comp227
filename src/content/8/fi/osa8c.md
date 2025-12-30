@@ -292,7 +292,7 @@ Mutation: {
         throw new GraphQLError('Creating the user failed', {
           extensions: {
             code: 'BAD_USER_INPUT',
-            invalidArgs: args.name,
+            invalidArgs: args.username,
             error
           }
         })
@@ -351,7 +351,7 @@ Aivan kuten REST:in tapauksessa myös nyt ideana on, että kirjautunut käyttäj
 
 ![](../../images/8/24x.png)
 
-Muutetaan backendin käynnistämistä siten, että annetaan käynnistyksen huolehtivalle funktiolle [startStandaloneServer](https://www.apollographql.com/docs/apollo-server/api/standalone/) toinen parametri [context](https://www.apollographql.com/docs/apollo-server/data/context/):
+Muutetaan backendin käynnistämistä siten, että annetaan käynnistyksestä huolehtivalle funktiolle [startStandaloneServer](https://www.apollographql.com/docs/apollo-server/api/standalone/) toinen parametri [context](https://www.apollographql.com/docs/apollo-server/data/context/):
 
 ```js
 startStandaloneServer(server, {
@@ -374,7 +374,7 @@ startStandaloneServer(server, {
 })
 ```
 
-Kontekstin avulla voidaan suorittaa jotain kaikille kyselyille ja mutaatioille yhteisiä asioita, esim. pyyntöön liittyvän [käyttäjän tunnistaminen](https://blog.apollographql.com/authorization-in-graphql-452b1c402a9?_ga=2.45656161.474875091.1550613879-1581139173.1549828167).
+Kontekstin avulla voidaan suorittaa jotain kaikille kyselyille ja mutaatioille yhteisiä asioita, esim. pyyntöön liittyvän [käyttäjän tunnistaminen](https://www.apollographql.com/blog/authorization-in-graphql/).
 
 Contextin palauttama olio annetaan kaikille resolvereille <i>kolmantena parametrina</i>.
 
@@ -399,7 +399,7 @@ Jos headerissa on oikea arvo, palauttaa kysely headerin yksilöimän käyttäjä
 
 Viimeistellään sovelluksen backend siten, että henkilöiden luominen ja editointi edellyttää kirjautumista, ja että luodut henkilöt menevät automaattisesti kirjautuneen käyttäjän tuttavalistalle.
 
-Tyhjennetään ensin kannasta siellä ennestään olevat kenenkään tuttaviin kuulumattomat käyttäjät.
+Tyhjennetään ensin kannasta siellä ennestään olevat kenenkään tuttaviin kuulumattomat henkilöt.
 
 Mutaatio _addPerson_ muuttuu seuraavasti:
 
@@ -456,14 +456,14 @@ Mutaation toteuttava resolveri:
 
 ```js
   addAsFriend: async (root, args, { currentUser }) => {
-    const nonFriendAlready = (person) => 
-      !currentUser.friends.map(f => f._id.toString()).includes(person._id.toString())
-
     if (!currentUser) {
       throw new GraphQLError('wrong credentials', {
         extensions: { code: 'BAD_USER_INPUT' }
       }) 
     }
+
+    const nonFriendAlready = (person) => 
+      !currentUser.friends.map(f => f._id.toString()).includes(person._id.toString())
 
     const person = await Person.findOne({ name: args.name })
     if ( nonFriendAlready(person) ) {
@@ -515,7 +515,7 @@ Tämän luvun tehtävät todennäköisesti hajottavat frontendin koodin. Tässä
 
 #### 8.13: Tietokanta, osa 1
 
-Muuta kirjastosovellusta siten, että se tallettaa tiedot tietokantaan. Kirjojen ja kirjailijoiden <i>Mongoose-skeema</i> löytyy valmiiksi [täältä](https://github.com/fullstack-hy/misc/blob/master/library-schema.md).
+Muuta kirjastosovellusta siten, että se tallettaa tiedot tietokantaan. Kirjojen ja kirjailijoiden <i>Mongoose-skeema</i> löytyy valmiiksi [täältä](https://github.com/fullstack-hy2020/misc/blob/master/library-schema.md).
 
 Muutetaan myös graphql-skeemaa hiukan kirjan osalta
 
@@ -558,7 +558,7 @@ type Mutation {
 
 Täydennä sovellusta siten, että kaikki kyselyt (kyselyn _allBooks_ parametrin _author_ toimintaansaattaminen on vapaaehtoinen lisätehtävä!) sekä mutaatiot toimivat.
 
-Kirjojen haun parametrin <i>genre</i> suhteen tilanne on hieman haastavampi. Ratkaisu on yksinkertainen, mutta sen löytäminen voi tuottaa päänvaivaa. Saatat hyötyä [tästä](https://www.mongodb.com/docs/manual/tutorial/query-array-of-documents/). 
+Kirjojen haun parametrin <i>genre</i> suhteen tilanne on hieman haastavampi. Ratkaisu on yksinkertainen, mutta sen löytäminen voi tuottaa päänvaivaa. Saatat hyötyä [tästä](https://www.mongodb.com/docs/manual/tutorial/query-arrays/). 
 
 #### 8.15 Tietokanta, osa 3
 

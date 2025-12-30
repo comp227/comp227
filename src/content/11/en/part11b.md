@@ -9,7 +9,7 @@ lang: en
 
 Before we start playing with GitHub Actions, let's have a look at what they are and how do they work.
 
-GitHub Actions work on a basis of [workflows](https://docs.github.com/en/free-pro-team@latest/actions/learn-github-actions/introduction-to-github-actions#workflows). A workflow is a series of [jobs](https://docs.github.com/en/free-pro-team@latest/actions/learn-github-actions/introduction-to-github-actions#jobs) that are run when a certain triggering [event](https://docs.github.com/en/free-pro-team@latest/actions/learn-github-actions/introduction-to-github-actions#events) happens. The jobs that are run then themselves contain instructions for what GitHub Actions should do.
+GitHub Actions operate on [workflows](https://docs.github.com/en/free-pro-team@latest/actions/learn-github-actions/introduction-to-github-actions#workflows). A workflow is a series of [jobs](https://docs.github.com/en/free-pro-team@latest/actions/learn-github-actions/introduction-to-github-actions#jobs) that run when a specific [event](https://docs.github.com/en/free-pro-team@latest/actions/learn-github-actions/introduction-to-github-actions#events) triggers them. Each job contains its own set of instructions that tell GitHub Actions what to do.
 
 A typical execution of a workflow looks like this:
 
@@ -39,7 +39,7 @@ GitHub Actions have a great advantage over self-hosted solutions: the repository
 
 ### Exercise 11.2.
 
-In most exercises of this part, we are building a CI/CD pipeline for a small project found in [this example project repository](https://github.com/smartlyio/fullstackopen-cicd).
+In most exercises of this part, we are building a CI/CD pipeline for a small project found in [this example project repository](https://github.com/fullstack-hy2020/full-stack-open-pokedex).
 
 #### 11.2 The example project
 
@@ -51,7 +51,7 @@ To fork the repository, you can click on the Fork button in the top-right area o
 
 Once you've clicked on the Fork button, GitHub will start the creation of a new repository called <code>{github_username}/full-stack-open-pokedex</code>.
 
-Once the process has been finished, you should be redirected to your brand new repository:
+Once the process has been finished, you should be redirected to your brand-new repository:
 
 ![](../../images/11/2.png)
 
@@ -65,7 +65,9 @@ Try now the following:
 - run tests
 - lint the code 
 
-You might notice that project contains some broken tests and linting errors. **Just leave them as they are for now.** We will get around those later in the exercises.
+You might notice that the project contains some broken tests and linting errors. **Just leave them as they are for now.** We will get around those later in the exercises.
+
+**NOTE** the tests of the project have been made with [Jest](https://jestjs.io/). The course material in [part 5](/en/part5/testing_react_apps) uses [Vitest](https://vitest.dev/guide/). From the usage point of view, the libraries have barely any difference. 
 
 As you might remember from [part 3](/en/part3/deploying_app_to_internet#frontend-production-build), the React code <i>should not</i> be run in development mode once it is deployed in production. Try now the following
 - create a production <i>build</i> of the project
@@ -73,9 +75,9 @@ As you might remember from [part 3](/en/part3/deploying_app_to_internet#frontend
 
 Also for these two tasks, there are ready-made npm scripts in the project!
 
-Study the structure of the project for a while. As you notice both the frontend and the backend code is now [in the same repository](/en/part7/class_components_miscellaneous#frontend-and-backend-in-the-same-repository). In earlier parts of the course we had a separate repository for both, but having those in the same repository makes things much simpler when setting up a CI environment. 
+Study the structure of the project for a while. As you notice both the frontend and the backend code are now [in the same repository](/en/part7/class_components_miscellaneous#frontend-and-backend-in-the-same-repository). In earlier parts of the course we had a separate repository for both, but having those in the same repository makes things much simpler when setting up a CI environment. 
 
-In contrast to most projects in this course, the frontend code <i>does not use</i> create-react-app, but it has a relatively simple [webpack](/en/part7/webpack) configuration that takes care of creating the development environment and creating the production bundle.
+In contrast to most projects in this course, the frontend code <i>does not use</i> Vite but it has a relatively simple [Webpack](/en/part7/webpack) configuration that takes care of creating the development environment and creating the production bundle.
 
 </div>
 
@@ -117,19 +119,18 @@ name: Hello World!
 on:
   push:
     branches:
-      - master
-      # note that your "main" branch might be called main instead of master
+      - main
 
 jobs:
   hello_world_job:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
       - name: Say hello
         run: |
           echo "Hello World!"
 ```
 
-In this example, the trigger is a push to the main branch, which in our project is called <i>master</i>. (Your main branch could be called <i>main</i> or <i>master</i>).  There is one job named <i>hello\_world\_job</i>, it will be run in a virtual environment with Ubuntu 20.04. The job has just one step named "Say hello", which will run the <code>echo "Hello World!"</code> command in the shell.
+There is one job named <i>hello\_world\_job</i>, it will be run in a virtual environment with Ubuntu 20.04. The job has just one step named "Say hello", which will run the <code>echo "Hello World!"</code> command in the shell.
 
 So you may ask, when does GitHub trigger a workflow to be started? There are plenty of [options](https://docs.github.com/en/free-pro-team@latest/actions/reference/events-that-trigger-workflows) to choose from, but generally speaking, you can configure a workflow to start once:
 
@@ -150,7 +151,7 @@ To tie this all together, let us now get GitHub Actions up and running in the ex
 
 #### 11.3 Hello world!
 
-Create a new Workflow which outputs "Hello World!" to the user. For the setup, you should create the directory <code>.github/workflows</code> and a file <code>hello.yml</code> to your repository.
+Create a new Workflow that outputs "Hello World!" to the user. For the setup, you should create the directory <code>.github/workflows</code> and a file <code>hello.yml</code> to your repository.
 
 To see what your GitHub Action workflow has done, you can navigate to the **Actions** tab in GitHub where you should see the workflows in your repository and the steps they implement. The output of your Hello World workflow should look something like this with a properly configured workflow.
 
@@ -162,15 +163,15 @@ Note that GitHub Actions also informs you on the exact environment (operating sy
 
 #### 11.4 Date and directory contents
 
-Extend the workflow with steps that print the date and current directory content in long format. 
+Extend the workflow with steps that print the date and current directory content in the long format. 
 
 Both of these are easy steps, and just running commands [date](https://man7.org/linux/man-pages/man1/date.1.html) and [ls](https://man7.org/linux/man-pages/man1/ls.1.html) will do the trick.
 
 Your workflow should now look like this
 
-![Date and dir content in workflow](../../images/11/4.png)
+![Date and dir content in the workflow](../../images/11/4.png)
 
-As the output of command <code>ls -l</code> shows, by default, the virtual environment that runs our workflow <i>does not</i> have any code!
+As the output of the command <code>ls -l</code> shows, by default, the virtual environment that runs our workflow <i>does not</i> have any code!
 
 </div>
 
@@ -182,7 +183,7 @@ After completing the first exercises, you should have a simple but pretty useles
 
 Let's implement a GitHub Action that will lint the code. If the checks don't pass, GitHub Actions will show a red status. 
 
-At start, the workflow that we will save to file <code>pipeline.yml</code> looks like this:
+At the start, the workflow that we will save to file <code>pipeline.yml</code> looks like this:
 
 ```yml
 name: Deployment pipeline
@@ -190,8 +191,7 @@ name: Deployment pipeline
 on:
   push:
     branches:
-      - master
-      # note that your "main" branch might be called main instead of master
+      - main
 
 jobs:
 ```
@@ -200,7 +200,7 @@ Before we can run a command to lint the code, we have to perform a couple of act
 
 #### Setting up the environment
 
-Setting up the environment is an important task while configuring a pipeline. We're going to use an <code>ubuntu-20.04</code> virtual environment because this is the version of Ubuntu we're going to be running in production. 
+Setting up the environment is an important task while configuring a pipeline. We're going to use an <code>ubuntu-latest</code> virtual environment because this is the version of Ubuntu we're going to be running in production. 
 
 It is important to replicate the same environment in CI as in production as closely as possible, to avoid situations where the same code works differently in CI and production, which would effectively defeat the purpose of using CI.
 
@@ -214,32 +214,32 @@ name: Deployment pipeline
 on:
   push:
     branches:
-      - master
+      - main
 
 jobs:
   simple_deployment_pipeline: # highlight-line
-    runs-on: ubuntu-20.04 # highlight-line
+    runs-on: ubuntu-latest # highlight-line
     steps: # highlight-line
-      - uses: actions/checkout@v3 # highlight-line
+      - uses: actions/checkout@v4 # highlight-line
 ```
 
 The [uses](https://docs.github.com/en/free-pro-team@latest/actions/reference/workflow-syntax-for-github-actions#jobsjob_idstepsuses) keyword tells the workflow to run a specific <i>action</i>. An action is a reusable piece of code, like a function. Actions can be defined in your repository in a separate file or you can use the ones available in public repositories. 
 
-Here we're using a public action [actions/checkout](https://github.com/actions/checkout) and we specify a version (<code>@v3</code>) to avoid potential breaking changes if the action gets updated. The <code>checkout</code> action does what the name implies: it checkouts the project source code from Git.
+Here we're using a public action [actions/checkout](https://github.com/actions/checkout) and we specify a version (<code>@v4</code>) to avoid potential breaking changes if the action gets updated. The <code>checkout</code> action does what the name implies: it checkouts the project source code from Git.
 
-Secondly, as the application is written in JavaScript, Node.js must be set up to be able to utilize the commands that are specified in <code>package.json</code>. To set up Node.js, [actions/setup-node](https://github.com/actions/setup-node) action can be used. Version <code>16</code> is selected because it is the version the application is using in the production environment.
+Secondly, as the application is written in JavaScript, Node.js must be set up to be able to utilize the commands that are specified in <code>package.json</code>. To set up Node.js, [actions/setup-node](https://github.com/actions/setup-node) action can be used. Version <code>20</code> is selected because it is the version the application is using in the production environment.
 
 ```yml
 # name and trigger not shown anymore...
 
 jobs:
   simple_deployment_pipeline:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3 # highlight-line
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4 # highlight-line
         with: # highlight-line
-          node-version: '16' # highlight-line
+          node-version: '20' # highlight-line
 ```
 
 As we can see, the [with](https://docs.github.com/en/free-pro-team@latest/actions/reference/workflow-syntax-for-github-actions#jobsjob_idstepswith) keyword is used to give a "parameter" to the action. Here the parameter specifies the version of Node.js we want to use.
@@ -250,12 +250,12 @@ Lastly, the dependencies of the application must be installed. Just like on your
 ```yml
 jobs:
   simple_deployment_pipeline:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: '16'
+          node-version: '20'
       - name: Install dependencies # highlight-line
         run: npm install # highlight-line
 ```
@@ -269,12 +269,12 @@ After the environment has been set up we can run all the scripts from <code>pack
 ```yml
 jobs:
   simple_deployment_pipeline:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: '16'
+          node-version: '20'
       - name: Install dependencies 
         run: npm install  
       - name: Check style  # highlight-line
@@ -329,13 +329,55 @@ Once you have fixed all the issues and the Pokedex is bug-free, the workflow run
 
 ![tests fixed](../../images/11/8.png)
 
-#### 11.9 Simple end to end tests
+#### 11.9 Simple end-to-end tests
 
-The current set of tests use [Jest](https://jestjs.io/) to ensure that the React components work as intended. This is exactly the same thing that is done in section [Testing React apps](/en/part5/testing_react_apps) of part 5. 
+The current set of tests uses [Jest](https://jestjs.io/) to ensure that the React components work as intended. This is essentially the same thing that is done in the section [Testing React apps](/en/part5/testing_react_apps) of part 5 with [Vitest](https://vitest.dev/). 
 
-Testing components in isolation is quite useful but that still does not ensure that the system as a whole works as we wish. To have more confidence about this, let us write a couple of really simple end to end tests with the [Cypress](https://www.cypress.io/) library similarly what we do in section [End to end testing](/en/part5/end_to_end_testing) of part 5. 
+Testing components in isolation is quite useful but that still does not ensure that the system as a whole works as we wish. To have more confidence about this, let us write a couple of really simple end-to-end tests similarly we did in section [part 5](/en/part5/). You could use [Playwright](https://playwright.dev/) or [Cypress](https://www.cypress.io/) for the tests.
 
-So, setup Cypress (you'll find [here](/en/part5/end_to_end_testing/) all info you need) and use this test at first:
+No matter which you choose, you should extend Jest-definition in package.json to prevent Jest from trying to run the e2e-tests. Assuming that directory _e2e-tests_ is used for e2e-tests, the definition is:
+
+```json
+{
+  // ...
+  "jest": {
+    "testEnvironment": "jsdom",
+    "testPathIgnorePatterns": ["e2e-tests"] // highlight-line
+  }
+}
+```
+
+**Playwright**
+
+Set Playwright up (you'll find [here](/en/part5/end_to_end_testing_playwright) all the info you need) to your repository. Note that in contrast to part 5, you should now install Playwright to the same project with the rest of the code!
+
+Use this test first:
+
+```js
+const { test, describe, expect, beforeEach } = require('@playwright/test')
+
+describe('Pokedex', () => {
+  test('front page can be opened', async ({ page }) => {
+     await page.goto('')
+    await expect(page.getByText('ivysaur')).toBeVisible()
+    await expect(page.getByText('Pokémon and Pokémon character names are trademarks of Nintendo.')).toBeVisible()
+  })
+})
+```
+
+**Note** is that although the page renders the Pokemon names with an initial capital letter, the names are actually written with lowercase letters in the source, so you should test for <code>ivysaur</code> instead of <code>Ivysaur</code>!
+
+Define a npm script <code>test:e2e</code> for running the e2e tests from the command line.
+
+Remember that the Playwright tests <i>assume that the application is up and running</i> when you run the test! Instead of starting the app manually, you should now configure a <i>Playwright development server</i> to start the app while tests are executed, see [here](https://playwright.dev/docs/next/api/class-testconfig#test-config-web-server) how that can be done.
+
+Ensure that the test passes locally. 
+
+Once the end-to-end test works in your machine, include it in the GitHub Action workflow. That should be pretty easy by following [this](https://playwright.dev/docs/ci-intro#on-pushpull_request).
+
+**Cypress**
+
+Set Cypress up (you'll find [here](/en/part5/end_to_end_testing_cypress) all the info you need) and use this test first:
 
 ```js
 describe('Pokedex', function() {
@@ -349,13 +391,11 @@ describe('Pokedex', function() {
 
 Define a npm script <code>test:e2e</code> for running the e2e tests from the command line.
 
-**Note** do not include the word <i>spec</i> in the Cypress test file name, that would cause also Jest to run it, and it might cause problems. 
+**Note** is that although the page renders the Pokemon names with an initial capital letter, the names are actually written with lowercase letters in the source, so you should test for <code>ivysaur</code> instead of <code>Ivysaur</code>!
 
-**Another thing to note** is that although the page renders the Pokemon names with an initial capital letter, the names are actually written with lower case letters in the source, so you should test for <code>ivysaur</code> instead of <code>Ivysaur</code>!
+Ensure that the test passes locally. Remember that the Cypress tests _assume that the application is up and running_ when you run the test! If you have forgotten the details, please see [part 5](/en/part5/end_to_end_testing) how to get up and running with Cypress.
 
-Ensure that the test passes locally. Remember that the Cypress tests _assume that the application is up and running_ when you run the test! If you have forgotten the details (that happened to me too!), please see [part 5](/en/part5/end_to_end_testing) how to get up and running with Cypress.
-
-Once the end to end test works in your machine, include it in the GitHub Action workflow. By far the easiest way to do that is to use the ready-made action [cypress-io/github-action](https://github.com/cypress-io/github-action). The step that suits us is the following:
+Once the end-to-end test works in your machine, include it in the GitHub Action workflow. By far the easiest way to do that is to use the ready-made action [cypress-io/github-action](https://github.com/cypress-io/github-action). The step that suits us is the following:
 
 ```js
 - name: e2e tests
@@ -368,17 +408,18 @@ Once the end to end test works in your machine, include it in the GitHub Action 
 
 Three options are used: [command](https://github.com/cypress-io/github-action#custom-test-command) specifies how to run Cypress tests, [start](https://github.com/cypress-io/github-action#start-server) gives npm script that starts the server, and [wait-on](https://github.com/cypress-io/github-action#wait-on) says that before the tests are run, the server should have started on url <http://localhost:5000>.
 
+Note that you need to build the app in GitHub Actions before it can be started in production mode!
+
+**Once the pipeline works...**
 
 Once you are sure that the pipeline works, <i>write another test</i> that ensures that one can navigate from the main page to the page of a particular Pokemon, e.g. <i>ivysaur</i>. The test does not need to be a complex one, just check that when you navigate to a link, the page has some proper content, such as the string <i>chlorophyll</i> in the case of <i>ivysaur</i>.
 
-**Note** the Pokemon abilities are written with lower case letters in the source code (the capitalization is done in CSS), so <i>do not</i> test for <i>Chlorophyll</i> but rather <i>chlorophyll</i>.
-
-**Note2** that you should not try <i>bulbasaur</i>, for some reason the page of that particular Pokemon does not work properly...
+**Note** the Pokemon abilities are written with lowercase letters in the source code (the capitalization is done in CSS), so <i>do not</i> test for <i>Chlorophyll</i> but rather <i>chlorophyll</i>.
 
 The end result should be something like this
 
 ![e2e tests](../../images/11/9.png)
 
-End to end tests are nice since they give us confidence that software works from the end user's perspective. The price we have to pay is the slower feedback time. Now executing the whole workflow takes quite much longer.
+End-to-end tests are nice since they give us confidence that software works from the end user's perspective. The price we have to pay is the slower feedback time. Now executing the whole workflow takes quite much longer.
 
 </div>

@@ -9,47 +9,66 @@ lang: fi
 
 Reactilla tehtyjen frontendien testaamiseen on monia tapoja. Aloitetaan niihin tutustuminen nyt.
 
-Testit tehdään samaan tapaan kuin edellisessä osassa eli Facebookin [Jest](http://jestjs.io/)-kirjastolla.
+Kurssilla käytettiin aiemmin React-komponenttien testaamiseen Facebookin kehittämää [Jest](http://jestjs.io/)-kirjastoa. Käytämme kurssilla nyt Viten kehittäjien uuden generaation testikirjastoa [Vitestiä](https://vitest.dev/). Konfigurointia lukuunottamatta kirjastot tarjoavat saman ohjelmointirajapinnan, joten testauskoodissa ei käytännössä ole mitään eroa.
 
-Tarvitsemme Jestin lisäksi testaamiseen apukirjaston, jonka avulla React-komponentteja voidaan renderöidä testejä varten. 
+Aloitetaan asentamalla Vitest sekä Web-selainta simuloiva [jsdom](https://github.com/jsdom/jsdom)-kirjasto:
 
-Tähän tarkoitukseen ehdottomasti paras vaihtoehto on [React Testing Library](https://github.com/testing-library/react-testing-library). Jestin ilmaisuvoimaa kannattaa laajentaa myös kirjastolla [jest-dom](https://github.com/testing-library/jest-dom).
+```
+npm install --save-dev vitest jsdom
+```
+
+Tarvitsemme Vitestin lisäksi testaamiseen apukirjaston, jonka avulla React-komponentteja voidaan renderöidä testejä varten. 
+
+Tähän tarkoitukseen ehdottomasti paras vaihtoehto on [React Testing Library](https://github.com/testing-library/react-testing-library). Testien ilmaisuvoimaa kannattaa laajentaa myös kirjastolla [jest-dom](https://github.com/testing-library/jest-dom).
 
 Asennetaan tarvittavat kirjastot:
 
 ```js
-npm install --save-dev @testing-library/react @testing-library/jest-dom jest-environment-jsdom @babel/preset-env @babel/preset-react
+npm install --save-dev @testing-library/react @testing-library/jest-dom
 ```
 
-Lisätään tiedostoon <i>package.json</i> seuraavat:
+Ennen kuin pääsemme tekemään ensimmäistä testiä, tarvitsemme hieman konfiguraatioita.
+
+Lisätään tiedostoon <i>package.json</i> skripti testien suorittamiselle:
 
 ```js 
 {
   "scripts": {
     // ...
-    "test": "jest"
+    "test": "vitest run"
   }
   // ...
-  "jest": {
-    "testEnvironment": "jsdom",
-    "moduleNameMapper": {
-      "^.+\\.svg$": "jest-svg-transformer",
-      "^.+\\.(css|less|scss)$": "identity-obj-proxy"
-    }
+}
+```
+
+Tehdään projektin juureen tiedosto _testSetup.js_ ja sille sisältö
+
+```js
+import { afterEach } from 'vitest'
+import { cleanup } from '@testing-library/react'
+import '@testing-library/jest-dom/vitest'
+
+afterEach(() => {
+  cleanup()
+})
+```
+
+Nyt jokaisen testin jälkeen suoritetaan toimenpide joka nollaa selainta simuloivan jsdomin.
+
+Laajennetaan tiedostoa _vite.config.js_ seuraavasti
+
+```js
+export default defineConfig({
+  // ...
+  test: {
+    environment: 'jsdom',
+    globals: true,
+    setupFiles: './testSetup.js', 
   }
-}
+})
 ```
 
-Luodaan tiedosto <i>.babelrc</i> jolla on seuraava sisältö:
-
-```js 
-{
-  "presets": [
-    "@babel/preset-env",
-    ["@babel/preset-react", { "runtime": "automatic" }]
-  ]
-}
-```
+Määrittelyn _globals: true_ ansiosta testien käyttämiä avainsanoja kuten _describe_, _test_ ja _expect_ ei ole tarvetta importata testeissä.
 
 Testataan aluksi muistiinpanon renderöivää komponenttia:
 
@@ -72,13 +91,11 @@ Huomaa, että muistiinpanon sisältävällä <i>li</i>-elementillä on [CSS](htt
 
 ### Komponentin renderöinti testiä varten
 
-Tehdään testi tiedostoon <i>src/components/Note.test.js</i> eli samaan hakemistoon, jossa komponentti itsekin sijaitsee.
+Tehdään testi tiedostoon <i>src/components/Note.test.jsx</i> eli samaan hakemistoon, jossa komponentti itsekin sijaitsee.
 
 Ensimmäinen testi varmistaa, että komponentti renderöi muistiinpanon sisällön:
 
 ```js
-import React from 'react'
-import '@testing-library/jest-dom'
 import { render, screen } from '@testing-library/react'
 import Note from './Note'
 
@@ -95,7 +112,7 @@ test('renders content', () => {
 })
 ```
 
-Alun konfiguroinnin jälkeen testi renderöi komponentin  React Testing Library ‑kirjaston tarjoaman funktion [render](https://testing-library.com/docs/react-testing-library/api#render) avulla:
+Alun konfiguroinnin jälkeen testi renderöi komponentin React Testing Library ‑kirjaston tarjoaman funktion [render](https://testing-library.com/docs/react-testing-library/api#render) avulla:
 
 ```js
 render(<Note note={note} />)
@@ -110,24 +127,51 @@ Testin renderöimään näkymään päästään käsiksi olion [screen](https://
   expect(element).toBeDefined()
 ```
 
+Elementin olemassaolo tarkastetaan Vitestin [expect](https://vitest.dev/api/expect.html#expect) komennon avulla. Expect muodostaa parametristaan väittämän jonka paikkansapitävyyttä voidaan testata erilaisten ehtofunktioiden avulla. Nyt käytössä oli [toBeDefined](https://vitest.dev/api/expect.html#tobedefined) joka siis testaa, onko expectin parametrina oleva _element_ olemassa.
+
 Suoritetaan testi:
 
 ```js
 $ npm test
 
 > notes-frontend@0.0.0 test
-> jest
+> vitest run
 
- PASS  src/components/Note.test.js
-  ✓ renders content (15 ms)
 
-Test Suites: 1 passed, 1 total
-Tests:       1 passed, 1 total
-Snapshots:   0 total
-Time:        1.152 s
+ RUN  v3.2.3 /home/vejolkko/repot/fullstack-examples/notes-frontend
+
+ ✓ src/components/Note.test.jsx (1 test) 19ms
+   ✓ renders content 18ms
+
+ Test Files  1 passed (1)
+      Tests  1 passed (1)
+   Start at  14:31:54
+   Duration  874ms (transform 51ms, setup 169ms, collect 19ms, tests 19ms, environment 454ms, prepare 87ms)
 ```
 
 Kuten olettaa saattaa, testi menee läpi.
+
+Eslint valittaa testeissä olevista avainsanoista _test_ ja _expect_. Ongelmasta päästään eroon lisäämällä tiedostoon <i>eslint.config.js</i> seuraava määrittely:
+
+```js
+// ...
+
+export default [
+  // ...
+  // highlight-start
+  {
+    files: ['**/*.test.{js,jsx}'],
+    languageOptions: {
+      globals: {
+        ...globals.vitest
+      }
+    }
+  }
+  // highlight-end
+]
+```
+
+Näin ESLintille kerrotaan, että Vitestin avainsanat ovat testitiedostoissa globaalisti saatavilla. 
 
 ### Testien sijainti
 
@@ -135,15 +179,13 @@ Reactissa on (ainakin) [kaksi erilaista](https://medium.com/@JeffLombardJr/organ
 
 Toinen tapa olisi sijoittaa testit "normaaliin" tapaan omaan erilliseen hakemistoon. Valitaanpa kumpi tapa tahansa, on varmaa että se on jonkun mielestä täysin väärä.
 
-Itse en pidä siitä, että testit ja normaali koodi ovat samassa hakemistossa. Noudatamme kuitenkin nyt tätä tapaa, sillä se on oletusarvo Create React App:lla konfiguroiduissa sovelluksissa.
+Itse en pidä siitä, että testit ja normaali koodi ovat samassa hakemistossa. Noudatamme kuitenkin nyt tätä tapaa, sillä se on yleisin käytäntö pienissä projekteissa.
 
 ### Sisällön etsiminen testattavasta komponentista
 
-React Testing Library ‑kirjasto tarjoaa runsaasti tapoja testattavan komponentin sisällön tutkimiseen. Itse asiassa testimme viimeisellä rivillä oleva expect on turha
+React Testing Library ‑kirjasto tarjoaa runsaasti tapoja testattavan komponentin sisällön tutkimiseen. Tutustuimme jo aiemmin komentoon _getByText_. Itse asiassa testimme viimeisellä rivillä oleva expect on turha
 
 ```js
-import React from 'react'
-import '@testing-library/jest-dom'
 import { render, screen } from '@testing-library/react'
 import Note from './Note'
 
@@ -163,11 +205,80 @@ test('renders content', () => {
 
 Testi ei mene läpi, jos _getByText_ ei löydä halutun tekstin sisältävää elementtiä.
 
+Komento _getByText_ etsii oletusarvoisesti elementtiä, joka sisältää ainoastaan <i> parametrina annetun tekstin</i> eikä mitään muuta. Oletetaan että komponentti renderöisi samaan HTML-elementtiin tekstiä seuraavasti:
+
+```js
+const Note = ({ note, toggleImportance }) => {
+  const label = note.important
+    ? 'make not important' : 'make important'
+
+  return (
+    <li className='note'>
+      Your awesome note: {note.content} // highlight-line
+      <button onClick={toggleImportance}>{label}</button>
+    </li>
+  )
+}
+
+export default Note
+```
+
+Nyt testissä käyttämämme _getByText_ ei löydä elementtiä:
+
+```js 
+test('renders content', () => {
+  const note = {
+    content: 'Does not work anymore :(',
+    important: true
+  }
+
+  render(<Note note={note} />)
+
+  const element = screen.getByText('Does not work anymore :(')
+
+  expect(element).toBeDefined()
+})
+```
+
+Jos halutaan etsiä komponenttia joka <i>sisältää</i> tekstin, voidaan joko lisätä komennolle ekstraoptio:
+
+```js 
+const element = screen.getByText(
+  'Does not work anymore :(', { exact: false }
+)
+```
+
+tai käyttää komentoa _findByText_:
+
+```js 
+const element = await screen.findByText('Does not work anymore :(')
+```
+
+On tärkeä huomata, että toisin kuin muut _ByText_-komennoista, _findByText_ palauttaa promisen!
+
+On myös jotain tilanteita, missä komennon muoto _queryByText_ on käyttökelpoinen. Komento palauttaa elementin mutta <i>ei aiheuta poikkeusta</i> jos etsittävää elementtiä ei löydy. 
+
+Komentoa voidaan hyödyntää esim. varmistamaan, että jokin asia <i>ei renderöidy</i>:
+
+```js 
+test('does not render this', () => {
+  const note = {
+    content: 'This is a reminder',
+    important: true
+  }
+
+  render(<Note note={note} />)
+
+  const element = screen.queryByText('do not want this thing to be rendered')
+  expect(element).toBeNull()
+})
+```
+
+Muitakin tapoja on, esim. [getByTestId](https://testing-library.com/docs/queries/bytestid/), joka etsii elementtejä erikseen testejä varten luotujen id-kenttien perusteella.
+
 Jos haluamme etsiä testattavia komponentteja [CSS-selektorien](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Selectors) avulla, se onnistuu renderin palauttaman [container](https://testing-library.com/docs/react-testing-library/api/#container)-olion metodilla [querySelector](https://developer.mozilla.org/en-US/docs/Web/API/Document/querySelector):
  
 ```js
-import React from 'react'
-import '@testing-library/jest-dom'
 import { render, screen } from '@testing-library/react'
 import Note from './Note'
 
@@ -188,17 +299,15 @@ test('renders content', () => {
 })
 ```
 
-Muitakin tapoja on, esim. [getByTestId](https://testing-library.com/docs/queries/bytestid/), joka etsii elementtejä erikseen testejä varten luotujen id-kenttien perusteella.
+On kuitenkin suositeltavaa etsiä elementtejä lähtökohtaisesti muilla tavoin kuin _container_-oliota ja CSS-selektoreja käyttäen. CSS-määreitä voidaan usein muuttaa vaikuttamatta sovelluksen toiminnallisuuteen, eikä käyttäjä ole niistä tietoinen. On parempi etsiä elementtejä käyttäjälle havaittavien ominaisuuksien perusteella, esimerkiksi _getByText_-metodia käyttäen. Tällä tavoin testit simuloivat paremmin komponentin todellista olemusta ja sitä, miten käyttäjä löytäisi elementin ruudulta.
 
 ### Testien debuggaaminen
 
 Testejä tehdessä törmäämme tyypillisesti moniin ongelmiin. 
 
-Olion _screen_ -olion metodilla [debug](https://testing-library.com/docs/queries/about/#screendebug) voimme tulostaa komponentin tuottaman HTML:n konsoliin. Eli kun muutamme testiä seuraavasti:
+Olion _screen_ metodilla [debug](https://testing-library.com/docs/queries/about/#screendebug) voimme tulostaa komponentin tuottaman HTML:n konsoliin. Eli kun muutamme testiä seuraavasti:
 
 ```js
-import React from 'react'
-import '@testing-library/jest-dom'
 import { render, screen } from '@testing-library/react'
 import Note from './Note'
 
@@ -220,7 +329,6 @@ test('renders content', () => {
 konsoliin tulostuu komponentin generoima HTML:
 
 ```js
-console.log
   <body>
     <div>
       <li
@@ -238,8 +346,6 @@ console.log
 On myös mahdollista etsiä komponentista pienempi osa, ja tulostaa sen HTML-koodi:
 
 ```js
-import React from 'react'
-import '@testing-library/jest-dom'
 import { render, screen } from '@testing-library/react'
 import Note from './Note'
 
@@ -259,7 +365,7 @@ test('renders content', () => {
 })
 ```
 
-Haimme nyt halutun tekstin sisältävän elemementin sisällön tulostettavaksi:
+Haimme nyt halutun tekstin sisältävän elementin sisällön tulostettavaksi:
 
 ```js
   <li
@@ -285,8 +391,6 @@ npm install --save-dev @testing-library/user-event
 Testaus onnistuu seuraavasti:
 
 ```js
-import React from 'react'
-import '@testing-library/jest-dom'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event' // highlight-line
 import Note from './Note'
@@ -299,7 +403,7 @@ test('clicking the button calls event handler once', async () => {
     important: true
   }
 
-  const mockHandler = jest.fn()
+  const mockHandler = vi.fn()
 
   render(
     <Note note={note} toggleImportance={mockHandler} />
@@ -313,10 +417,10 @@ test('clicking the button calls event handler once', async () => {
 })
 ```
 
-Testissä on muutama mielenkiintoinen seikka. Tapahtumankäsittelijäksi annetaan Jestin avulla määritelty [mock](https://facebook.github.io/jest/docs/en/mock-functions.html)-funktio:
+Testissä on muutama mielenkiintoinen seikka. Tapahtumankäsittelijäksi annetaan Vitestin avulla määritelty [mock](https://vitest.dev/api/mock)-funktio:
 
 ```js
-const mockHandler = jest.fn()
+const mockHandler = vi.fn()
 ```
   
 Jotta renderöidyn komponentin kanssa voi vuorovaikuttaa tapahtumien avulla, tulee ensin aloittaa uusi sessio. Tämä onnistuu userEvent-olion [setup](https://testing-library.com/docs/user-event/setup/)-metodin avulla:
@@ -334,11 +438,13 @@ await user.click(button)
 
 Klikkaaminen tapahtuu userEvent-olion metodin [click](https://testing-library.com/docs/user-event/convenience/#click) avulla.
 
-Testin ekspektaatio varmistaa, että <i>mock-funktiota</i> on kutsuttu täsmälleen kerran:
+Testin ekspektaatio varmistaa [toHaveLength](https://vitest.dev/api/expect.html#tohavelength) matcherin avulla, että <i>mock-funktiota</i> on kutsuttu täsmälleen kerran:
 
 ```js
 expect(mockHandler.mock.calls).toHaveLength(1)
 ```
+
+Mock-funktion kutsut tallennetaan mockin sisällä olevaan listaan [mock.calls](https://vitest.dev/api/mock#mock-calls).
 
 [Mock-oliot ja ‑funktiot](https://en.wikipedia.org/wiki/Mock_object) ovat testauksessa yleisesti käytettyjä valekomponentteja, joiden avulla korvataan testattavien komponenttien riippuvuuksia eli niiden tarvitsemia muita komponentteja. Mockit mahdollistavat mm. kovakoodattujen syötteiden palauttamisen ja metodikutsujen lukumäärän ja parametrien tarkkailun testauksen aikana.
 
@@ -346,48 +452,20 @@ Esimerkissämme mock-funktio sopi tarkoitukseen erinomaisesti, sillä sen avulla
 
 ### Komponentin Togglable testit
 
-Tehdään komponentille <i>Togglable</i> muutama testi. Lisätään komponentin lapset renderöivään div-elementtiin CSS-luokka <i>togglableContent</i>:
+Tehdään komponentille <i>Togglable</i> muutama testi. Testit ovat seuraavassa:
 
 ```js
-const Togglable = forwardRef((props, ref) => {
-  // ...
-
-  return (
-    <div>
-      <div style={hideWhenVisible}>
-        <button onClick={toggleVisibility}>
-          {props.buttonLabel}
-        </button>
-      </div>
-      <div style={showWhenVisible} className="togglableContent"> // highlight-line
-        {props.children}
-        <button onClick={toggleVisibility}>cancel</button>
-      </div>
-    </div>
-  )
-})
-```
-
-Testit ovat seuraavassa:
-
-```js
-import React from 'react'
-import '@testing-library/jest-dom'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import Togglable from './Togglable'
 
 describe('<Togglable />', () => {
-  let container
-
   beforeEach(() => {
-    container = render(
+    render(
       <Togglable buttonLabel="show...">
-        <div className="testDiv" >
-          togglable content
-        </div>
+        <div>togglable content</div>
       </Togglable>
-    ).container
+    )
   })
 
   test('renders its children', () => {
@@ -395,8 +473,8 @@ describe('<Togglable />', () => {
   })
 
   test('at start the children are not displayed', () => {
-    const div = container.querySelector('.togglableContent')
-    expect(div).toHaveStyle('display: none')
+    const element = screen.getByText('togglable content')
+    expect(element).not.toBeVisible()
   })
 
   test('after clicking the button, children are displayed', async () => {
@@ -404,23 +482,23 @@ describe('<Togglable />', () => {
     const button = screen.getByText('show...')
     await user.click(button)
 
-    const div = container.querySelector('.togglableContent')
-    expect(div).not.toHaveStyle('display: none')
+    const element = screen.getByText('togglable content')
+    expect(element).toBeVisible()
   })
 })
 ```
 
-Ennen jokaista testiä suoritettava _beforeEach_ renderöi <i>Togglable</i>-komponentin ja tallettaa paluuarvon kentän _container_ samannimiseen muuttujaan.
+Ennen jokaista testiä suoritettava _beforeEach_ renderöi <i>Togglable</i>-komponentin.
 
 Ensimmäinen testi tarkastaa, että <i>Togglable</i> renderöi sen lapsikomponentin
 
 ```js
-<div className="testDiv">
+<div>
   togglable content
 </div>
 ```
 
-Loput testit varmistavat metodia [toHaveStyle](https://www.npmjs.com/package/@testing-library/jest-dom#tohavestyle) käyttäen, että Togglablen sisältämä lapsikomponentti on alussa näkymättömissä, eli että sen sisältävään <i>div</i>-elementtiin liittyy tyyli _{ display: 'none' }_, ja että nappia painettaessa komponentti näkyy, eli näkymättömäksi tekevää tyyliä <i>ei</i> enää ole. 
+Loput testit varmistavat metodia _toBeVisible_ käyttäen, että Togglablen sisältämä lapsikomponentti on alussa näkymättömissä, eli että sen sisältävään <i>div</i>-elementtiin liittyy tyyli _{ display: 'none' }_, ja että nappia painettaessa komponentti näkyy käyttäjälle, eli näkymättömäksi tekevää tyyliä <i>ei</i> enää ole. 
 
 Lisätään vielä mukaan testi, joka varmistaa että auki togglattu sisältö saadaan piilotettua painamalla komponentin nappia <i>cancel</i>:
 
@@ -438,8 +516,8 @@ describe('<Togglable />', () => {
     const closeButton = screen.getByText('cancel')
     await user.click(closeButton)
 
-    const div = container.querySelector('.togglableContent')
-    expect(div).toHaveStyle('display: none')
+    const element = screen.getByText('togglable content')
+    expect(element).not.toBeVisible()
   })
 })
 ```
@@ -453,7 +531,7 @@ const button = screen.getByText('show...')
 await user.click(button)
 ```
 
-Käytännössä siis loimme metodin avulla <i>click</i>-tapahtuman metodin argumenttina annatulle komponentille. Voimme simuloida myös lomakkeelle kirjoittamista <i>userEventin</i>-olion avulla.
+Käytännössä siis loimme metodin avulla <i>click</i>-tapahtuman metodin argumenttina annetulle komponentille. Voimme simuloida myös lomakkeelle kirjoittamista <i>userEvent</i>-olion avulla.
 
 Tehdään testi komponentille <i>NoteForm</i>. Lomakkeen koodi näyttää seuraavalta:
 
@@ -463,28 +541,24 @@ import { useState } from 'react'
 const NoteForm = ({ createNote }) => {
   const [newNote, setNewNote] = useState('')
 
-  const handleChange = (event) => {
-    setNewNote(event.target.value)
-  }
-
-  const addNote = (event) => {
+  const addNote = event => {
     event.preventDefault()
     createNote({
       content: newNote,
-      important: Math.random() > 0.5,
+      important: true
     })
 
     setNewNote('')
   }
 
   return (
-    <div className="formDiv">
+    <div>
       <h2>Create a new note</h2>
 
       <form onSubmit={addNote}>
         <input
           value={newNote}
-          onChange={handleChange}
+          onChange={event => setNewNote(event.target.value)}
         />
         <button type="submit">save</button>
       </form>
@@ -500,15 +574,13 @@ Lomakkeen toimintaperiaatteena on kutsua sille propsina välitettyä funktiota _
 Testi on seuraavassa:
 
 ```js
-import React from 'react'
 import { render, screen } from '@testing-library/react'
-import '@testing-library/jest-dom'
 import NoteForm from './NoteForm'
 import userEvent from '@testing-library/user-event'
 
 test('<NoteForm /> updates parent state and calls onSubmit', async () => {
   const user = userEvent.setup()
-  const createNote = jest.fn()
+  const createNote = vi.fn()
 
   render(<NoteForm createNote={createNote} />)
 
@@ -525,6 +597,31 @@ test('<NoteForm /> updates parent state and calls onSubmit', async () => {
 
 Syötekenttä etsitään metodin [getByRole](https://testing-library.com/docs/queries/byrole) avulla. Syötekenttään kirjoitetaan metodin [type](https://testing-library.com/docs/user-event/utility#type) avulla. Testin ensimmäinen ekspektaatio varmistaa, että lomakkeen lähetys on aikaansaanut tapahtumankäsittelijän _createNote_ kutsumisen. Toinen ekspektaatio tarkistaa, että tapahtumankäsittelijää kutsutaan oikealla parametrilla, eli että luoduksi tulee samansisältöinen muistiinpano kuin lomakkeelle kirjoitetaan.
 
+Kannattaa huomata, että vanha kunnon _console.log_ toimii testeissä normaaliin tapaan. Jos esim. halutaan takastella miltä mock-olion tallettamat kutsut näyttävät, voidaan tehdä seuraavasti
+
+```js
+test('<NoteForm /> updates parent state and calls onSubmit', async () => {
+  const user = userEvent.setup()
+  const createNote = vi.fn()
+
+  render(<NoteForm createNote={createNote} />)
+
+  const input = screen.getByRole('textbox')
+  const sendButton = screen.getByText('save')
+
+  await user.type(input, 'testing a form...')
+  await user.click(sendButton)
+
+  console.log(createNote.mock.calls)  // highlight-line
+})
+```
+
+Testien suorituksen sekaan tulostuu
+
+```
+[ [ { content: 'testing a form...', important: true } ] ]
+```
+
 ### Lisää elementtien etsimisestä
 
 Oletetaan että lomakkeella olisi useita syötekenttiä:
@@ -540,7 +637,7 @@ const NoteForm = ({ createNote }) => {
       <form onSubmit={addNote}>
         <input
           value={newNote}
-          onChange={handleChange}
+          onChange={event => setNewNote(event.target.value)}
         />
         // highlight-start
         <input
@@ -575,6 +672,40 @@ await user.type(inputs[0], 'testing a form...')
 
 Metodi <i>getAllByRole</i>  palauttaa taulukon, ja oikea tekstikenttä on taulukossa ensimmäisenä. Testi on kuitenkin hieman epäilyttävä, sillä se luottaa tekstikenttien järjestykseen.
 
+Jos syötekentälle olisi määritelty <i>label</i>, voisi kyseisen syötekentän etsiä sen avulla käyttäen metodia _getByLabelText_. Jos siis lisäisimme syötekentälle labelin:
+
+```js
+  // ...
+  <label> // highlight-line
+    content // highlight-line
+    <input
+      value={newNote}
+      onChange={event => setNewNote(event.target.value)}
+    />
+  </label> // highlight-line
+  // ...
+```
+
+Testi löytäisi syötekentän seuraavasti:
+
+```js
+test('<NoteForm /> updates parent state and calls onSubmit', async () => {
+  const user = userEvent.setup()
+  const createNote = vi.fn()
+
+  render(<NoteForm createNote={createNote} />) 
+
+  const input = screen.getByLabelText('content') // highlight-line
+  const sendButton = screen.getByText('save')
+
+  await user.type(input, 'testing a form...')
+  await user.click(sendButton)
+
+  expect(createNote.mock.calls).toHaveLength(1)
+  expect(createNote.mock.calls[0][0].content).toBe('testing a form...')
+})
+```
+
 Syötekentille määritellään usein placeholder-teksti, joka ohjaa käyttäjää kirjoittamaan syötekenttään oikean arvon. Lisätään placeholder lomakkeellemme:
 
 ```js
@@ -588,7 +719,7 @@ const NoteForm = ({ createNote }) => {
       <form onSubmit={addNote}>
         <input
           value={newNote}
-          onChange={handleChange}
+          onChange={event => setNewNote(event.target.value)}
           placeholder='write note content here' // highlight-line 
         />
         <input
@@ -605,23 +736,24 @@ const NoteForm = ({ createNote }) => {
 Nyt oikean syötekentän etsiminen onnistuu metodin [getByPlaceholderText](https://testing-library.com/docs/queries/byplaceholdertext) avulla:
 
 ```js
-test('<NoteForm /> updates parent state and calls onSubmit', () => {
-  const createNote = jest.fn()
+test('<NoteForm /> updates parent state and calls onSubmit', async () => {
+  const user = userEvent.setup()
+  const createNote = vi.fn()
 
   render(<NoteForm createNote={createNote} />) 
 
   const input = screen.getByPlaceholderText('write note content here') // highlight-line 
   const sendButton = screen.getByText('save')
 
-  userEvent.type(input, 'testing a form...' )
-  userEvent.click(sendButton)
+  await user.type(input, 'testing a form...')
+  await user.click(sendButton)
 
   expect(createNote.mock.calls).toHaveLength(1)
-  expect(createNote.mock.calls[0][0].content).toBe('testing a form...' )
+  expect(createNote.mock.calls[0][0].content).toBe('testing a form...')
 })
 ```
 
-Kaikkein joustavimman tavan tarjoaa aiemmin [tässä luvussa](/osa5/react_sovellusten_testaaminen#sisallon-etsiminen-testattavasta-komponentista) esitellyn _render_-metodin palauttaman olion _content_-kentän metodi <i>querySelector</i>, joka mahdollistaa komponenttien etsimisen mielivaltaisten CSS-selektorien avulla. 
+Joskus oikean elementin löytäminen voi olla vaikeaa edellä kuvattuja metodeja käyttäen. Tällöin vaihtoehtona on aiemmin [tässä luvussa](/osa5/react_sovellusten_testaaminen#sisallon-etsiminen-testattavasta-komponentista) esitellyn _render_-metodin palauttaman olion _container_-kentän metodi <i>querySelector</i>, joka mahdollistaa komponenttien etsimisen mielivaltaisten CSS-selektorien avulla.
 
 Jos esim. määrittelisimme syötekentälle yksilöivän attribuutin _id_:
 
@@ -636,7 +768,7 @@ const NoteForm = ({ createNote }) => {
       <form onSubmit={addNote}>
         <input
           value={newNote}
-          onChange={handleChange}
+          onChange={event => setNewNote(event.target.value)}
           id='note-input' // highlight-line 
         />
         <input
@@ -659,89 +791,30 @@ const input = container.querySelector('#note-input')
 ```
 
 Jätämme koodiin placeholderiin perustuvan ratkaisun.
-  
-Vielä muutama tärkeä huomio. Jos komponentti renderöisi samaan HTML-elementtiin tekstiä seuraavasti:
-
-```js
-const Note = ({ note, toggleImportance }) => {
-  const label = note.important
-    ? 'make not important' : 'make important'
-
-  return (
-    <li className='note'>
-      Your awesome note: {note.content} // highlight-line
-      <button onClick={toggleImportance}>{label}</button>
-    </li>
-  )
-}
-
-export default Note
-```
-
-Ei testissä käyttämämme _getByText_ löydä elementtiä:
-
-```js 
-test('renders content', () => {
-  const note = {
-    content: 'Does not work anymore :(',
-    important: true
-  }
-
-  render(<Note note={note} />)
-
-  const element = screen.getByText('Does not work anymore :(')
-
-  expect(element).toBeDefined()
-})
-```
-
-Komento _getByText_ nimittäin etsii elementtiä missä on <i>ainoastaan parametrina teksti</i> eikä mitään muuta. Jos halutaan etsiä komponenttia joka <i>sisältää</i> tekstin, voidaan joko lisätä komennolle ekstraoptio:
-
-```js 
-const element = screen.getByText(
-  'Does not work anymore :(', { exact: false }
-)
-```
-
-tai käyttää komentoa _findByText_:
-
-```js 
-const element = await screen.findByText('Does not work anymore :(')
-```
-
-On tärkeä huomata, että toisin kuin muut _ByText_-komennoista, _findByText_ palauttaa promisen!
-
-On myös jotain tilanteita, missä komennon muoto _queryByText_ on käyttökelpoinen. Komento palauttaa elementin mutta <i>ei aiheuta poikkeusta</i> jos etsittävää elementtiä ei löydy. 
-
-Komentoa voidaan hyödyntää esim. varmistamaan, että jokin asia <i>ei renderöidy</i>:
-
-```js 
-test('does not render this', () => {
-  const note = {
-    content: 'This is a reminder',
-    important: true
-  }
-
-  render(<Note note={note} />)
-
-  const element = screen.queryByText('do not want this thing to be rendered')
-  expect(element).toBeNull()
-})
-```
 
 ### Testauskattavuus
 
-[Testauskattavuus](https://jestjs.io/blog/2020/01/21/jest-25#v8-code-coverage) saadaan helposti selville suorittamalla testit komennolla
+[Testauskattavuus](https://vitest.dev/guide/coverage.html#coverage) saadaan helposti selville suorittamalla testit komennolla
 
 ```js
-npm test -- --coverage --collectCoverageFrom='src/**/*.{jsx,js}'
+npm test -- --coverage
 ```
 
-![Konsoliin tulostuu taulukko joka näyttää kunkin tiedoston testien kattavuusraportin sekä mahdolliset testien kattamattomat rivit](../../images/5/18all.png)
+Kun suoritat ensimmäistä kertaa komennon, kysyy Vitest haluatko asentaa tarvittavan apukirjaston _@vitest/coverage-v8_. Asenna se, ja suorita komento uudelleen:
 
-Melko primitiivinen HTML-muotoinen raportti generoituu hakemistoon <i>coverage/lcov-report</i>. HTML-muotoinen raportti kertoo mm. yksittäisten komponentin testaamattomat koodirivit:
+![Konsoliin tulostuu taulukko joka näyttää kunkin tiedoston testien kattavuusraportin sekä mahdolliset testien kattamattomat rivit](../../images/5/18new.png)
 
-![Selaimeen renderöityy näkymä tiedostoista jossa värein merkattu ne rivit joita testit eivät kattaneet](../../images/5/19new.png)
+HTML-muotoinen raportti generoituu hakemistoon <i>coverage</i>. HTML-muotoinen raportti kertoo mm. yksittäisten komponentin testaamattomat koodirivit:
+
+![Selaimeen renderöityy näkymä tiedostoista jossa värein merkattu ne rivit joita testit eivät kattaneet](../../images/5/19newer.png)
+
+Lisätään vielä hakemisto <i>coverage/</i> tiedostoon <i>.gitignore</i>, jotta hakemiston sisältö jää versionhallinnan ulkopuolelle:
+
+```js
+//...
+
+coverage/
+```
 
 Sovelluksen tämänhetkinen koodi on kokonaisuudessaan [GitHubissa](https://github.com/fullstack-hy2020/part2-notes-frontend/tree/part5-8), branchissa <i>part5-8</i>.
 
@@ -765,7 +838,7 @@ Tee testi, joka varmistaa, että jos komponentin <i>like</i>-nappia painetaan ka
 
 #### 5.16: blogilistan testit, step4
 
-Tee uuden blogin luomisesta huolehtivalle lomakkelle testi, joka varmistaa, että lomake kutsuu propsina saamaansa takaisinkutsufunktiota oikeilla tiedoilla siinä vaiheessa kun blogi luodaan.
+Tee uuden blogin luomisesta huolehtivalle lomakkeelle testi, joka varmistaa, että lomake kutsuu propsina saamaansa takaisinkutsufunktiota oikeilla tiedoilla siinä vaiheessa kun blogi luodaan.
 
 </div>
 
@@ -781,7 +854,7 @@ Voisimme tehdä myös frontendille useiden komponenttien yhteistoiminnallisuutta
 
 ### Snapshot-testaus
 
-Jest tarjoaa "perinteisen" testaustavan lisäksi aivan uudenlaisen tavan testaukseen, ns. [snapshot](https://facebook.github.io/jest/docs/en/snapshot-testing.html)-testauksen. Mielenkiintoista snapshot-testauksessa on se, että sovelluskehittäjän ei tarvitse itse määritellä ollenkaan testejä, snapshot-testauksen käyttöönotto riittää.
+Vitest tarjoaa "perinteisen" testaustavan lisäksi aivan uudenlaisen tavan testaukseen, ns. [snapshot](https://vitest.dev/guide/snapshot)-testauksen. Mielenkiintoista snapshot-testauksessa on se, että sovelluskehittäjän ei tarvitse itse määritellä ollenkaan testejä, snapshot-testauksen käyttöönotto riittää.
 
 Periaatteena on verrata aina koodin muutoksen jälkeen komponenttien määrittelemää HTML:ää siihen HTML:ään, jonka komponentit määrittelivät ennen muutosta.
 

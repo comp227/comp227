@@ -99,11 +99,11 @@ module.exports = {
 O arquivo <i>.env</i> tem <i>variáveis separadas</i> para os endereços do banco de dados dos ambientes de desenvolvimento e testes:
 
 ```bash
-MONGODB_URI=mongodb+srv://fullstack:<password>@cluster0.o1opl.mongodb.net/noteApp?retryWrites=true&w=majority
+MONGODB_URI=mongodb+srv://fullstack:thepasswordishere@cluster0.o1opl.mongodb.net/noteApp?retryWrites=true&w=majority
 PORT=3001
 
 // highlight-start
-TEST_MONGODB_URI=mongodb+srv://fullstack:<password>@cluster0.o1opl.mongodb.net/testNoteApp?retryWrites=true&w=majority
+TEST_MONGODB_URI=mongodb+srv://fullstack:thepasswordishere@cluster0.o1opl.mongodb.net/testNoteApp?retryWrites=true&w=majority
 // highlight-end
 ```
 
@@ -580,7 +580,7 @@ const initialNotes = [
 const nonExistingId = async () => {
   const note = new Note({ content: 'willremovethissoon' })
   await note.save()
-  await note.remove()
+  await note.deleteOne()
 
   return note._id.toString()
 }
@@ -938,13 +938,13 @@ Nós salvamos no banco dedados as notas armazenadas no array por meio de um <i>l
 
 O console mostra a seguinte saída:
 
-<pre>
+```
 cleared
 done
 entered test
 saved
 saved
-</pre>
+```
 
 Apesar de usarmos a sintaxe async/await, nossa solução não funciona como esperávamos. A execução do teste começa antes que o banco de dados seja inicializado!
 
@@ -1004,7 +1004,7 @@ O desenvolvimento full stack é extremamente difícil, por isso usarei todos os 
 - <i>Vou escrever muitos comandos console.log para entender o comportamento do código e dos testes e auxiliar na identificação de problemas</i>
 - Se meu código não funcionar, não escreverei mais código. Em vez disso, voltarei a apagar o código até que funcione ou simplesmente retorne a um estado anterior em que tudo ainda estava funcionando.
 - <i>Se um teste falhar, eu vou me certificar de que a funcionalidade testada realmente funcione na aplicação</i>
-- Quando pedir ajuda no canal Discord ou Telegram do curso ou em outro lugar, formularei corretamente minhas perguntas. Veja [aqui](https://fullstackopen.com/ptbr/part0/informacoes_gerais#canal-do-curso-no-discord-e-telegram) como pedir ajuda.
+- Quando pedir ajuda no canal Discord do curso ou em outro lugar, formularei corretamente minhas perguntas. Veja [aqui](https://fullstackopen.com/ptbr/part0/informacoes_gerais#canal-do-curso-no-discord) como pedir ajuda.
 
 </div>
 

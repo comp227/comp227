@@ -83,7 +83,7 @@ La página de inicio de la aplicación de ejemplo funciona como una <i>aplicaci�
 El servidor ha formado este documento de alguna manera. El documento puede ser un archivo de texto <i>estático</i> guardado en el directorio del servidor. El servidor también puede formar los documentos HTML <i>dinámicamente</i> de acuerdo con el código de la aplicación, utilizando, por ejemplo, datos de una base de datos.
 El código HTML de la aplicación de ejemplo se ha formado de forma dinámica, porque contiene información sobre el número de notas creadas.
 
-El código HTML de la página de inicio es el siguiente:
+El código HTML de la página de inicio es formado dinámicamente en el servidor:
 
 ```js
 const getFrontPageHtml = noteCount => {
@@ -118,7 +118,7 @@ Escribir HTML en medio del código no es muy inteligente, pero para los programa
 
 En las aplicaciones web tradicionales, el navegador es "tonto". Solo obtiene datos HTML del servidor, y toda la lógica de la aplicación reside en el servidor. Un servidor puede ser creado utilizando [Java Spring](https://spring.io/projects/spring-framework), [Python Flask](https://flask.palletsprojects.com/en/2.2.x/), o [Ruby on Rails](http://rubyonrails.org/), por mencionar solo algunos ejemplos.
 
-El ejemplo utiliza la biblioteca [Express](https://expressjs.com/) con Node.js. Este curso utilizará Node.js y Express para crear servidores web.
+El ejemplo utiliza la librería [Express](https://expressjs.com/) con Node.js. Este curso utilizará Node.js y Express para crear servidores web.
 
 ### Ejecución de la lógica de la aplicación en el navegador
 
@@ -129,7 +129,7 @@ Ahora, cuando vayas a la página [notes](https://studies.cs.helsinki.fi/examplea
 
 Todas las solicitudes tienen tipos <i>diferentes</i>. El tipo de la primera solicitud es <i>document</i>. Es el código HTML de la página y tiene el siguiente aspecto:
 
-![Vista detallada de la primera solcitud](../../images/0/9e.png)
+![Vista detallada de la primera solicitud](../../images/0/9e.png)
 
 Cuando comparamos la página que se muestra en el navegador y el código HTML devuelto por el servidor, notamos que el código no contiene la lista de notas.
 La sección [head](https://developer.mozilla.org/es/docs/Web/HTML/Element/head) del HTML contiene una etiqueta [script](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/script), que hace que el navegador obtenga un archivo JavaScript llamado <i>main.js</i>.
@@ -264,7 +264,7 @@ La solicitud al servidor se envía en la última línea, pero el código para ma
 xhttp.onreadystatechange = function() {
 ```
 
-En esta linea, se define un <i>controlador de eventos (event handler)</i> para el objeto <em>xhttp</em> que realiza la solicitud. Cuando cambia el estado del objeto, el navegador llama a la función del controlador de eventos. El código de la función verifica que [readyState](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/readyState) sea igual a 4 (que describe la situación <i>La operación está completa</i>) y que el código de estado HTTP de la respuesta es 200.
+En esta línea, se define un <i>controlador de eventos (event handler)</i> para el objeto <em>xhttp</em> que realiza la solicitud. Cuando cambia el estado del objeto, el navegador llama a la función del controlador de eventos. El código de la función verifica que [readyState](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/readyState) sea igual a 4 (que describe la situación <i>La operación está completa</i>) y que el código de estado HTTP de la respuesta es 200.
 
 ```js
 xhttp.onreadystatechange = function() { 
@@ -280,7 +280,7 @@ El mecanismo de invocación de controladores de eventos es muy común en JavaScr
 
 Podemos pensar en las páginas HTML como estructuras de árbol implícitas.
 
-<pre>
+```
 html
   head
     link
@@ -296,7 +296,7 @@ html
       form
         input
         input
-</pre>
+```
 
 La misma estructura arbórea se puede ver en la pestaña de la consola <i>Elements (Elementos)</i>.
 
@@ -348,13 +348,13 @@ newElement = document.createElement('li')
 newElement.textContent = 'Page manipulation from console is easy'
 ```
 
-Y agregua el nuevo elemento li a la lista:
+Y agrega el nuevo elemento li a la lista:
 
 ```js
 list.appendChild(newElement)
 ```
 
-![Captura de pantalla de la pagina con la nueva nota agregada a la lista](../../images/0/16e.png)
+![Captura de pantalla de la página con la nueva nota agregada a la lista](../../images/0/16e.png)
 
 Aunque la página se actualiza en tu navegador, los cambios no son permanentes. Si se vuelve a cargar la página, la nueva nota desaparecerá porque los cambios no se enviaron al servidor. El código JavaScript que obtiene el navegador siempre creará la lista de notas basada en datos JSON de la dirección <https://studies.cs.helsinki.fi/exampleapp/data.json>.
 
@@ -408,7 +408,7 @@ Revisemos lo que sucede cuando la página <https://studies.cs.helsinki.fi/exampl
 ![Diagrama de secuencia de la interacción entre el navegador y el servidor](../../images/0/19e.png)
 
 - El navegador obtiene el código HTML que define el contenido y la estructura de la página del servidor mediante una solicitud HTTP GET.
-- Los enlaces en el código HTML hacen que el navegador también busque la hoja de estilos CSS <i>main.cs</i>...
+- Los enlaces en el código HTML hacen que el navegador también busque la hoja de estilos CSS <i>main.css</i>...
 - ...y un archivo de código JavaScript <i>main.js</i>
 - El navegador ejecuta el código JavaScript. El código realiza una solicitud HTTP GET a la dirección https://studies.cs.helsinki.fi/exampleapp/data.json, que devuelve las notas como datos JSON.
 - Cuando se han obtenido los datos, el navegador ejecuta un <i>controlador de eventos</i>, que muestra las notas en la página utilizando DOM-API.
@@ -438,13 +438,13 @@ La pestaña network también muestra los datos enviados con el formulario:
 
 Nota: En las versiones más recientes de Chrome, el menú desplegable Form Data se encuentra dentro de la nueva pestaña Payload, ubicada a la derecha de la pestaña Headers
 
-![Dropdown de datos del formulario](../../images/0/23e.png)
+![Dropdown de datos del formulario](../../images/0/23g.png)
 
 La etiqueta Form tiene atributos <i>action</i> y <i>method</i>, que definen que el envío del formulario se realiza como una solicitud HTTP POST a la dirección <i>new\_note</i>.
 
 ![Highlight de action y method](../../images/0/24e.png)
 
-El código en el servidor responsable de la solicitud POST es bastante simple (Nota: este código está en el servidor, y no en el código JavaScript obtenido por el browser):
+El código en el servidor responsable de la solicitud POST es bastante simple (Nota: este código está en el servidor, y no en el código JavaScript obtenido por el navegador):
 
 ```js
 app.post('/new_note', (req, res) => {
@@ -494,7 +494,7 @@ La cosa denominada AJAX es ahora tan común que se da por sentado. El término s
 
 En nuestra aplicación de ejemplo, la página de inicio funciona como una página web tradicional: toda la lógica está en el servidor y el navegador solo muestra el HTML como se indica.
 
-La página Notas da parte de la responsabilidad al navegador, la generación del código HTML para las notas existentes. El navegador aborda esta tarea ejecutando el código JavaScript que obtuvo del servidor. El código obtiene las notas del servidor como datos JSON y agrega elementos HTML para mostrar las notas en la página usando la [DOM-API](/es/part0/fundamentos_de_las_aplicaciones_web#modelo-de-objeto-de-documento-o-dom).
+La página Notas da parte de la responsabilidad al navegador, la generación del código HTML para las notas existentes. El navegador aborda esta tarea ejecutando el código JavaScript que obtuvo del servidor. El código obtiene las notas del servidor como datos JSON y agrega elementos HTML para mostrar las notas en la página usando la [DOM-API](/es/part0/fundamentos_de_las_aplicaciones_web#modelo-de-objetos-del-documento-o-dom).
 
 En los últimos años, ha surgido el estilo de [Aplicación de una sola página](https://es.wikipedia.org/wiki/Single-page_application) (SPA) para crear aplicaciones web. Los sitios web de estilo SPA no obtienen todas sus páginas por separado del servidor como lo hace nuestra aplicación de muestra, sino que comprenden solo una página HTML obtenida del servidor, cuyo contenido se manipula con JavaScript que se ejecuta en el navegador.
 
@@ -550,7 +550,7 @@ form.onsubmit = function(e) {
 }
 ```
 
-El comando <em>document.getElementById('notes_form')</em> le indica al código que obtenga el elemento form de la página y que registre un <i>event handler</i> para manejar el evento de envío del formulario. El controlador de eventos llama inmediatamente al método <em>e.preventDefault()</em> para evitar el manejo por defecto del envío de formularios. El método por defecto enviaría los datos al servidor y causaría una nueva solicitud GET, lo cual no queremos que suceda.
+El comando <em>document.getElementById('notes\_form')</em> le indica al código que obtenga el elemento form de la página y que registre un <i>event handler</i> para manejar el evento de envío del formulario. El controlador de eventos llama inmediatamente al método <em>e.preventDefault()</em> para evitar el manejo por defecto del envío de formularios. El método por defecto enviaría los datos al servidor y causaría una nueva solicitud GET, lo cual no queremos que suceda.
 
 Luego el controlador de eventos crea una nueva nota, la agrega a la lista de notas con el comando <em>notes.push(note)</em>, vuelve a renderizar la lista de notas en la página y envía la nueva nota al servidor.
 
@@ -584,8 +584,8 @@ El auge de las aplicaciones de una sola página trajo varias formas más "modern
 
 Sin embargo, la popularidad de Angular se desplomó después de que el [equipo de Angular anunció que el soporte para la versión 1 terminaría](https://web.archive.org/web/20151208002550/https://jaxenter.com/angular-2-0-announcement-backfires-112127.html), y que Angular 2 no sería retrocompatible con la primera versión. Angular 2 y las versiones más nuevas no recibieron una bienvenida muy cálida.
 
-Actualmente, la herramienta más popular para implementar la lógica del lado del navegador en las aplicaciones web es la biblioteca [React](https://react.dev/) de Facebook.
-Durante este curso, nos familiarizaremos con React y la biblioteca [Redux](https://github.com/reactjs/redux), que se usan juntos con frecuencia.
+Actualmente, la herramienta más popular para implementar la lógica del lado del navegador en las aplicaciones web es la librería [React](https://react.dev/) de Facebook.
+Durante este curso, nos familiarizaremos con React y la librería [Redux](https://github.com/reactjs/redux), que se usan juntos con frecuencia.
 
 El estado de React parece sólido, pero el mundo de JavaScript cambia constantemente. Por ejemplo, recientemente un recién llegado -[VueJS](https://vuejs.org/)- ha estado captando cierto interés.
 
@@ -616,7 +616,7 @@ Tú mismo sufrirás fatiga de JavaScript durante este curso. Afortunadamente par
 <div class="tasks">
   <h3>Ejercicios 0.1.-0.6.</h3>
 
-Los ejercicios se envían a través de GitHub y marcando los ejercicios como realizados en el [sistema de envío ejercicios](https://studies.cs.helsinki.fi/stats/courses/fullstackopen).
+Los ejercicios se envían a través de GitHub y marcando los ejercicios como realizados en el [sistema de envío de ejercicios](https://studies.cs.helsinki.fi/stats/courses/fullstackopen).
 
 Puedes enviar todos los ejercicios al mismo repositorio o utilizar varios repositorios diferentes. Si envías ejercicios de diferentes partes al mismo repositorio, nombra bien sus directorios. Si utilizas un repositorio privado para enviar los ejercicios, agrega a _mluukkai_ como colaborador.
 
@@ -660,7 +660,7 @@ Aprende sobre los conceptos básicos de los formularios HTML leyendo el tutorial
 
 En el capítulo [Cargando una página que contiene JavaScript - revisión](/es/part0/fundamentos_de_las_aplicaciones_web#cargando-una-pagina-que-contiene-java-script-revisada) la cadena de eventos causada al abrir la página <https://studies.cs.helsinki.fi/exampleapp/notes> se representa como un [diagrama de secuencia](https://www.geeksforgeeks.org/unified-modeling-language-uml-sequence-diagrams/)
 
-El diagrama se hizo como un archivo Markdown de Github usando la sintaxis [Mermaid](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/creating-diagrams), de la siguiente manera:
+El diagrama se hizo como un archivo Markdown de GitHub usando la sintaxis [Mermaid](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/creating-diagrams), de la siguiente manera:
 
 ```text
 sequenceDiagram
@@ -707,7 +707,7 @@ Puedes crear los diagramas con cualquier programa, pero quizás la mejor y más 
 
 Crea un diagrama que describa la situación en la que el usuario accede a la versión de [aplicación de una sola página](/es/part0/fundamentos_de_las_aplicaciones_web#aplicacion-de-una-sola-pagina) de la aplicación de notas en <https://studies.cs.helsinki.fi/exampleapp/spa>.
 
-<h4>0.6: Nueva nota en diagrama de aplicación de una sola pagina</h4>
+<h4>0.6: Nueva nota en diagrama de aplicación de una sola página</h4>
 
 Crea un diagrama que represente la situación en la que el usuario crea una nueva nota utilizando la versión de una sola página de la aplicación.
 

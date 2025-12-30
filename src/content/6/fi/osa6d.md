@@ -26,19 +26,19 @@ const App = () => {
 
   const notes = []
 
-  return(
+  return (
     <div>
       <h2>Notes app</h2>
       <form onSubmit={addNote}>
         <input name="note" />
         <button type="submit">add</button>
       </form>
-      {notes.map(note =>
+      {notes.map((note) => (
         <li key={note.id} onClick={() => toggleImportance(note)}>
-          {note.content} 
+          {note.content}
           <strong> {note.important ? 'important' : ''}</strong>
         </li>
-      )}
+      ))}
     </div>
   )
 }
@@ -47,11 +47,6 @@ export default App
 ```
 
 Alkuvaiheen koodi on GitHubissa repositorion [https://github.com/fullstack-hy2020/query-notes](https://github.com/fullstack-hy2020/query-notes/tree/part6-0) branchissa <i>part6-0</i>.
-
-**Huom:** Oletuksena repon kloonaus antaa sinulle ainoastaan main-branchin. Kloonaa siis yllä mainittu repo käyttämällä seuraavaa komentoa, jotta saat part6-0 branchin sisällön.
-```
-git clone --branch part6-0 https://github.com/fullstack-hy2020/query-notes.git
-```
 
 ### Palvelimella olevan datan hallinta React Query ‑kirjaston avulla
 
@@ -66,45 +61,63 @@ npm install @tanstack/react-query
 Tiedostoon <i>main.jsx</i> tarvitaan muutama lisäys, jotta kirjaston funktiot saadaan välitettyä koko sovelluksen käyttöön:
 
 ```js
-import ReactDOM from 'react-dom/client'
+import { createRoot } from 'react-dom/client'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query' // highlight-line
 
-import App from './App'
+import App from './App.jsx'
 
 const queryClient = new QueryClient() // highlight-line
 
-ReactDOM.createRoot(document.getElementById('root')).render(
+createRoot(document.getElementById('root')).render(
   <QueryClientProvider client={queryClient}> // highlight-line
     <App />
   </QueryClientProvider> // highlight-line
 )
 ```
 
+Käytetään aiemmista osista tuttuun tapaan [JSON Serveriä](https://github.com/typicode/json-server) simuloimaan backendin toimintaa. JSON Server on valmiiksi konfiguroituna esimerkkiprojektiin, ja projektin juuressa on tiedosto <i>db.json</i>, joka sisältää oletuksena kaksi muistiinpanoa. Voimme siis käynnistää serverin suoraan komennolla: 
+
+```js
+npm run server
+```
+
 Voimme nyt hakea muistiinpanot komponentissa <i>App</i>. Koodi laajenee seuraavasti:
 
 ```js
-import { useQuery } from '@tanstack/react-query'  // highlight-line
-import axios from 'axios'  // highlight-line
+import { useQuery } from '@tanstack/react-query' // highlight-line
 
 const App = () => {
-  // ...
+  const addNote = async (event) => {
+    event.preventDefault()
+    const content = event.target.note.value
+    event.target.note.value = ''
+    console.log(content)
+  }
 
-   // highlight-start
-  const result = useQuery({
-    queryKey: ['notes'],
-    queryFn: () => axios.get('http://localhost:3001/notes').then(res => res.data)
-  })
-
-  console.log(JSON.parse(JSON.stringify(result)))
-  // highlight-end
+  const toggleImportance = (note) => {
+    console.log('toggle importance of', note.id)
+  }
 
   // highlight-start
-  if ( result.isLoading ) {
+  const result = useQuery({
+    queryKey: ['notes'],
+    queryFn: async () => {
+      const response = await fetch('http://localhost:3001/notes')
+      if (!response.ok) {
+        throw new Error('Failed to fetch notes')
+      }
+      return await response.json()
+    }
+  })
+ 
+  console.log(JSON.parse(JSON.stringify(result)))
+ 
+  if (result.isLoading) {
     return <div>loading data...</div>
   }
+ 
+  const notes = result.data
   // highlight-end
-
-  const notes = result.data  // highlight-line
 
   return (
     // ...
@@ -112,9 +125,9 @@ const App = () => {
 }
 ```
 
-Datan hakeminen palvelimelta tapahtuu edelleen tuttuun tapaan Axiosin <i>get</i>-metodilla. Axiosin metodikutsu on kuitenkin nyt kääritty [useQuery](https://tanstack.com/query/latest/docs/react/reference/useQuery)-funktiolla muodostetuksi [kyselyksi](https://tanstack.com/query/latest/docs/react/guides/queries). Funktiokutsun ensimmäisenä parametrina on merkkijono <i>notes</i> joka toimii [avaimena](https://tanstack.com/query/latest/docs/react/guides/query-keys) määriteltyyn kyselyyn, eli muistiinpanojen listaan.
+Datan hakeminen palvelimelta tapahtuu edellisen luvun tapaan Fetch APIn <i>fetch</i>-metodilla. Metodikutsu on kuitenkin nyt kääritty [useQuery](https://tanstack.com/query/latest/docs/react/reference/useQuery)-funktiolla muodostetuksi [kyselyksi](https://tanstack.com/query/latest/docs/react/guides/queries). <i>useQuery</i>-funktiokutsun parametrina on olio, jolla on kentät <i>queryKey</i> ja <i>queryFn</i>. Kentän <i>queryKey</i> arvona on taulukko, joka sisältää merkkijonon <i>notes</i>. Se toimii [avaimena](https://tanstack.com/query/latest/docs/react/guides/query-keys) määriteltyyn kyselyyn, eli muistiinpanojen listaan.
 
-Funktion <i>useQuery</i> paluuarvo on olio, joka kertoo kyselyn tilan. Konsoliin tehty tulostus havainnollistaa tilannetta: 
+Funktion <i>useQuery</i> paluuarvo on olio, joka kertoo kyselyn tilan. Konsoliin tehty tulostus havainnollistaa tilannetta:
 
 ![](../../images/6/60new.png)
 
@@ -128,19 +141,24 @@ HTTP-pyyntö kuitenkin valmistuu niin nopeasti, että tekstiä eivät edes tarkk
 
 Sovellus siis hakee datan palvelimelta ja renderöi sen ruudulle käyttämättä ollenkaan luvuissa 2-5 käytettyjä Reactin hookeja <i>useState</i> ja <i>useEffect</i>. Palvelimella oleva data on nyt kokonaisuudessaan React Query ‑kirjaston hallinnoinnin alaisuudessa, ja sovellus ei tarvitse ollenkaan Reactin <i>useState</i>-hookilla määriteltyä tilaa!
 
-Siirretään varsinaisen HTTP-pyynnön tekevä funktio omaan tiedostoonsa <i>requests.js</i>:
+Siirretään varsinaisen HTTP-pyynnön tekevä funktio omaan tiedostoonsa <i>src/requests.js</i>:
 
 ```js
-import axios from 'axios'
+const baseUrl = 'http://localhost:3001/notes'
 
-export const getNotes = () =>
-  axios.get('http://localhost:3001/notes').then(res => res.data)
+export const getNotes = async () => {
+  const response = await fetch(baseUrl)
+  if (!response.ok) {
+    throw new Error('Failed to fetch notes')
+  }
+  return await response.json()
+}
 ```
 
-Komponentti <i>App</i> yksinkertaistuu nyt hiukan
+Komponentti <i>App</i> yksinkertaistuu nyt seuraavasti:
 
 ```js
-import { useQuery } from 'react-query' 
+import { useQuery } from '@tanstack/react-query'
 import { getNotes } from './requests' // highlight-line
 
 const App = () => {
@@ -164,25 +182,47 @@ Data haetaan jo onnistuneesti palvelimelta. Huolehditaan seuraavaksi siitä, ett
 Tehdään tiedostoon <i>requests.js</i> funktio <i>createNote</i> uusien muistiinpanojen talletusta varten:
 
 ```js
-import axios from 'axios'
-
 const baseUrl = 'http://localhost:3001/notes'
 
-export const getNotes = () =>
-  axios.get(baseUrl).then(res => res.data)
+export const getNotes = async () => {
+  const response = await fetch(baseUrl)
+  if (!response.ok) {
+    throw new Error('Failed to fetch notes')
+  }
+  return await response.json()
+}
 
-export const createNote = newNote => // highlight-line
-  axios.post(baseUrl, newNote).then(res => res.data) // highlight-line
+// highlight-start
+export const createNote = async (newNote) => {
+  const options = {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(newNote)
+  }
+ 
+  const response = await fetch(baseUrl, options)
+ 
+  if (!response.ok) {
+    throw new Error('Failed to create note')
+  }
+ 
+  return await response.json()
+}
+// highlight-end
 ```
 
 Komponentti <i>App</i> muuttuu seuraavasti
 
 ```js
-import { useQuery, useMutation } from 'react-query' // highlight-line
+import { useQuery, useMutation } from '@tanstack/react-query' // highlight-line
 import { getNotes, createNote } from './requests' // highlight-line
 
 const App = () => {
-  const newNoteMutation = useMutation({ mutationFn: createNote }) // highlight-line
+  //highlight-start
+  const newNoteMutation = useMutation({
+    mutationFn: createNote,
+  })
+  // highlight-end
 
   const addNote = async (event) => {
     event.preventDefault()
@@ -191,18 +231,20 @@ const App = () => {
     newNoteMutation.mutate({ content, important: true }) // highlight-line
   }
 
-  // 
+  //
 
 }
 ```
 
-Uuden muistiinpanon luomista varten määritellään [mutaatio](https://tanstack.com/query/latest/docs/react/guides/mutations) funktion [useMutation](https://tanstack.com/query/latest/docs/react/reference/useMutatio) avulla:
+Uuden muistiinpanon luomista varten määritellään siis [mutaatio](https://tanstack.com/query/latest/docs/react/guides/mutations) funktion [useMutation](https://tanstack.com/query/latest/docs/react/reference/useMutatio) avulla:
 
 ```js
-const newNoteMutation = useMutation({ mutationFn: createNote })
+const newNoteMutation = useMutation({
+  mutationFn: createNote,
+})
 ```
 
-Parametrina on tiedostoon <i>requests.js</i> lisäämämme funktio, joka lähettää Axiosin avulla uuden muistiinpanon palvelille.
+Parametrina on tiedostoon <i>requests.js</i> lisäämämme funktio, joka lähettää Fetch APIn avulla uuden muistiinpanon palvelimelle.
 
 Tapahtumakäsittelijä <i>addNote</i> suorittaa mutaation kutsumalla mutaatio-olion funktiota <i>mutate</i> ja antamalla uuden muistiinpanon parametrina:
 
@@ -210,24 +252,25 @@ Tapahtumakäsittelijä <i>addNote</i> suorittaa mutaation kutsumalla mutaatio-ol
 newNoteMutation.mutate({ content, important: true })
 ```
 
-Ratkaisumme on hyvä. Paitsi se ei toimi. Uusi muistiinpano kyllä tallettuu palvelimelle, mutta se ei päivity näytölle. 
+Ratkaisumme on hyvä. Paitsi se ei toimi. Uusi muistiinpano kyllä tallettuu palvelimelle, mutta se ei päivity näytölle.
 
-Jotta saamme renderöityä myös uuden muistiinpanon, meidän on kerrottava React Querylle, että kyselyn, jonka avaimena on merkkijono <i>notes</i> vanha tulos tulee mitätöidä eli
-[invalidoida](https://tanstack.com/query/latest/docs/react/guides/invalidations-from-mutations). 
+Jotta saamme renderöityä myös uuden muistiinpanon, meidän on kerrottava React Querylle, että kyselyn, jonka avaimena on merkkijono <i>notes</i>, vanha tulos tulee mitätöidä eli
+[invalidoida](https://tanstack.com/query/latest/docs/react/guides/invalidations-from-mutations).
 
 Invalidointi on onneksi helppoa, se voidaan tehdä kytkemällä mutaatioon sopiva <i>onSuccess</i>-takaisinkutsufunktio:
 
 ```js
-import { useQuery, useMutation, useQueryClient } from 'react-query' // highlight-line
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query' // highlight-line
 import { getNotes, createNote } from './requests'
 
 const App = () => {
   const queryClient = useQueryClient() // highlight-line
 
-  const newNoteMutation = useMutation(createNote, {
+  const newNoteMutation = useMutation({
+    mutationFn: createNote,
     onSuccess: () => {  // highlight-line
       queryClient.invalidateQueries({ queryKey: ['notes'] }) // highlight-line
-    },
+    }, // highlight-line
   })
 
   // ...
@@ -237,7 +280,7 @@ const App = () => {
 Kun mutaatio on nyt suoritettu onnistuneesti, suoritetaan funktiokutsu
 
 ```js
-queryClient.invalidateQueries('notes')
+queryClient.invalidateQueries({ queryKey: ['notes'] })
 ```
 
 Tämä taas saa aikaan sen, että React Query päivittää automaattisesti kyselyn, jonka avain on  <i>notes</i> eli hakee muistiinpanot palvelimelta. Tämän seurauksena sovellus renderöi ajantasaisen palvelimella olevan tilan, eli myös lisätty muistiinpano renderöityy.
@@ -245,27 +288,57 @@ Tämä taas saa aikaan sen, että React Query päivittää automaattisesti kysel
 Toteutetaan vielä muistiinpanojen tärkeyden muutos. Lisätään tiedostoon <i>requests.js</i> muistiinpanojen päivityksen hoitava funktio:
 
 ```js
-export const updateNote = updatedNote =>
-  axios.put(`${baseUrl}/${updatedNote.id}`, updatedNote).then(res => res.data)
+export const updateNote = async (updatedNote) => {
+  const options = {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(updatedNote)
+  }
+
+  const response = await fetch(`${baseUrl}/${updatedNote.id}`, options)
+
+  if (!response.ok) {
+    throw new Error('Failed to update note')
+  }
+
+  return await response.json()
+}
 ```
 
 Myös muistiinpanon päivittäminen tapahtuu mutaation avulla. Komponentti <i>App</i> laajenee seuraavasti:
 
 ```js
-import { useQuery, useMutation, useQueryClient } from 'react-query' 
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { getNotes, createNote, updateNote } from './requests' // highlight-line
 
 const App = () => {
-  // ...
+  const queryClient = useQueryClient()
 
-  const updateNoteMutation = useMutation(updateNote, {
+  const newNoteMutation = useMutation({
+    mutationFn: createNote,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['notes'] })
-    },
+    }
   })
 
+  // highlight-start
+  const updateNoteMutation = useMutation({
+    mutationFn: updateNote,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['notes'] })
+    }
+  })
+  // highlight-end
+
+  const addNote = async (event) => {
+    event.preventDefault()
+    const content = event.target.note.value
+    event.target.note.value = ''
+    newNoteMutation.mutate({ content, important: true })
+  }
+
   const toggleImportance = (note) => {
-    updateNoteMutation.mutate({...note, important: !note.important })
+    updateNoteMutation.mutate({...note, important: !note.important }) // highlight-line
   }
 
   // ...
@@ -281,11 +354,12 @@ Sovelluksen tämän hetken koodi on [GitHubissa](https://github.com/fullstack-hy
 Sovellus toimii hyvin, ja koodikin on suhteellisen yksinkertaista. Erityisesti yllättää muistiinpanojen listan muutoksen toteuttamisen helppous. Esim. kun muutamme muistiinpanon tärkeyttä, riittää kyselyn <i>notes</i> invalidointi siihen, että sovelluksen data päivittyy:
 
 ```js
-  const updateNoteMutation = useMutation(updateNote, {
-    onSuccess: () => {
-      queryClient.invalidateQueries('notes') // highlight-line
-    },
-  })
+const updateNoteMutation = useMutation({
+  mutationFn: updateNote,
+  onSuccess: () => {
+    queryClient.invalidateQueries({ queryKey: ['notes'] }) // highlight-line
+  }
+})
 ```
 
 Tästä on toki seurauksena se, että sovellus tekee muistiinpanon muutoksen aiheuttavan PUT-pyynnön jälkeen uuden GET-pyynnön, jonka avulla se hakee palvelimelta kyselyn datan:
@@ -300,14 +374,18 @@ Muutos uuden muistiinpanon lisäävän mutaation osalta on seuraavassa:
 
 ```js
 const App = () => {
-  const queryClient =  useQueryClient() 
+  const queryClient = useQueryClient()
 
-  const newNoteMutation = useMutation(createNote, {
+  const newNoteMutation = useMutation({
+    mutationFn: createNote,
+    // highlight-start
     onSuccess: (newNote) => {
-      const notes = queryClient.getQueryData('notes') // highlight-line
-      queryClient.setQueryData('notes', notes.concat(newNote)) // highlight-line
+      const notes = queryClient.getQueryData(['notes'])
+      queryClient.setQueryData(['notes'], notes.concat(newNote))
+    // highlight-end
     }
   })
+
   // ...
 }
 ```
@@ -315,18 +393,31 @@ const App = () => {
 Eli <i>onSuccess</i>-takaisinkutsussa ensin luetaan <i>queryClient</i>-olion avulla olemassaoleva kyselyn <i>notes</i> tila ja päivitetään sitä lisäämällä mukaan uusi muistiinpano, joka saadaan takaisunkutsufunktion parametrina. Parametrin arvo on funktion <i>createNote</i> palauttama arvo, jonka määriteltiin tiedostossa <i>requests.js</i> seuraavasti:
 
 ```js
-export const createNote = newNote =>
-  axios.post(baseUrl, newNote).then(res => res.data)
+export const createNote = async (newNote) => {
+  const options = {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(newNote)
+  }
+
+  const response = await fetch(baseUrl, options)
+
+  if (!response.ok) {
+    throw new Error('Failed to create note')
+  }
+
+  return await response.json()
+}
 ```
 
 Samankaltainen muutos olisi suhteellisen helppoa tehdä myös muistiinpanon tärkeyden muuttavaan mutaatioon, jätämme sen kuitenkin vapaaehtoiseksi harjoitustehtäväksi.
 
-Jos seuraamme tarkasti selaimen network-välilehteä, huomaamme että React Query hakee kaikki muistiinpanot jo siinä vaiheessa kun viemme kursorin syötekenttään:
+Kiinnitetään lopuksi huomio erikoiseen yksityiskohtaan. React Query hakee kaikki muistiinpanot uudestaan, jos siirrymme selaimessa toiselle välilehdelle ja sen jälkeen palaamme sovelluksen välilehdelle. Tämän voi havaita Developer Consolen network-välilehdeltä:
 
-![](../../images/6/62new.png)
+![](../../images/6/62new-2025.png)
 
 Mistä on kyse? Hieman [dokumentaatiota](https://tanstack.com/query/latest/docs/react/reference/useQuery)
-tutkimalla huomataan, että React Queryn kyselyjen oletusarvoinen toiminnallisuus on se, että kyselyt (joiden tila on <i>stale</i>) päivitetään kun <i>window focus</i> eli sovelluksen käyttöliittymän aktiivinen elementti vaihtuu. Voimme halutessamme kytkeä toiminnallisuuden pois luomalla kyselyn seuraavasti:
+tutkimalla huomataan, että React Queryn kyselyjen oletusarvoinen toiminnallisuus on se, että kyselyt (joiden tila on <i>stale</i>) päivitetään kun <i>window focus</i> vaihtuu. Voimme halutessamme kytkeä toiminnallisuuden pois luomalla kyselyn seuraavasti:
 
 ```js
 const App = () => {
@@ -350,7 +441,7 @@ React Query on monipuolinen kirjasto joka jo nyt nähdyn perusteella yksinkertai
 - React Query is a <i>server-state library</i>, responsible for managing asynchronous operations between your server and client
 - Redux, etc. are <i>client-state libraries</i> that can be used to store asynchronous data, albeit inefficiently when compared to a tool like React Query
 
-React Query on siis kirjasto, joka ylläpitää frontendissä <i>palvelimen tilaa</i>, eli toimii ikäänkuin välimuistina sille, mitä palvelimelle on talletettu. React Query yksinkertaistaa palvelimella olevan datan käsittelyä, ja voi joissain tapauksissa eliminoida tarpeen sille, että palvelimella oleva data haettaisiin frontendin tilaan. Useimmat React-sovellukset tarvitsevat palvelimella olevan datan tilapäisen tallettamisen lisäksi myös jonkun ratkaisun sille, miten frontendin muu tila (esim. lomakkeiden tai notifikaatioiden tila) käsitellään. 
+React Query on siis kirjasto, joka ylläpitää frontendissä <i>palvelimen tilaa</i>, eli toimii ikäänkuin välimuistina sille, mitä palvelimelle on talletettu. React Query yksinkertaistaa palvelimella olevan datan käsittelyä, ja voi joissain tapauksissa eliminoida tarpeen sille, että palvelimella oleva data haettaisiin frontendin tilaan. Useimmat React-sovellukset tarvitsevat palvelimella olevan datan tilapäisen tallettamisen lisäksi myös jonkun ratkaisun sille, miten frontendin muu tila (esim. lomakkeiden tai notifikaatioiden tila) käsitellään.
 
 </div>
 
@@ -361,15 +452,19 @@ React Query on siis kirjasto, joka ylläpitää frontendissä <i>palvelimen tila
 Tehdään nyt anekdoottisovelluksesta uusi, React Query ‑kirjastoa hyödyntävä versio. Ota lähtökohdaksesi
 [täällä](https://github.com/fullstack-hy2020/query-anecdotes) oleva projekti. Projektissa on valmiina asennettuna JSON Server, jonka toimintaa on hieman modifioitu. Käynnistä palvelin komennolla <i>npm run server</i>.
 
+Käytä pyyntöjen tekemiseen Fetch APIa. 
+
+HUOM. Osa 6 on päivitetty 12.10.2025 käyttämään Fetch APIa, joka esitellään osassa 6c. Jos olet aloittanut osan läpikäymisen ennen tätä päivämäärää, voit halutessasi käyttää tehtävissä vielä Axiosta.
+
 #### Tehtävä 6.20
 
-Toteuta anekdoottien hakeminen palvelimelta React Queryn avulla. 
+Toteuta anekdoottien hakeminen palvelimelta React Queryn avulla.
 
 Sovelluksen tulee toimia siten, että jos palvelimen kanssa kommunikoinnissa ilmenee ongelmia, tulee näkyviin ainoastaan virhesivu:
 
 ![](../../images/6/65new.png)
 
-Löydät ohjeen virhetilanteen havaitsemiseen [täältä](https://tanstack.com/query/latest/docs/react/guides/queries). 
+Löydät ohjeen virhetilanteen havaitsemiseen [täältä](https://tanstack.com/query/latest/docs/react/guides/queries).
 
 Voit simuloida palvelimen kanssa tapahtuvaa ongelmaa esim. sammuttamalla JSON Serverin. Huomaa, että kysely on ensin jonkin aikaa tilassa <i>isLoading</i> sillä epäonnistuessaan React Query yrittää pyyntöä muutaman kerran ennen kuin se toteaa, että pyyntö ei onnistu. Voit halutessasi määritellä, että uudelleenyrityksiä ei tehdä:
 
@@ -415,22 +510,23 @@ Tarkastellaan yksinkertaista laskurisovellusta. Sovellus näyttää laskurin arv
 
 ![](../../images/6/63new.png)
 
-Toteutetaan laskurin tilan hallinta Reactin sisäänrakennetun [useReducer](https://react.dev/reference/react/useReducer)-hookin tarjoamalla Reduxin kaltaisella tilanhallintamekanismilla:
+Toteutetaan laskurin tilan hallinta Reactin sisäänrakennetun [useReducer](https://react.dev/reference/react/useReducer)-hookin tarjoamalla Reduxin kaltaisella tilanhallintamekanismilla. 
 
+Sovelluksen lähtötilanteen koodi on [GitHubissa](https://github.com/fullstack-hy2020/hook-counter/tree/part6-1) branchissa <i>part6-1</i>. Tiedosto <i>App.jsx</i> näyttää seuraavalta:
 
 ```js
 import { useReducer } from 'react'
 
 const counterReducer = (state, action) => {
   switch (action.type) {
-    case "INC":
-        return state + 1
-    case "DEC":
-        return state - 1
-    case "ZERO":
-        return 0
+    case 'INC':
+      return state + 1
+    case 'DEC':
+      return state - 1
+    case 'ZERO':
+      return 0
     default:
-        return state
+      return state
   }
 }
 
@@ -441,9 +537,9 @@ const App = () => {
     <div>
       <div>{counter}</div>
       <div>
-        <button onClick={() => counterDispatch({ type: "INC"})}>+</button>
-        <button onClick={() => counterDispatch({ type: "DEC"})}>-</button>
-        <button onClick={() => counterDispatch({ type: "ZERO"})}>0</button>
+        <button onClick={() => counterDispatch({ type: 'INC' })}>+</button>
+        <button onClick={() => counterDispatch({ type: 'DEC' })}>-</button>
+        <button onClick={() => counterDispatch({ type: 'ZERO' })}>0</button>
       </div>
     </div>
   )
@@ -463,14 +559,14 @@ Tilan muutokset hoitava reduserifunktio on täysin samanlainen Reduxin reducerie
 ```js
 const counterReducer = (state, action) => {
   switch (action.type) {
-    case "INC":
-        return state + 1
-    case "DEC":
-        return state - 1
-    case "ZERO":
-        return 0
+    case 'INC':
+      return state + 1
+    case 'DEC':
+      return state - 1
+    case 'ZERO':
+      return 0
     default:
-        return state
+      return state
   }
 }
 ```
@@ -487,9 +583,9 @@ const App = () => {
     <div>
       <div>{counter}</div> // highlight-line
       <div>
-        <button onClick={() => counterDispatch({ type: "INC" })}>+</button> // highlight-line
-        <button onClick={() => counterDispatch({ type: "DEC" })}>-</button>
-        <button onClick={() => counterDispatch({ type: "ZERO" })}>0</button>
+        <button onClick={() => counterDispatch({ type: 'INC' })}>+</button> // highlight-line
+        <button onClick={() => counterDispatch({ type: 'DEC' })}>-</button>
+        <button onClick={() => counterDispatch({ type: 'ZERO' })}>0</button>
       </div>
     </div>
   )
@@ -502,17 +598,23 @@ Tilan muutos tapahtuu siis täsmälleen kuten Reduxia käytettäessä, dispatch-
 counterDispatch({ type: "INC" })
 ```
 
-Sovelluksen tämänhetkinen koodi on GitHubissa repositorion [https://github.com/fullstack-hy2020/hook-counter](https://github.com/fullstack-hy2020/hook-counter/tree/part6-1) branchissa <i>part6-1</i>.
+### Tilan välittäminen propseina
 
-### Kontekstin käyttö tilan välittämiseen
+Kun sovellus jaetaan useaan komponenttiin, laskurin arvo sekä sen hallintaan käytettävä dispatch-funktio on välitettävä jotenkin myös muille komponenteille. Eräs ratkaisu on välittää nämä tuttuun tapaan propseina.
 
-Jos haluamme jakaa sovelluksen useaan komponenttiin, on laskurin arvo sekä sen hallintaan käytettävä dispatch-funktio välitettävä myös muille komponenteille. Eräs ratkaisu olisi välittää nämä tuttuun tapaan propseina:
+Määritellään sovellukselle erillinen <i>Display</i>-komponentti, jonka vastuulla on laskurin arvon näyttäminen. Tiedoston <i>src/components/Display.jsx</i> sisällöksi tulee:
 
 ```js
 const Display = ({ counter }) => {
   return <div>{counter}</div>
 }
 
+export default Display
+```
+
+Määritellään lisäksi <i>Button</i>-komponentti, joka vastaa sovelluksen painikkeista:
+
+```js
 const Button = ({ dispatch, type, label }) => {
   return (
     <button onClick={() => dispatch({ type })}>
@@ -521,17 +623,41 @@ const Button = ({ dispatch, type, label }) => {
   )
 }
 
+export default Button
+```
+
+Tiedosto <i>App.jsx</i> muuttuu seuraavasti:
+
+```js
+import { useReducer } from 'react'
+
+import Button from './components/Button' // highlight-line
+import Display from './components/Display' // highlight-line
+
+const counterReducer = (state, action) => {
+  switch (action.type) {
+    case 'INC':
+      return state + 1
+    case 'DEC':
+      return state - 1
+    case 'ZERO':
+      return 0
+    default:
+      return state
+  }
+}
+
 const App = () => {
   const [counter, counterDispatch] = useReducer(counterReducer, 0)
 
   return (
     <div>
-      <Display counter={counter}/> // highlight-line
+      <Display counter={counter} /> // highlight-line
       <div>
         // highlight-start
-        <Button dispatch={counterDispatch} type='INC' label='+' />
-        <Button dispatch={counterDispatch} type='DEC' label='-' />
-        <Button dispatch={counterDispatch} type='ZERO' label='0' />
+        <Button dispatch={counterDispatch} type="INC" label="+" />
+        <Button dispatch={counterDispatch} type="DEC" label="-" />
+        <Button dispatch={counterDispatch} type="ZERO" label="0" />
         // highlight-end
       </div>
     </div>
@@ -539,13 +665,17 @@ const App = () => {
 }
 ```
 
-Ratkaisu toimii, mutta ei ole optimaalinen. Jos komponenttirakenne monimutkaistuu, tulee esim dispatcheria välittää propsien avulla monen komponentin kautta sitä tarvitseville komponenteille siitäkin huolimatta, että komponenttipuussa välissä olevat komponentit eivät dispatcheria tarvitsisikaan. Tästä ilmiöstä käytetään nimitystä <i>prop drilling</i>. 
+Sovellus on nyt jaettu useampaan komponenttiin. Tilanhallinta on määritelty tiedostossa <i>App.jsx</i>, josta tilanhallintaan tarvittavat arvot ja funktiot välitetään lapsikomponenteille propseina.
+
+Ratkaisu toimii, mutta ei ole optimaalinen. Jos komponenttirakenne monimutkaistuu, tulee esim dispatcheria välittää propsien avulla monen komponentin kautta sitä tarvitseville komponenteille siitäkin huolimatta, että komponenttipuussa välissä olevat komponentit eivät dispatcheria tarvitsisikaan. Tästä ilmiöstä käytetään nimitystä <i>prop drilling</i>.
+
+### Kontekstin käyttö tilan välittämiseen
 
 Reactin sisäänrakennettu [Context API](https://react.dev/learn/passing-data-deeply-with-context) tuo tilanteeseen ratkaisun. Reactin konteksti on eräänlainen sovelluksen globaali tila, johon on mahdollista antaa suora pääsy mille tahansa komponentille.
 
 Luodaan sovellukseen nyt konteksti, joka tallettaa laskurin tilanhallinnan.
 
-Konteksti luodaan Reactin hookilla [createContext](https://react.dev/reference/react/createContext). Luodaan konteksti tiedostoon <i>CounterContext.jsx</i>:
+Konteksti luodaan Reactin hookilla [createContext](https://react.dev/reference/react/createContext). Luodaan konteksti tiedostoon <i>src/CounterContext.jsx</i>:
 
 ```js
 import { createContext } from 'react'
@@ -558,18 +688,26 @@ export default CounterContext
 Komponentti <i>App</i> voi nyt <i>tarjota</i> kontekstin sen alikomponenteille seuraavasti:
 
 ```js
+import { useReducer } from 'react'
+
+import Button from './components/Button'
+import Display from './components/Display'
 import CounterContext from './CounterContext' // highlight-line
+
+// ...
 
 const App = () => {
   const [counter, counterDispatch] = useReducer(counterReducer, 0)
 
   return (
-    <CounterContext.Provider value={[counter, counterDispatch]}>  // highlight-line
-      <Display />
+    <CounterContext.Provider value={{ counter, counterDispatch }}>  // highlight-line
+      <Display /> // highlight-line
       <div>
-        <Button type='INC' label='+' />
-        <Button type='DEC' label='-' />
-        <Button type='ZERO' label='0' />
+        // highlight-start
+        <Button type="INC" label="+" />
+        <Button type="DEC" label="-" />
+        <Button type="ZERO" label="0" />
+        // highlight-end
       </div>
     </CounterContext.Provider> // highlight-line
   )
@@ -578,32 +716,47 @@ const App = () => {
 
 Kontekstin tarjoaminen siis tapahtuu käärimällä lapsikomponentit komponentin <i>CounterContext.Provider</i> sisälle ja asettamalla kontekstille sopiva arvo.
 
-Kontekstin arvoksi annetaan nyt taulukko, joka sisältää laskimen arvon, sekä arvon muuttamiseen käytettävän <i>dispatch</i>-funktion.
+Kontekstin arvoksi annetaan nyt olio, jolla on attribuutit <i>counter</i> ja <i>counterDispatch</i>. Kenttä <i>counter</i> sisältää laskimen arvon ja <i>counterDispatch</i> arvon muuttamiseen käytettävän <i>dispatch</i>-funktion.
 
-Muut komponentit saavat nyt kontekstin käyttöön hookin [useContext](https://react.dev/reference/react/useContext) avulla:
+Muut komponentit saavat nyt kontekstin käyttöön hookin [useContext](https://react.dev/reference/react/useContext) avulla. <i>Display</i>-komponentti muuttuu seuraavasti:
 
 ```js
 import { useContext } from 'react' // highlight-line
-import CounterContext from './CounterContext'
+import CounterContext from './CounterContext' // highlight-line
 
-const Display = () => {
-  const [counter, dispatch] = useContext(CounterContext) // highlight-line
-  return <div>
-    {counter}
-  </div>
+const Display = () => {  // highlight-line
+  const { counter } = useContext(CounterContext) // highlight-line
+
+  return <div>{counter}</div>
 }
+```
 
-const Button = ({ type, label }) => {
-  const [counter, dispatch] = useContext(CounterContext) // highlight-line
+<i>Display</i>-komponentti ei siis tarvitse enää propseja, vaan se saa laskurin arvon käyttöönsä kutsumalla <i>useContext</i>-hookia, jolle se antaa argumentiksi <i>CounterContext</i>-olion.
+
+Vastaavasti <i>Button</i>-komponentti muuttuu muotoon: 
+
+```js
+import { useContext } from 'react' // highlight-line
+import CounterContext from './CounterContext' // highlight-line
+
+const Button = ({ type, label }) => {  // highlight-line
+  const { counterDispatch } = useContext(CounterContext) // highlight-line
+
   return (
-    <button onClick={() => dispatch({ type })}>
+    <button onClick={() => counterDispatch({ type })}> // highlight-line
       {label}
     </button>
   )
 }
 ```
 
-Komponentit saavat siis näin tietoonsa kontekstin tarjoajan siihen asettaman sisällön, joka on tällä kertaa taulukko mikä sisältää laskurin arvon, sekä laskurin tilaa muuttavan dispatch-funktion.
+Komponentit saavat siis näin tietoonsa kontekstin tarjoajan siihen asettaman sisällön. Tässä tapauksessa kontekstina on olio, jolla on laskurin arvoa kuvaava kenttä <i>counter</i> sekä laskurin tilaa muuttavaa dispatch-funktiota kuvaava kenttä <i>counterDispatch</i>. 
+
+Komponentit ottavat käyttöönsä tarvitsemansa attribuutit käyttäen hyödykseen JavaScriptin destrukturointisyntaksia:
+
+```js
+const { counter } = useContext(CounterContext)
+```
 
 Sovelluksen tämänhetkinen koodi on GitHubissa repositorion [https://github.com/fullstack-hy2020/hook-counter](https://github.com/fullstack-hy2020/hook-counter/tree/part6-2) branchissa <i>part6-2</i>.
 
@@ -616,14 +769,14 @@ import { createContext, useReducer } from 'react'
 
 const counterReducer = (state, action) => {
   switch (action.type) {
-    case "INC":
-        return state + 1
-    case "DEC":
-        return state - 1
-    case "ZERO":
-        return 0
+    case 'INC':
+      return state + 1
+    case 'DEC':
+      return state - 1
+    case 'ZERO':
+      return 0
     default:
-        return state
+      return state
   }
 }
 
@@ -633,7 +786,7 @@ export const CounterContextProvider = (props) => {
   const [counter, counterDispatch] = useReducer(counterReducer, 0)
 
   return (
-    <CounterContext.Provider value={[counter, counterDispatch] }>
+    <CounterContext.Provider value={{ counter, counterDispatch }}>
       {props.children}
     </CounterContext.Provider>
   )
@@ -647,15 +800,20 @@ Tiedosto exporttaa nyt kontekstia vastaavan olion <i>CounterContext</i> lisäksi
 Otetaan kontekstin tarjoaja käyttöön tiedostossa <i>main.jsx</i>
 
 ```js
-import ReactDOM from 'react-dom/client'
+import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+
 import App from './App'
 import { CounterContextProvider } from './CounterContext' // highlight-line
 
-ReactDOM.createRoot(document.getElementById('root')).render(
-  <CounterContextProvider>  // highlight-line
-    <App />
-  </CounterContextProvider>  // highlight-line
+createRoot(document.getElementById('root')).render(
+  <StrictMode>
+    <CounterContextProvider> // highlight-line
+      <App />
+    </CounterContextProvider> // highlight-line
+  </StrictMode>
 )
+
 ```
 
 Nyt laskurin arvon ja toiminnallisuuden määrittelevä konteksti on <i>kaikkien</i> sovelluksen komponenttien käytettävissä.
@@ -663,17 +821,17 @@ Nyt laskurin arvon ja toiminnallisuuden määrittelevä konteksti on <i>kaikkien
 Komponentti <i>App</i> yksinkertaistuu seuraavaan muotoon:
 
 ```js
-import Display from './components/Display'
 import Button from './components/Button'
+import Display from './components/Display'
 
 const App = () => {
   return (
     <div>
       <Display />
       <div>
-        <Button type='INC' label='+' />
-        <Button type='DEC' label='-' />
-        <Button type='ZERO' label='0' />
+        <Button type="INC" label="+" />
+        <Button type="DEC" label="-" />
+        <Button type="ZERO" label="0" />
       </div>
     </div>
   )
@@ -682,16 +840,17 @@ const App = () => {
 export default App
 ```
 
-Kontekstia käytetään edelleen samalla tavalla, esim. komponentti <i>Button</i> on siis määritelty seuraavasti:
+Kontekstia käytetään edelleen samalla tavalla, eikä muihin kompoentteihin tarvita muutoksia. Esimerkiksi komponentti <i>Button</i> on siis määritelty seuraavasti:
 
 ```js
 import { useContext } from 'react'
 import CounterContext from '../CounterContext'
 
 const Button = ({ type, label }) => {
-  const [counter, dispatch] = useContext(CounterContext)
+  const { counterDispatch } = useContext(CounterContext)
+
   return (
-    <button onClick={() => dispatch({ type })}>
+    <button onClick={() => counterDispatch({ type })}>
       {label}
     </button>
   )
@@ -700,72 +859,9 @@ const Button = ({ type, label }) => {
 export default Button
 ```
 
-Komponentti <i>Button</i> tarvitsee ainoastaan laskuriin liittyvää <i>dispatch</i>-funktiota, mutta se saa kontekstista funktion <i>useContext</i> avulla haltuunsa myös laskurin arvon (eli muuttujan <i>counter</i>):
-
-```js
-  const [counter, dispatch] = useContext(CounterContext)
-```
-
-Tämä ei ole suuri ongelma, mutta koodia on mahdollista muuttaa hieman miellyttävämpään ja ilmaisuvoimaisempaan suuntaan määrittelemällä tiedostoon <i>CounterContext</i> pari apufunktiota:
-
-```js
-import { createContext, useReducer, useContext } from 'react' // highlight-line
-
-const CounterContext = createContext()
-
-// ...
-
-export const useCounterValue = () => {
-  const counterAndDispatch = useContext(CounterContext)
-  return counterAndDispatch[0]
-}
-
-export const useCounterDispatch = () => {
-  const counterAndDispatch = useContext(CounterContext)
-  return counterAndDispatch[1]
-}
-
-// ...
-```
-
-Näiden apufunktioiden avulla kontekstia käyttävien komponenttien on mahdollista saada haltuunsa juuri tarvitsemansa osa kontekstia. Komponentti <i>Display</i> muuttuu seuraavasti:
-
-```js
-import { useCounterValue } from '../CounterContext' // highlight-line
-
-const Display = () => {
-  const counter = useCounterValue() // highlight-line
-  return <div>
-    {counter}
-  </div>
-}
-
-
-export default Display
-```
-
-Komponentti <i>Button</i> muuttuu muotoon:
-
-```js
-import { useCounterDispatch } from '../CounterContext' // highlight-line
-
-const Button = ({ type, label }) => {
-  const dispatch = useCounterDispatch() // highlight-line
-  return (
-    <button onClick={() => dispatch({ type })}>
-      {label}
-    </button>
-  )
-}
-
-export default Button
-```
-
-Ratkaisu on varsin tyylikäs. Koko sovelluksen tila eli laskurin arvo ja sen hallintaan tarkoitettu koodi on nyt eristetty tiedostoon <i>CounterContext</i> joka tarjoaa komponenteille hyvin nimetyt ja helppokäyttöiset apufunktiot tilan käsittelyyn.
+Ratkaisu on varsin tyylikäs. Koko sovelluksen tila eli laskurin arvo ja sen hallintaan tarkoitettu koodi on nyt eristetty tiedostoon <i>CounterContext</i>. Komponentit saavat käyttöönsä juuri tarvitsemansa osan kontekstia <i>useContext</i>-hookia ja JavaScriptin destrukturointi-syntaksia käyttäen.
 
 Sovelluksen lopullinen koodi on GitHubissa repositorion [https://github.com/fullstack-hy2020/hook-counter](https://github.com/fullstack-hy2020/hook-counter/tree/part6-3) branchissa <i>part6-3</i>.
-
-Teknisenä yksityiskohtana todettakoon, että apufunktiot <i>useCounterValue</i> ja <i>useCounterDispatch</i> on määritelty ns. [custom hookeina](https://react.dev/learn/reusing-logic-with-custom-hooks), sillä funktion <i>useContext</i> kutsuminen [ei ole mahdollista](https://legacy.reactjs.org/docs/hooks-rules.html) muualta kuin React-komponenteista tai custom hookeista käsin. Custom hookit taas ovat JavaScript-funktioita joiden nimen pitää alkaa merkkijonolla _use_. Palaamme custom hookeihin hieman tarkemmin kurssin [osassa 7](/osa7/custom_hookit).
 
 </div>
 
@@ -790,8 +886,7 @@ Kuten tehtävässä 6.20 todettiin, palvelin vaatii, että lisättävän anekdoo
 
 ![](../../images/6/67new.png)
 
-Virhetilanne kannattaa käsitellä sille rekisteröidyssä takaisinkutsufunktiossa, ks 
-[täältä](https://tanstack.com/query/latest/docs/react/reference/useMutation) miten rekisteröit funktion.
+Virhetilanne kannattaa käsitellä sille rekisteröidyssä takaisinkutsufunktiossa, ks [täältä](https://tanstack.com/query/latest/docs/react/reference/useMutation) miten rekisteröit funktion.
 
 Tämä oli osan viimeinen tehtävä ja on aika pushata koodi GitHubiin sekä merkata tehdyt tehtävät [palautussovellukseen](https://studies.cs.helsinki.fi/stats/courses/fullstackopen).
 
@@ -811,14 +906,14 @@ Aloittelijaa ja kokenuttakin web-kehittäjää tilanne saattaa hämmentää. Mit
 
 Yksinkertaisessa sovelluksessa <i>useState</i> on varmasti hyvä lähtökohta. Jos sovellus kommunikoi palvelimen kanssa, voi kommunikoinnin hoitaa lukujen 1-5 tapaan itse sovelluksen tilaa hyödyntäen. Viime aikoina on kuitenkin yleistynyt se, että kommunikointi ja siihen liittyvä tilanhallinta siirretään ainakin osin React Queryn (tai jonkun muun samantapaisen kirjaston) hallinnoitavaksi. Jos useState ja sen myötä aiheutuva prop drilling arveluttaa, voi kontekstin käyttö olla hyvä vaihtoehto. On myös tilanteita, joissa osa tilasta voi olla järkevää hoitaa useStaten ja osa kontekstien avulla.
 
-Kaikkien kattavimman ja järeimmän tilanhallintaratkaisun tarjoaa Redux, joka on eräs tapa toteuttaa ns. [Flux](https://facebook.github.io/flux/)-arkkitehtuuri. Redux on hieman vanhempi kuin tässä aliosassa esitetyt ratkaisut. Reduxin jähmeys onkin ollut motivaationa monille uusille tilanhallintaratkaisuille kuten tässä osassa esittelemällemme Reactin <i>useReducer</i>:ille. Osa Reduxin jäykkyyteen kohdistuvasta kritiikistä tosin on jo vanhentunut [Redux Toolkit](https://redux-toolkit.js.org/):in ansiosta. 
+Kaikkien kattavimman ja järeimmän tilanhallintaratkaisun tarjoaa Redux, joka on eräs tapa toteuttaa ns. [Flux](https://facebookarchive.github.io/flux/)-arkkitehtuuri. Redux on hieman vanhempi kuin tässä aliosassa esitetyt ratkaisut. Reduxin jähmeys onkin ollut motivaationa monille uusille tilanhallintaratkaisuille kuten tässä osassa esittelemällemme Reactin <i>useReducer</i>:ille. Osa Reduxin jäykkyyteen kohdistuvasta kritiikistä tosin on jo vanhentunut [Redux Toolkit](https://redux-toolkit.js.org/):in ansiosta.
 
 Vuosien saatossa on myös kehitelty muita Reduxia vastaavia tilantahallintakirjastoja, kuten esim. uudempi tulokas [Recoil](https://recoiljs.org/) ja hieman iäkkäämpi [MobX](https://mobx.js.org/). [Npm trendsien](https://npmtrends.com/mobx-vs-recoil-vs-redux) perusteella Redux kuitenkin dominoi edelleen selvästi, ja näyttää itse asiassa vaan kasvattavan etumatkaansa:
 
 ![](../../images/6/64new.png)
 
-Myöskään Reduxia ei ole pakko käyttää sovelluksessa kokonaisvaltaisesti. Saattaa olla mielekästä hoitaa esim. sovellusten lomakkeiden datan tallentaminen Reduxin ulkopuolella, erityisesti niissä tilanteissa, missä lomakkeen tila ei vaikuta muuhun sovellukseen. Myös Reduxin ja React Queryn yhteiskäyttö samassa sovellukssa on täysin mahdollista. 
+Myöskään Reduxia ei ole pakko käyttää sovelluksessa kokonaisvaltaisesti. Saattaa olla mielekästä hoitaa esim. sovellusten lomakkeiden datan tallentaminen Reduxin ulkopuolella, erityisesti niissä tilanteissa, missä lomakkeen tila ei vaikuta muuhun sovellukseen. Myös Reduxin ja React Queryn yhteiskäyttö samassa sovelluksessa on täysin mahdollista.
 
-Kysymys siitä mitä tilanhallintarkatkaisua tulisi käyttää ei ole ollenkaan suoraviivainen. Yhtä oikeaa vastausta on mahdotonta antaa, ja on myös todennäköistä, että valittu tilanhallintaratkaisu saattaa sovelluksen kasvaessa osoittautua siinä määrin epäoptimaaliseksi, että tilanhallinnan ratkaisuja täytyy vaihtaa vaikka sovellus olisi jo ehditty viedä tuotantokäyttöön.
+Kysymys siitä mitä tilanhallintaratkaisua tulisi käyttää ei ole ollenkaan suoraviivainen. Yhtä oikeaa vastausta on mahdotonta antaa, ja on myös todennäköistä, että valittu tilanhallintaratkaisu saattaa sovelluksen kasvaessa osoittautua siinä määrin epäoptimaaliseksi, että tilanhallinnan ratkaisuja täytyy vaihtaa vaikka sovellus olisi jo ehditty viedä tuotantokäyttöön.
 
 </div>

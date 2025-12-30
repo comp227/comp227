@@ -85,7 +85,7 @@ lang: zh
  然而，我们将利用在Heroku云服务平台上为应用创建Postgres数据库的优势，这一点在第3和第4章节中已经很熟悉。
 
 <!-- In the theory material of this section, we will be building a Postgres-enabled version from the backend of the notes-storage application, which was built in sections 3 and 4.-->
- 在本节的理论材料中，我们将从第3和第4节中建立的笔记存储应用的后台建立一个支持Postgres的版本。
+ 在本节的理论材料中，我们将从第3和第4节中建立的笔记存储应用的后端建立一个支持Postgres的版本。
 
 <!-- Now let's create a suitable directory inside the Heroku application, add a database to it and use the _heroku config_ command to get the <i>connect string</i>, which is required to connect to the database:-->
  现在让我们在Heroku应用中创建一个合适的目录，在其中添加一个数据库，并使用_heroku config_命令来获得<i>连接字符串</i>，这是连接数据库所需要的。
@@ -97,7 +97,7 @@ heroku create
 heroku addons:create heroku-postgresql:hobby-dev -a <app-name>
 heroku config -a <app-name>
 === cryptic-everglades-76708 Config Vars
-DATABASE_URL: postgres://<username>:<password>@<host-of-postgres-addon>:5432/<db-name>
+DATABASE_URL: postgres://<username>:thepasswordishere@<host-of-postgres-addon>:5432/<db-name>
 ```
 
 <!-- Particularly when using a relational database, it is essential to access the database directly as well. There are many ways to do this, there are several different graphical user interfaces, such as [pgAdmin](https://www.pgadmin.org/). However, we will be using Postgres [psql](https://www.postgresql.org/docs/current/app-psql.html) command-line tool.-->
@@ -262,7 +262,7 @@ The database <i>connect string</i>, which is revealed by the _heroku config_ com
 
 ```bash
 $ cat .env
-DATABASE_URL=postgres://<username>:<password>@ec2-54-83-137-206.compute-1.amazonaws.com:5432/<databasename>
+DATABASE_URL=postgres://<username>:thepasswordishere@ec2-54-83-137-206.compute-1.amazonaws.com:5432/<databasename>
 ```
 
 Let's test for a successful connection:
@@ -465,7 +465,7 @@ app.post('/api/notes', async (req, res) => {
 
 Creating a new note is done by calling the model's <i>Note</i> method [create](https://sequelize.org/master/manual/model-querying-basics.html#simple-insert-queries) and passing as a parameter an object that defines the values of the columns.
 
-Instead of the <i>create</i> method, it [is also possible](https://sequelize.org/master/manual/model-instances.html#creating-an-instance) to save to a database using the [build](https://sequelize.org/master/class/lib/model.js~Model.html#static-method-build) method first to create a Model-object from the desired data, and then calling the [save](https://sequelize.org/master/class/lib/model.js~Model.html#instance-method-save) method on it:
+Instead of the <i>create</i> method, it [is also possible](https://sequelize.org/master/manual/model-instances.html#creating-an-instance) to save to a database using the [build](https://sequelize.org/api/v6/class/src/model.js~model#static-method-build) method first to create a Model-object from the desired data, and then calling the [save](https://sequelize.org/master/class/lib/model.js~Model.html#instance-method-save) method on it:
 
 ```js
 const note = Note.build(req.body)

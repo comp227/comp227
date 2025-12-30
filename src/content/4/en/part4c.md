@@ -169,7 +169,7 @@ The ids of the notes are stored within the user document as an array of Mongo id
 }
 ```
 
-The type of the field is <i>ObjectId</i> that references <i>note</i>-style documents. Mongo does not inherently know that this is a field that references notes, the syntax is purely related to and defined by Mongoose.
+The field type is <i>ObjectId</i>, meaning it refers to another document. The <i>ref</i> field specifies the name of the model being referenced. Mongo does not inherently know that this is a field that references notes, the syntax is purely related to and defined by Mongoose.
 
 Let's expand the schema of the note defined in the <i>models/note.js</i> file so that the note contains information about the user who created it:
 
@@ -207,11 +207,16 @@ Creating new users happens in compliance with the RESTful conventions discussed 
 Let's define a separate <i>router</i> for dealing with users in a new <i>controllers/users.js</i> file. Let's take the router into use in our application in the <i>app.js</i> file, so that it handles requests made to the <i>/api/users</i> url:
 
 ```js
-const usersRouter = require('./controllers/users')
+// ...
+const notesRouter = require('./controllers/notes')
+const usersRouter = require('./controllers/users') // highlight-line
 
 // ...
 
-app.use('/api/users', usersRouter)
+app.use('/api/notes', notesRouter)
+app.use('/api/users', usersRouter) // highlight-line
+
+// ...
 ```
 
 The contents of the file, <i>controllers/users.js</i>, that defines the router is as follows:
@@ -243,7 +248,7 @@ module.exports = usersRouter
 
 The password sent in the request is <i>not</i> stored in the database. We store the <i>hash</i> of the password that is generated with the _bcrypt.hash_ function.
 
-The fundamentals of [storing passwords](https://codahale.com/how-to-safely-store-a-password/) are outside the scope of this course material. We will not discuss what the magic number 10 assigned to the [saltRounds](https://github.com/kelektiv/node.bcrypt.js/#a-note-on-rounds) variable means, but you can read more about it in the linked material.
+The fundamentals of [storing passwords](https://bytebytego.com/guides/how-to-store-passwords-in-the-database/) are outside the scope of this course material. We will not discuss what the magic number 10 assigned to the [saltRounds](https://github.com/kelektiv/node.bcrypt.js/#a-note-on-rounds) variable means, but you can read more about it in the linked material.
 
 Our current code does not contain any error handling or input validation for verifying that the username and password are in the desired format.
 
@@ -285,10 +290,10 @@ describe('when there is initially one user in db', () => {
       .expect('Content-Type', /application\/json/)
 
     const usersAtEnd = await helper.usersInDb()
-    expect(usersAtEnd).toHaveLength(usersAtStart.length + 1)
+    assert.strictEqual(usersAtEnd.length, usersAtStart.length + 1)
 
     const usernames = usersAtEnd.map(u => u.username)
-    expect(usernames).toContain(newUser.username)
+    assert(usernames.includes(newUser.username))
   })
 })
 ```
@@ -334,34 +339,27 @@ describe('when there is initially one user in db', () => {
       .expect(400)
       .expect('Content-Type', /application\/json/)
 
-    expect(result.body.error).toContain('expected `username` to be unique')
-
     const usersAtEnd = await helper.usersInDb()
-    expect(usersAtEnd).toEqual(usersAtStart)
+    assert(result.body.error.includes('expected `username` to be unique'))
+
+    assert.strictEqual(usersAtEnd.length, usersAtStart.length)
   })
 })
 ```
 
 The test case obviously will not pass at this point. We are essentially practicing [test-driven development (TDD)](https://en.wikipedia.org/wiki/Test-driven_development), where tests for new functionality are written before the functionality is implemented.
 
-Mongoose does not have a built-in validator for checking the uniqueness of a field. Fortunately there is a ready-made solution for this, the [mongoose-unique-validator](https://www.npmjs.com/package/mongoose-unique-validator) library. Let us install the library:
-
-```bash
-npm install mongoose-unique-validator
-```
-
-and extend the code by following the library documentation in <i>models/user.js</i>:
+Mongoose validations do not provide a direct way to check the uniqueness of a field value. However, it is possible to achieve uniqueness by defining [uniqueness index](https://mongoosejs.com/docs/schematypes.html) for a field. The definition is done as follows:
 
 ```js
 const mongoose = require('mongoose')
-const uniqueValidator = require('mongoose-unique-validator') // highlight-line
 
 const userSchema = mongoose.Schema({
   // highlight-start
   username: {
     type: String,
     required: true,
-    unique: true
+    unique: true // this ensures the uniqueness of username
   },
   // highlight-end
   name: String,
@@ -374,20 +372,30 @@ const userSchema = mongoose.Schema({
   ],
 })
 
-userSchema.plugin(uniqueValidator) // highlight-line
-
 // ...
 ```
 
-Note: when installing the _mongoose-unique-validator_ library, you may encounter the following error message:
+However, we want to be careful when using the uniqueness index. If there are already documents in the database that violate the uniqueness condition, [no index will be created](https://dev.to/akshatsinghania/mongoose-unique-not-working-16bf). So when adding a uniqueness index, make sure that the database is in a healthy state! The test above added the user with username _root_ to the database twice, and these must be removed for the index to be formed and the code to work.
 
-![](../../images/4/uniq.png)
+Mongoose validations do not detect the index violation, and instead of _ValidationError_ they return an error of type _MongoServerError_. We therefore need to extend the error handler for that case:
 
-The reason for this is that at the time of writing (10.11.2023) the library is not yet compatible with Mongoose version 8. If you encounter this error, you can revert to an older version of Mongoose by running the command
+```js
+const errorHandler = (error, request, response, next) => {
+  if (error.name === 'CastError') {
+    return response.status(400).send({ error: 'malformatted id' })
+  } else if (error.name === 'ValidationError') {
+    return response.status(400).json({ error: error.message })
+// highlight-start
+  } else if (error.name === 'MongoServerError' && error.message.includes('E11000 duplicate key error')) {
+    return response.status(400).json({ error: 'expected `username` to be unique' })
+  }
+  // highlight-end
 
+  next(error)
+}
 ```
-npm install mongoose@7.6.5
-```
+
+After these changes, the tests will pass.
 
 We could also implement other validations into the user creation. We could check that the username is long enough, that the username only consists of permitted characters, or that the password is strong enough. Implementing these functionalities is left as an optional exercise.
 
@@ -408,7 +416,6 @@ For making new users in a production or development environment, you may send a 
     "name": "Superuser",
     "password": "salainen"
 }
-
 ```
 
 The list looks like this:
@@ -424,6 +431,8 @@ The code for creating a new note has to be updated so that the note is assigned 
 Let's expand our current implementation in <i>controllers/notes.js</i> so that the information about the user who created a note is sent in the <i>userId</i> field of the request body:
 
 ```js
+const notesRouter = require('express').Router()
+const Note = require('../models/note')
 const User = require('../models/user') //highlight-line
 
 //...
@@ -431,39 +440,31 @@ const User = require('../models/user') //highlight-line
 notesRouter.post('/', async (request, response) => {
   const body = request.body
 
-  const user = await User.findById(body.userId) //highlight-line
+  const user = await User.findById(body.userId)// highlight-line
+
+  // highlight-start
+  if (!user) {
+    return response.status(400).json({ error: 'userId missing or not valid' })
+  }
+  // highlight-end
 
   const note = new Note({
     content: body.content,
-    important: body.important === undefined ? false : body.important,
-    user: user.id //highlight-line
+    important: body.important || false,
+    user: user._id //highlight-line
   })
 
   const savedNote = await note.save()
   user.notes = user.notes.concat(savedNote._id) //highlight-line
   await user.save()  //highlight-line
-  
+
   response.status(201).json(savedNote)
 })
-```
-The note scheme will also need to change as follows in our models/note.js file:
 
-```js
-const noteSchema = new mongoose.Schema({
-  content: {
-    type: String,
-    required: true,
-    minlength: 5
-  },
-  important: Boolean,
-  // highlight-start
-  user: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
-  }
-  //highlight-end
-})
+// ...
 ```
+
+The database is first queried for a user using the <i>userId</i> provided in the request. If the user is not found, the response is sent with a status code of 400 (<i>Bad Request</i>) and an error message: <i>"userId missing or not valid"</i>.
 
 It's worth noting that the <i>user</i> object also changes. The <i>id</i> of the note is stored in the <i>notes</i> field of the <i>user</i> object:
 
@@ -488,7 +489,9 @@ We can see that the user has two notes.
 
 Likewise, the ids of the users who created the notes can be seen when we visit the route for fetching all notes:
 
-![api/notes shows ids of numbers in JSON](../../images/4/12e.png)
+![api/notes shows ids of users in JSON](../../images/4/12e.png)
+
+Due to the changes we made, the tests no longer pass, but we leave fixing the tests as an optional exercise. The changes we made have also not been accounted for in the frontend, so the note creation functionality no longer works. We will fix the frontend in part 5 of the course.
 
 ### Populate
 
@@ -507,15 +510,15 @@ usersRouter.get('/', async (request, response) => {
 })
 ```
 
-The [populate](http://mongoosejs.com/docs/populate.html) method is chained after the <i>find</i> method making the initial query. The parameter given to the populate method defines that the <i>ids</i> referencing <i>note</i> objects in the <i>notes</i> field of the <i>user</i> document will be replaced by the referenced <i>note</i> documents.
+The [populate](http://mongoosejs.com/docs/populate.html) method is chained after the <i>find</i> method making the initial query. The argument given to the populate method defines that the <i>ids</i> referencing <i>note</i> objects in the <i>notes</i> field of the <i>user</i> document will be replaced by the referenced <i>note</i> documents. Mongoose first queries the <i>users</i> collection for the list of users, and then queries the collection corresponding to the model object specified by the <i>ref</i> property in the users schema for data with the given object id.
 
 The result is almost exactly what we wanted:
 
 ![JSON data showing populated notes and users data with repetition](../../images/4/13new.png)
 
-We can use the populate parameter for choosing the fields we want to include from the documents. In addition to the field <i>id</i> we are now only interested in <i>content</i> and <i>important</i>.
+We can use the populate method for choosing the fields we want to include from the documents. In addition to the field <i>id</i> we are now only interested in <i>content</i> and <i>important</i>.
 
-The selection of fields is done with the Mongo [syntax](https://docs.mongodb.com/manual/tutorial/project-fields-from-query-results/#return-the-specified-fields-and-the-id-field-only):
+The selection of fields is done with the Mongo [syntax](https://www.mongodb.com/docs/manual/tutorial/project-fields-from-query-results/#return-the-specified-fields-and-the-_id-field-only):
 
 ```js
 usersRouter.get('/', async (request, response) => {
@@ -565,7 +568,5 @@ const noteSchema = new mongoose.Schema({
 ```
 
 You can find the code for our current application in its entirety in the <i>part4-8</i> branch of [this GitHub repository](https://github.com/fullstack-hy2020/part3-notes-backend/tree/part4-8).
-
-NOTE: At this stage, firstly, some tests will fail. We will leave fixing the tests to a non-compulsory exercise. Secondly, in the deployed notes app, the creating a note feature will stop working as user is not yet linked to the frontend.
 
 </div>

@@ -113,7 +113,7 @@ A imagem exibe o <i>URI do MongoDB</i>, que é o endereço do banco de dados que
 O endereço se parece com isso:
 
 ```bash
-mongodb+srv://fullstack:<password>@cluster0.o1opl.mongodb.net/?retryWrites=true&w=majority
+mongodb+srv://fullstack:thepasswordishere@cluster0.o1opl.mongodb.net/?retryWrites=true&w=majority
 ```
 
 Estamos prontos para usar o banco de dados.
@@ -317,12 +317,12 @@ node mongo.js suasenha
 
 o programa deverá exibir todas as entradas da lista telefônica:
 
-<pre>
+```
 phonebook:
 Anna 040-1234556
 Arto Vihavainen 045-1232456
 Ada Lovelace 040-1231236
-</pre>
+```
 
 É possível obter os parâmetros da linha de comando através da variável [process.argv](https://nodejs.org/docs/latest-v8.x/api/process.html#process_process_argv).
 
@@ -517,7 +517,7 @@ npm install dotenv
 Para usar a biblioteca, criamos um arquivo <i>.env</i> na raiz do projeto. As variáveis de ambiente são definidas dentro do arquivo, coisa que se parece assim:
 
 ```bash
-MONGODB_URI=mongodb+srv://fullstack:<password>@cluster0.o1opl.mongodb.net/noteApp?retryWrites=true&w=majority
+MONGODB_URI=mongodb+srv://fullstack:thepasswordishere@cluster0.o1opl.mongodb.net/noteApp?retryWrites=true&w=majority
 PORT=3001
 ```
 
@@ -560,7 +560,7 @@ No entanto, uma [opção melhor](https://community.fly.io/t/clarification-on-env
 Defina o valor da variável de ambiente na linha de comando desta forma:
 
 ```
-fly secrets set MONGODB_URI='mongodb+srv://fullstack:<password>@cluster0.o1opl.mongodb.net/noteApp?retryWrites=true&w=majority'
+fly secrets set MONGODB_URI='mongodb+srv://fullstack:thepasswordishere@cluster0.o1opl.mongodb.net/noteApp?retryWrites=true&w=majority'
 ```
 
 Já que a variável PORT também é definida em nosso .env, é essencial ignorar o arquivo no Fly.io, caso contrário, a aplicação iniciará na porta errada.
@@ -686,7 +686,7 @@ Além da nota inexistente, há mais uma situação de erro que precisa ser lidad
 
 Se fizermos a seguinte requisição, obteremos a mensagem de erro mostrada abaixo:
 
-<pre>
+```
 Method: GET
 Path:   /api/notes/someInvalidId
 Body:   {}
@@ -695,7 +695,7 @@ Body:   {}
     at CastError (/Users/mluukkai/opetus/_fullstack/osa3-muisiinpanot/node_modules/mongoose/lib/error/cast.js:27:11)
     at ObjectId.cast (/Users/mluukkai/opetus/_fullstack/osa3-muisiinpanot/node_modules/mongoose/lib/schema/objectid.js:158:13)
     ...
-</pre>
+```
 
 Dado um ID mal formatado como argumento, o método <em>findById</em> lançará um erro, fazendo com que a promessa retornada seja rejeitada. Isso fará com que a função callback definida no bloco <em>catch</em> seja chamada.
 
@@ -912,7 +912,7 @@ Desenvolvimento Full Stack é algo <i>extremamente difícil</i>, e é por isso q
 - Eu vou progredir aos poucos, passo a passo;
 - Eu escreverei muitas instruções _console.log_ para ter certeza de que estou entendendo como o código se comporta e para me ajudar a identificar os erros;
 - Se meu código não funcionar, não escreverei mais nenhuma linha no código. Em vez disso, começarei a excluir o código até que funcione ou retornarei ao estado em que tudo ainda estava funcionando; e
-- Quando eu pedir ajuda no canal do Discord ou Telegram do curso ou em outro lugar, formularei minhas perguntas de forma adequada. Veja [aqui](/ptbr/part0/informacoes_gerais#como-pedir-ajuda-no-discord-telegam) como pedir ajuda.
+- Quando eu pedir ajuda no canal do Discord do curso ou em outro lugar, formularei minhas perguntas de forma adequada. Veja [aqui](/ptbr/part0/informacoes_gerais#como-pedir-ajuda-no-discord) como pedir ajuda.
 
 </div>
 

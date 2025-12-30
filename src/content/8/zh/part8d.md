@@ -8,7 +8,7 @@ lang: zh
 <div class="content">
 
 <!-- The frontend of our application shows the phone directory just fine with the updated server. However, if we want to add new persons, we have to add login functionality to the frontend.-->
- 我们的应用的前端在更新了服务器后显示电话目录很好。然而，如果我们想添加新的人员，我们必须在前台添加登录功能。
+ 我们的应用的前端在更新了服务器后显示电话目录很好。然而，如果我们想添加新的人员，我们必须在前端添加登录功能。
 
 ### User login
 
@@ -60,7 +60,7 @@ export const LOGIN = gql`
 
 ```js
 import { useState, useEffect } from 'react'
-import { useMutation } from '@apollo/client'
+import { useMutation } from '@apollo/client/react'
 import { LOGIN } from '../queries'
 
 const LoginForm = ({ setError, setToken }) => {
@@ -122,10 +122,10 @@ export default LoginForm
 <!-- Let's also add a button which enables a logged-in user to log out. The button's onClick handler sets the _token_ state to null, removes the token from local storage and resets the cache of the Apollo client. The last step is [important](https://www.apollographql.com/docs/react/networking/authentication/#reset-store-on-logout), because some queries might have fetched data to cache, which only logged-in users should have access to.-->
  让我们也添加一个按钮，使登录的用户可以注销。这个按钮的onClick处理程序将_token_状态设置为null，从本地存储中删除token并重置Apollo客户端的缓存。最后一步是[重要的](https://www.apollographql.com/docs/react/networking/authentication/#reset-store-on-logout)，因为有些查询可能已经获取了数据到缓存中，而这些数据只有登录的用户才有机会访问。
 
-<!-- We can reset the cache using the [resetStore](https://www.apollographql.com/docs/react/api/core/ApolloClient/#ApolloClient.resetStore) method of an Apollo _client_ object.-->
- 我们可以使用Apollo _client_对象的[resetStore](https://www.apollographql.com/docs/react/api/core/ApolloClient/#ApolloClient.resetStore)方法重置缓存。
-<!-- The client can be accessed with the [useApolloClient](https://www.apollographql.com/docs/react/api/react-hooks/#useapolloclient) hook:-->
-客户端可以通过[useApolloClient](https://www.apollographql.com/docs/react/api/react-hooks/#useapolloclient)钩子访问。
+<!-- We can reset the cache using the [resetStore](https://www.apollographql.com/docs/react/api/core/ApolloClient#resetstore) method of an Apollo _client_ object.-->
+ 我们可以使用Apollo _client_对象的[resetStore](https://www.apollographql.com/docs/react/api/core/ApolloClient#resetstore)方法重置缓存。
+<!-- The client can be accessed with the [useApolloClient](https://www.apollographql.com/docs/react/api/react/useApolloClient) hook:-->
+客户端可以通过[useApolloClient](https://www.apollographql.com/docs/react/api/react/useApolloClient)钩子访问。
 
 ```js
 const App = () => {
@@ -175,7 +175,7 @@ const App = () => {
 ### Adding a token to a header
 
 <!-- After the backend changes, creating new persons requires that a valid user token is sent with the request. In order to send the token, we have to change the way we define the _ApolloClient_ object in <i>index.js</i> a little.-->
- 后台修改后，创建新的人需要在请求中发送一个有效的用户令牌。为了发送令牌，我们必须稍微改变一下<i>index.js</i>中定义_ApolloClient_对象的方式。
+ 后端修改后，创建新的人需要在请求中发送一个有效的用户令牌。为了发送令牌，我们必须稍微改变一下<i>index.js</i>中定义_ApolloClient_对象的方式。
 
 ```js
 import { setContext } from '@apollo/client/link/context' // highlight-line
@@ -294,8 +294,8 @@ const PersonForm = ({ setError }) => {
 <!-- In some situations, the only sensible way to keep the cache up to date is using the _update_ callback.-->
  在某些情况下，保持缓存更新的唯一合理方式是使用_update_回调。
 
-<!-- When necessary, it is possible to disable cache for the whole application or [single queries](https://www.apollographql.com/docs/react/api/react/hooks/#options) by setting the field managing the use of cache, [fetchPolicy](https://www.apollographql.com/docs/react/data/queries/#configuring-fetch-logic) as <em>no-cache</em>.-->
- 必要时，可以通过将管理缓存使用的字段[fetchPolicy](https://www.apollographql.com/docs/react/data/queries/#configuring-fetch-logic)设置为<em>no-cache</em>，来禁用整个应用或[单个查询](https://www.apollographql.com/docs/react/api/react/hooks/#options)的缓存。
+<!-- When necessary, it is possible to disable cache for the whole application or [single queries](https://www.apollographql.com/docs/react/api/react/hooks/#options) by setting the field managing the use of cache, [fetchPolicy](https://www.apollographql.com/docs/react/data/queries#setting-a-fetch-policy) as <em>no-cache</em>.-->
+ 必要时，可以通过将管理缓存使用的字段[fetchPolicy](https://www.apollographql.com/docs/react/data/queries#setting-a-fetch-policy)设置为<em>no-cache</em>，来禁用整个应用或[单个查询](https://www.apollographql.com/docs/react/api/react/hooks/#options)的缓存。
 
 <!-- Be diligent with the cache. Old data in cache can cause hard-to-find bugs. As we know, keeping the cache up to date is very challenging. According to a coder proverb:-->
  勤于使用缓存。缓存中的旧数据会导致难以发现的bug。正如我们所知，保持缓存的更新是非常具有挑战性的。根据一个编码员的谚语。
@@ -315,7 +315,7 @@ const PersonForm = ({ setError }) => {
 #### 8.17 Listing books
 
 <!-- After the backend changes, the list of books does not work anymore. Fix it.-->
- 后台修改后，书籍列表不再起作用了。修复它。
+ 后端修改后，书籍列表不再起作用了。修复它。
 
 #### 8.18 Log in
 

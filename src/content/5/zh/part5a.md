@@ -12,12 +12,13 @@ lang: zh
  在过去的两部分中，我们主要集中在后端，而我们在[第二章节](/en/part2)中开发的前端还不支持我们在第四章节中对后端实现的用户管理。
 
 <!-- At the moment the frontend shows existing notes, and lets users change the state of a note from important to not important and vice versa. New notes cannot be added anymore because of the changes made to the backend in part 4: the backend now expects that a token verifying a user's identity is sent with the new note.-->
- 目前，前台显示现有的笔记，并允许用户将一个笔记的状态从重要改为不重要，反之亦然。由于第四章节中对后台所做的修改，新的笔记不能再被添加：后台现在期望一个验证用户身份的令牌与新的笔记一起被发送。
+ 目前，前端显示现有的笔记，并允许用户将一个笔记的状态从重要改为不重要，反之亦然。由于第四章节中对后端所做的修改，新的笔记不能再被添加：后端现在期望一个验证用户身份的令牌与新的笔记一起被发送。
 
 <!-- We'll now implement a part of the required user management functionality in the frontend. Let's begin with user login. Throughout this part we will assume that new users will not be added from the frontend.-->
- 我们现在要在前台实现一部分所需的用户管理功能。让我们从用户登录开始。在这一部分中，我们将假设新用户不会从前端添加。
+ 我们现在要在前端实现一部分所需的用户管理功能。让我们从用户登录开始。在这一部分中，我们将假设新用户不会从前端添加。
 
-### Handling login
+### Adding a Login Form
+
 <!-- A login form has now been added to the top of the page. The form for adding new notes has also been moved to the bottom of the list of notes.-->
  现在，一个登录表格已经被添加到页面的顶部。添加新笔记的表格也被移到了笔记列表的底部。
 
@@ -29,13 +30,13 @@ lang: zh
 
 ```js
 const App = () => {
-  const [notes, setNotes] = useState([])
+  const [notes, setNotes] = useState([]) 
   const [newNote, setNewNote] = useState('')
   const [showAll, setShowAll] = useState(true)
   const [errorMessage, setErrorMessage] = useState(null)
   // highlight-start
-  const [username, setUsername] = useState('')
-  const [password, setPassword] = useState('')
+  const [username, setUsername] = useState('') 
+  const [password, setPassword] = useState('') 
 // highlight-end
 
   useEffect(() => {
@@ -57,28 +58,30 @@ const App = () => {
   return (
     <div>
       <h1>Notes</h1>
-
       <Notification message={errorMessage} />
-
+      
       // highlight-start
+      <h2>Login</h2>
       <form onSubmit={handleLogin}>
         <div>
-          username
+          <label>
+            username
             <input
-            type="text"
-            value={username}
-            name="Username"
-            onChange={({ target }) => setUsername(target.value)}
-          />
+              type="text"
+              value={username}
+              onChange={({ target }) => setUsername(target.value)}
+            />
+          </label>
         </div>
         <div>
-          password
+          <label>
+            password
             <input
-            type="password"
-            value={password}
-            name="Password"
-            onChange={({ target }) => setPassword(target.value)}
-          />
+              type="password"
+              value={password}
+              onChange={({ target }) => setPassword(target.value)}
+            />
+          </label>
         </div>
         <button type="submit">login</button>
       </form>
@@ -93,18 +96,17 @@ export default App
 ```
 
 <!-- Current application code can be found on [Github](https://github.com/fullstack-hy2020/part2-notes/tree/part5-1), branch <i>part5-1</i>. If you clone the repo, don't forget to run _npm install_ before attempting to run the frontend.-->
- 当前的应用代码可以在[Github](https://github.com/fullstack-hy2020/part2-notes/tree/part5-1)上找到，分支<i>part5-1</i>。如果你克隆了这个 repo，在尝试运行前端之前，别忘了运行_npm install_。
+ 当前的应用代码可以在[Github](https://github.com/fullstack-hy2020/part2-notes/tree/part5-1)的分支<i>part5-1</i>上找到。如果你克隆了这个 repo，在尝试运行前端之前，别忘了运行_npm install_。
 
 <!-- The frontend will not display any notes if it's not connected to the backend. You can start the backend with _npm run dev_ in its folder from Part 4. This will run the backend on port 3001. While that is active, in a separate terminal window you can start the frontend with _npm start_, and now you can see the notes that are saved in your MongoDB database from Part 4.-->
- 如果前台没有连接到后台，它将不会显示任何注释。你可以在第四章节的文件夹中用_npm run dev_来启动后端。这将在3001端口运行后端。当它处于激活状态时，在一个单独的终端窗口中，你可以用_npm start_启动前台，现在你可以看到第四章节中保存在MongoDB数据库中的注释。
+ 如果前端没有连接到后端，它将不会显示任何注释。你可以在第四章节的文件夹中用_npm run dev_来启动后端。这将在3001端口运行后端。当它处于激活状态时，在一个单独的终端窗口中，你可以用_npm start_启动前端，现在你可以看到第四章节中保存在MongoDB数据库中的注释。
 
 <!-- Keep this in mind from now on.-->
  从现在开始记住这一点。
 
-<!-- The login form is handled the same way we handled forms in-->
- 登录表单的处理方式与我们在以下文章中处理表单的方式相同
-<!-- [part 2](/en/part2/forms). The app state has fields for  <i>username</i> and <i>password</i> to store the data from the form. The form fields have event handlers, which synchronize changes in the field to the state of the <i>App</i> component. The event handlers are simple: An object is given to them as a parameter, and they destructure the field <i>target</i> from the object and save its value to the state.-->
- [第二章节](/en/part2/forms)中处理表单的方式。应用状态有<i>用户名</i>和<i>密码</i>的字段来存储表单的数据。表单字段有事件处理程序，它将字段的变化与<i>App</i>组件的状态同步。事件处理程序很简单。一个对象被作为参数给他们，他们从对象中解构字段<i>target</i>并将其值保存到状态中。
+<!-- The login form is handled the same way we handled forms in
+[part 2](/en/part2/forms). The app state has fields for <i>username</i> and <i>password</i> to store the data from the form. The form fields have event handlers, which synchronize changes in the field to the state of the <i>App</i> component. The event handlers are simple: An object is given to them as a parameter, and they destructure the field <i>target</i> from the object and save its value to the state. -->
+登录表单的处理方式与我们在[第二部分](/en/part2/forms)中处理表单的方式相同。应用的状态有<i>username</i>和<i>password</i>字段来存储表单中的数据。表单字段有事件处理器，它们将字段中的变化同步到<i>App</i>组件的状态中。这些事件处理器很简单：给它们一个对象作为参数，它们从对象中解构出<i>target</i>字段，并将其值保存到状态中。
 
 ```js
 ({ target }) => setUsername(target.value)
@@ -113,11 +115,13 @@ export default App
 <!-- The method _handleLogin_, which is  responsible for handling the data in the form, is yet to be implemented.-->
  负责处理表单中数据的_handleLogin_方法还没有被实现。
 
+ ### Adding Logic to the Login Form
+
 <!-- Logging in is done by sending an HTTP POST request to server address <i>api/login</i>. Let's separate the code responsible for this request to its own module, to file <i>services/login.js</i>.-->
  登录是通过向服务器地址<i>api/login</i>发送一个HTTP POST请求来完成。让我们把负责这个请求的代码分离到自己的模块中，放到<i>services/login.js</i>文件中。
 
 <!-- We'll use <i>async/await</i> syntax instead of promises for the HTTP request:-->
- 我们将使用<i>async/await</i>语法而不是承诺来处理HTTP请求。
+ 我们将使用<i>async/await</i>语法而不是 promise 来处理HTTP请求。
 
 ```js
 import axios from 'axios'
@@ -131,34 +135,32 @@ const login = async credentials => {
 export default { login }
 ```
 
-<!-- The method for handling the login can be implemented as follows:-->
- 处理登录的方法可以实现如下。
+The method for handling the login can be implemented as follows:
 
 ```js
 import loginService from './services/login' // highlight-line
 
 const App = () => {
   // ...
-  const [username, setUsername] = useState('')
-  const [password, setPassword] = useState('')
+  const [username, setUsername] = useState('') 
+  const [password, setPassword] = useState('') 
 // highlight-start
   const [user, setUser] = useState(null)
 // highlight-end
 
-  // highlight-start
-  const handleLogin = async (event) => {
+  // ...
+
+  const handleLogin = async event => { // highlight-line
     event.preventDefault()
-
+    
+    // highlight-start
     try {
-      const user = await loginService.login({
-        username, password,
-      })
-
+      const user = await loginService.login({ username, password })
       setUser(user)
       setUsername('')
       setPassword('')
-    } catch (exception) {
-      setErrorMessage('Wrong credentials')
+    } catch {
+      setErrorMessage('wrong credentials')
       setTimeout(() => {
         setErrorMessage(null)
       }, 5000)
@@ -176,6 +178,8 @@ const App = () => {
 <!-- If the login fails, or running the function _loginService.login_ results in an error, the user is notified.-->
 如果登录失败，或运行_loginService.login_函数导致错误，用户将被通知。
 
+### Conditional Rendering of the Login Form
+
 <!-- The user is not notified about a successful login in any way. Let's modify the application to show the login form only <i>if the user is not logged-in</i> so when _user === null_. The form for adding new notes is shown only if the <i>user is logged-in</i>, so <i>user</i> contains the user details.-->
  用户不会以任何方式得到关于成功登录的通知。让我们修改应用，只有在<i>用户没有登录的情况下才显示登录表单</i>，所以当_user == null_。只有当<i>用户登录</i>时，才会显示添加新笔记的表单，所以<i>用户</i>包含用户的详细信息。
 
@@ -189,22 +193,24 @@ const App = () => {
   const loginForm = () => (
     <form onSubmit={handleLogin}>
       <div>
-        username
+        <label>
+          username
           <input
-          type="text"
-          value={username}
-          name="Username"
-          onChange={({ target }) => setUsername(target.value)}
-        />
+            type="text"
+            value={username}
+            onChange={({ target }) => setUsername(target.value)}
+          />
+        </label>
       </div>
       <div>
-        password
+        <label>
+          password
           <input
-          type="password"
-          value={password}
-          name="Password"
-          onChange={({ target }) => setPassword(target.value)}
-        />
+            type="password"
+            value={password}
+            onChange={({ target }) => setPassword(target.value)}
+          />
+        </label>
       </div>
       <button type="submit">login</button>
     </form>
@@ -212,10 +218,7 @@ const App = () => {
 
   const noteForm = () => (
     <form onSubmit={addNote}>
-      <input
-        value={newNote}
-        onChange={handleNoteChange}
-      />
+      <input value={newNote} onChange={handleNoteChange} />
       <button type="submit">save</button>
     </form>
   )
@@ -245,11 +248,10 @@ const App = () => {
   return (
     <div>
       <h1>Notes</h1>
-
       <Notification message={errorMessage} />
 
-      {user === null && loginForm()} // highlight-line
-      {user !== null && noteForm()} // highlight-line
+      {!user && loginForm()} // highlight-line
+      {user && noteForm()} // highlight-line
 
       <div>
         <button onClick={() => setShowAll(!showAll)}>
@@ -257,13 +259,13 @@ const App = () => {
         </button>
       </div>
       <ul>
-        {notesToShow.map((note, i) =>
+        {notesToShow.map(note => (
           <Note
-            key={i}
+            key={note.id}
             note={note}
             toggleImportance={() => toggleImportanceOf(note.id)}
           />
-        )}
+        ))}
       </ul>
 
       <Footer />
@@ -276,39 +278,11 @@ const App = () => {
  一个看起来有点奇怪，但常用的[React技巧](https://reactjs.org/docs/conditional-rendering.html#inline-if-with-logical--operator)被用来有条件地渲染表单。
 
 ```js
-{
-  user === null && loginForm()
-}
+{!user && loginForm()}
 ```
 
 <!-- If the first statement evaluates to false, or is [falsy](https://developer.mozilla.org/en-US/docs/Glossary/Falsy), the second statement (generating the form) is not executed at all.-->
  如果第一条语句计算为false，或者是[falsy](https://developer.mozilla.org/en-US/docs/Glossary/Falsy)，第二条语句(生成表单)根本就不会被执行。
-
-<!-- We can make this even more straightforward by using the [conditional operator](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Conditional_Operator):-->
-我们可以通过使用[条件运算符](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Conditional_Operator)使之更加简单明了。
-
-```js
-return (
-  <div>
-    <h1>Notes</h1>
-
-    <Notification message={errorMessage}/>
-
-    {user === null ?
-      loginForm() :
-      noteForm()
-    }
-
-    <h2>Notes</h2>
-
-    // ...
-
-  </div>
-)
-```
-
-<!-- If _user === null_ is [truthy](https://developer.mozilla.org/en-US/docs/Glossary/Truthy), _loginForm()_ is executed. If not, _noteForm()_ is.-->
- 如果_user === null_是[truthy](https://developer.mozilla.org/en-US/docs/Glossary/Truthy)，_loginForm()_被执行。如果不是，则_noteForm()_被执行。
 
 <!-- Let's do one more modification. If the user is logged-in, their name is shown on the screen:-->
  我们再做一个修改。如果用户已经登录，他们的名字就会显示在屏幕上。
@@ -317,33 +291,75 @@ return (
 return (
   <div>
     <h1>Notes</h1>
-
     <Notification message={errorMessage} />
 
-    {user === null ?
-      loginForm() :
+    {!user && loginForm()}
+    // highlight-start
+    {user && (
       <div>
-        <p>{user.name} logged-in</p>
+        <p>{user.name} logged in</p>
         {noteForm()}
       </div>
-    }
+    )}
+    // highlight-end
 
-    <h2>Notes</h2>
-
+    <div>
+      <button onClick={() => setShowAll(!showAll)}>
     // ...
-
-  </div>
 )
 ```
 
 <!-- The solution isn't perfect, but we'll leave it for now.-->
- 这个方案并不完美，但我们现在先把它留下。
+解决方案并不完美，但我们暂时就这样吧。
 
 <!-- Our main component <i>App</i> is at the moment way too large. The changes we did now are a clear sign that the forms should be refactored into their own components. However, we will leave that for an optional exercise.-->
  我们的主要组件<i>App</i>目前太大。我们现在所做的改变清楚地表明，表单应该被重构为它们自己的组件。然而，我们将把这个问题留给一个可选的练习。
 
 <!-- Current application code can be found on [Github](https://github.com/fullstack-hy2020/part2-notes/tree/part5-2), branch <i>part5-2</i>.-->
  目前的应用代码可以在[Github](https://github.com/fullstack-hy2020/part2-notes/tree/part5-2)上找到，分支<i>part5-2</i>。
+
+### Note on Using the Label Element
+
+<!-- We used the [label](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/label) element for the <i>input</i> fields in the login form. The <i>input</i> field for the username is placed inside the corresponding <i>label</i> element: -->
+我们在登录表单的 <i>input</i> 字段中使用了 [label](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/label) 元素。用户名的 <i>input</i> 字段放置在相应的 <i>label</i> 元素内部：
+
+```js
+<div>
+  <label>
+    username
+    <input
+      type="text"
+      value={username}
+      onChange={({ target }) => setUsername(target.value)}
+    />
+  </label>
+</div>
+// ...
+```
+
+<!-- Why did we implement the form this way? Visually, the same result could be achieved with simpler code, without a separate <i>label</i> element: -->
+我们为什么要以这种方式实现表单？从外观上看，使用更简单的代码，不使用单独的 <i>label</i> 元素也可以达到相同的效果：
+
+```js
+<div>
+  username
+  <input
+    type="text"
+    value={username}
+    onChange={({ target }) => setUsername(target.value)}
+  />
+</div>
+// ...
+```
+
+<!-- The <i>label</i> element is used in forms to describe and name <i>input</i> fields. It provides a description for the input field, helping the user understand what information should be entered into each field. This description is programmatically linked to the corresponding input field, improving the form's accessibility.  -->
+<i>label</i> 元素用于表单中，用于描述和命名 <i>input</i> 字段。它为输入字段提供描述，帮助用户理解应向每个字段输入什么信息。这种描述与相应的输入字段程可编程地关联，提高了表单的可访问性。
+
+<!-- This way, screen readers can read the field's name to the user when the input field is selected, and clicking on the label's text automatically focuses on the correct input field. Using the <i>label</i> element with <i>input</i> fields is always recommended, even if the same visual result could be achieved without it. -->
+这样，当输入字段被选中时，屏幕阅读器可以读出字段名称给用户听，点击标签的文本会自动聚焦到正确的输入字段。建议始终使用 <i>label</i> 元素与 <i>input</i> 字段配合使用，即使不使用它也能达到相同的外观效果。
+
+<!-- There are [several ways](https://react.dev/reference/react-dom/components/input#providing-a-label-for-an-input) to link a specific <i>label</i> to an <i>input</i> element. The easiest method is to place the <i>input</i> element inside the corresponding <i>label</i> element, as demonstrated in this material. This automatically associates the <i>label</i> with the correct input field, requiring no additional configuration. -->
+有[几种方法](https://react.dev/reference/react-dom/components/input#providing-a-label-for-an-input)可以将特定 <i>label</i> 与 <i>input</i> 元素关联起来。最简单的方法是将 <i>input</i> 元素放置在相应的 <i>label</i> 元素内部，正如本材料所示。这会自动将 <i>label</i> 与正确的输入字段关联起来，无需额外配置。
 
 ### Creating new notes
 
@@ -381,7 +397,7 @@ let token = null // highlight-line
 
 // highlight-start
 const setToken = newToken => {
-  token = `bearer ${newToken}`
+  token = `Bearer ${newToken}`
 }
 // highlight-end
 
@@ -393,7 +409,7 @@ const getAll = () => {
 const create = async newObject => {
   // highlight-start
   const config = {
-    headers: { Authorization: token },
+    headers: { Authorization: token }
   }
 // highlight-end
 
@@ -418,16 +434,14 @@ export default { getAll, create, update, setToken } // highlight-line
 ```js
 const handleLogin = async (event) => {
   event.preventDefault()
-  try {
-    const user = await loginService.login({
-      username, password,
-    })
 
+  try {
+    const user = await loginService.login({ username, password })
     noteService.setToken(user.token) // highlight-line
     setUser(user)
     setUsername('')
     setPassword('')
-  } catch (exception) {
+  } catch {
     // ...
   }
 }
@@ -470,24 +484,22 @@ window.localStorage.getItem('name')
 <!-- Let's extend our application so that it saves the details of a logged-in user to the local storage.-->
  让我们扩展我们的应用，使其将登录用户的详细信息保存在本地存储中。
 
-<!-- Values saved to the storage are [DOMstrings](https://developer.mozilla.org/en-US/docs/Web/API/DOMString), so we cannot save a JavaScript object as is. The object has to be parsed to JSON first, with the method _JSON.stringify_. Correspondingly, when a JSON object is read from the local storage, it has to be parsed back to JavaScript with _JSON.parse_.-->
- 保存到存储空间的值是[DOMstrings](https://developer.mozilla.org/en-US/docs/Web/API/DOMString)，所以我们不能原封不动地保存一个JavaScript对象。该对象必须首先被解析为JSON，使用_JSON.stringify_方法。相应地，当一个JSON对象从本地存储中读取时，必须用_JSON.parse_将其解析为JavaScript。
+<!-- Values saved to the storage are [DOMstrings](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage#description), so we cannot save a JavaScript object as is. The object has to be parsed to JSON first, with the method _JSON.stringify_. Correspondingly, when a JSON object is read from the local storage, it has to be parsed back to JavaScript with _JSON.parse_.-->
+ 保存到存储空间的值是[DOMstrings](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage#description)，所以我们不能原封不动地保存一个JavaScript对象。该对象必须首先被解析为JSON，使用_JSON.stringify_方法。相应地，当一个JSON对象从本地存储中读取时，必须用_JSON.parse_将其解析为JavaScript。
 
 <!-- Changes to the login method are as follows:-->
- 登录方法的变化如下。
+ 登录方法的变化如下：
 
 ```js
   const handleLogin = async (event) => {
     event.preventDefault()
     try {
-      const user = await loginService.login({
-        username, password,
-      })
+      const user = await loginService.login({ username, password })
 
       // highlight-start
       window.localStorage.setItem(
         'loggedNoteappUser', JSON.stringify(user)
-      )
+      ) 
       // highlight-end
       noteService.setToken(user.token)
       setUser(user)
@@ -527,12 +539,11 @@ const App = () => {
   const [user, setUser] = useState(null)
 
   useEffect(() => {
-    noteService
-      .getAll().then(initialNotes => {
-        setNotes(initialNotes)
-      })
+    noteService.getAll().then(initialNotes => {
+      setNotes(initialNotes)
+    })
   }, [])
-
+  
   // highlight-start
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem('loggedNoteappUser')
@@ -550,7 +561,7 @@ const App = () => {
 
 
 <!-- The empty array as the parameter of the effect ensures that the effect is executed only when the component is rendered [for the first time](https://reactjs.org/docs/hooks-reference.html#conditionally-firing-an-effect).-->
- 空数组作为效果的参数，确保效果只在组件被渲染[首次]时执行(https://reactjs.org/docs/hooks-reference.html#conditionally-firing-an-effect)。
+ 空数组作为效果的参数，确保效果只在组件被渲染[首次](https://reactjs.org/docs/hooks-reference.html#conditionally-firing-an-effect)时执行。
 
 <!-- Now a user stays logged-in in the application forever. We should probably add a <i>logout</i> functionality which removes the login details from the local storage. We will however leave it for an exercise.-->
  现在，一个用户会在应用中永远保持登录状态。我们也许应该添加一个<i>logout</i>功能，从本地存储中删除登录的细节。然而，我们将把它作为一个练习。
@@ -580,15 +591,15 @@ window.localStorage.clear()
 ### Exercises 5.1.-5.4.
 
 <!-- We will now create a frontend for the bloglist backend we created in the last part. You can use [this application](https://github.com/fullstack-hy2020/bloglist-frontend) from GitHub as the base of your solution. The application expects your backend to be running on port 3003.-->
- 我们现在将为我们在上一部分创建的博客列表后台创建一个前端。你可以使用GitHub上的[此应用](https://github.com/fullstack-hy2020/bloglist-frontend)作为你的解决方案的基础。该应用希望你的后端运行在3003端口。
+ 我们现在将为我们在上一部分创建的博客列表后端创建一个前端。你可以使用GitHub上的[此应用](https://github.com/fullstack-hy2020/bloglist-frontend)作为你的解决方案的基础。该应用希望你的后端运行在3003端口。
 
 <!-- It is enough to submit your finished solution. You can do a commit after each exercise, but that is not necessary.-->
 提交你完成的解决方案就可以了。你可以在每次练习后做一次提交，但这不是必须的。
 
 <!-- The first few exercises revise everything we have learned about React so far. They can be challenging, especially if your backend is incomplete.-->
- 前几个练习是对我们到目前为止所学的关于React的所有知识的回顾。它们可能很有挑战性，特别是如果你的后台不完整的话。
+ 前几个练习是对我们到目前为止所学的关于React的所有知识的回顾。它们可能很有挑战性，特别是如果你的后端不完整的话。
 <!-- It might be best to use the backend from model answers of part 4.-->
- 最好是使用第四章节的模型答案中的后台。
+ 最好是使用第四章节的模型答案中的后端。
 
 <!-- While doing the exercises, remember all of the debugging methods we have talked about, especially keeping an eye on the console.-->
  在做练习的时候，要记住我们说过的所有调试方法，特别是要注意观察控制台。
@@ -596,7 +607,7 @@ window.localStorage.clear()
 <!-- **Warning:** If you notice you are mixing in same function async/await and _then_ commands, it's 99.9%  certain you are doing something wrong. Use either or, never both.-->
  **警告：**如果你注意到你在同一函数中混入了async/await和_then_命令，那么99.9%的人肯定是做错了。请使用其中之一，不要同时使用。
 
-#### 5.1: bloglist frontend, step1
+#### 5.1: Blog List Frontend, step1
 
 <!-- Clone the application from [Github](https://github.com/fullstack-hy2020/bloglist-frontend) with the command:-->
  用命令从[Github](https://github.com/fullstack-hy2020/bloglist-frontend)克隆应用。
@@ -621,7 +632,7 @@ npm start
 ```
 
 <!-- Implement login functionality to the frontend. The token returned with a successful login is saved to the application's state <i>user</i>.-->
- 在前台实现登录功能。登录成功后返回的令牌被保存到应用的状态<i>user</i>。
+ 在前端实现登录功能。登录成功后返回的令牌被保存到应用的状态<i>user</i>。
 
 <!-- If a user is not logged-in, <i>only</i> the login form is visible.-->
  如果用户没有登录，<i>只有</i>登录表单是可见的。
@@ -662,7 +673,7 @@ npm start
 }
 ```
 
-#### 5.2: bloglist frontend, step2
+#### 5.2: Blog List Frontend, step2
 
 <!-- Make the login 'permanent' by using the local storage. Also implement a way to log out.-->
  通过使用本地存储使登录成为"永久"。同时实现一个注销的方法。
@@ -672,14 +683,14 @@ npm start
 <!-- Ensure the browser does not remember the details of the user after logging out.-->
 确保浏览器在注销后不会记住用户的详细信息。
 
-#### 5.3: bloglist frontend, step3
+#### 5.3: Blog List Frontend, step3
 
 <!-- Expand your application to allow  a logged-in user to add new blogs:-->
 扩展你的应用，允许登录的用户添加新的博客。
 
 ![](../../images/5/7e.png)
 
-#### 5.4: bloglist frontend, step4
+#### 5.4: Blog List Frontend, step4
 
 <!-- Implement notifications which inform the user about successful and unsuccessful operations at the top of the page. For example, when a new blog is added, the following notification can be shown:-->
  实施通知，在页面顶部告知用户成功和不成功的操作。例如，当一个新博客被添加时，可以显示以下通知。
@@ -706,7 +717,7 @@ npm start
  在上一部分的[结尾](/en/part4/token_authentication#problems-of-token-based-authentication)我们提到，基于令牌的认证的挑战是如何应对令牌持有者对API的访问需要被撤销的情况。
 
 <!-- There are two solutions to the problem. The first one is to limit the validity period of a token. This forces the user to relogin to the app once the token has expired. The other approach is to save the validity information of each token to the backend database. This solution is often called a <i>server side session</i>.-->
-这个问题有两种解决方案。第一个是限制令牌的有效期限。这迫使用户在令牌过期后重新登录到应用。另一种方法是将每个令牌的有效期信息保存到后台数据库中。这种解决方案通常被称为<i>服务器端会话</i>。
+这个问题有两种解决方案。第一个是限制令牌的有效期限。这迫使用户在令牌过期后重新登录到应用。另一种方法是将每个令牌的有效期信息保存到后端数据库中。这种解决方案通常被称为<i>服务器端会话</i>。
 
 <!-- No matter how the validity of tokens is checked and ensured, saving a token in the local storage might contain a security risk if the application has a security vulnerability that allows [Cross Site Scripting (XSS)](https://owasp.org/www-community/attacks/xss/) attacks. A XSS attack is possible if the application would allow a user to inject arbitrary JavaScript code (e.g. using a form) that the app would then execute. When using React in a sensible manner it should not be possible since [React sanitizes](https://reactjs.org/docs/introducing-jsx.html#jsx-prevents-injection-attacks) all text that it renders, meaning that it is not executing the rendered content as JavaScript.-->
  无论如何检查和确保令牌的有效性，如果应用有安全漏洞，允许[跨站脚本（XSS）](https://owasp.org/www-community/attacks/xss/)攻击，将令牌保存在本地存储中可能包含安全风险。如果应用允许用户注入任意的JavaScript代码（例如使用一个表单），然后由应用执行，那么XSS攻击就有可能。当以合理的方式使用React时，这应该是不可能的，因为[React对其渲染的所有文本进行消毒](https://reactjs.org/docs/introducing-jsx.html#jsx-prevents-injection-attacks)，这意味着它不会将渲染的内容作为JavaScript执行。

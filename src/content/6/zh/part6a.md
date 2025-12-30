@@ -12,22 +12,22 @@ lang: zh
 
 ### Flux-architecture
 
-<!-- Facebook developed the [Flux](https://facebook.github.io/flux/docs/in-depth-overview/)- architecture to make state management easier. In Flux, the state is separated completely from the React-components into its own <i>stores</i>.-->
- Facebook开发了[Flux](https://facebook.github.io/flux/docs/in-depth-overview/)-架构，使状态管理更容易。在Flux中，状态被完全从React组件中分离出来，进入它自己的<i>存储</i>。
+<!-- Facebook developed the [Flux](https://facebookarchive.github.io/flux/docs/in-depth-overview//)- architecture to make state management easier. In Flux, the state is separated completely from the React-components into its own <i>stores</i>.-->
+ Facebook开发了[Flux](https://facebookarchive.github.io/flux/docs/in-depth-overview//)-架构，使状态管理更容易。在Flux中，状态被完全从React组件中分离出来，进入它自己的<i>存储</i>。
 <!-- State in the store is not changed directly, but with different <i>actions</i>.-->
  存储器中的状态不是直接改变的，而是通过不同的<i>动作</i>改变的。
 
 <!-- When an action changes the state of the store, the views are rerendered:-->
 当一个动作改变了商店的状态时，视图会被重新渲染。
 
-![](https://facebook.github.io/flux/img/overview/flux-simple-f8-diagram-1300w.png)
+![](https://facebookarchive.github.io/flux/img/overview/flux-simple-f8-diagram-1300w.png)
 
 <!-- If some action on the application, for example pushing a button, causes the need to change the state, the change is made with an action.-->
  如果应用上的某些动作，例如按下一个按钮，导致需要改变状态，则用一个动作进行改变。
 <!-- This causes rerendering the view again:-->
 这将导致再次重新渲染视图。
 
-![](https://facebook.github.io/flux/img/overview/flux-simple-f8-diagram-with-client-action-1300w.png)
+![](https://facebookarchive.github.io/flux/img/overview/flux-simple-f8-diagram-with-client-action-1300w.png)
 
 <!-- Flux offers a standard way for how and where the application's state is kept and how it is modified.-->
  Flux为应用的状态如何保存、在哪里保存以及如何修改提供了一个标准的方法。
@@ -155,11 +155,11 @@ console.log(store.getState())
 <!-- would print the following to the console-->
 会在控制台中打印以下内容
 
-<pre>
+```
 0
 3
 -1
-</pre>
+```
 
 <!-- because at first the state of the store is 0. After three <i>INCREMENT</i>-actions the state is 3. In the end, after <i>ZERO</i> and <i>DECREMENT</i> actions, the state is -1.-->
 因为一开始商店的状态是0，经过三个<i>INCREMENT</i>动作后，状态是3。 最后，经过<i>ZERO</i>和<i>DECREMENT</i>动作，状态是-1。
@@ -198,13 +198,13 @@ store.dispatch({ type: 'DECREMENT' })
 <!-- would cause the following to be printed-->
 将导致以下内容被打印出来
 
-<pre>
+```
 1
 2
 3
 0
 -1
-</pre>
+```
 
 <!-- The code of our counter application is the following. All of the code has been written in the same file, so <i>store</i> is straight available for the React-code. We will get to know better ways to structure React/Redux-code later.-->
  我们的计数器应用的代码如下。所有的代码都写在同一个文件中，所以<i>store</i>对React代码来说是直接可用的。我们以后会了解到更好的结构React/Redux代码的方法。

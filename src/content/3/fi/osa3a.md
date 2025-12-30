@@ -11,13 +11,13 @@ Siirrämme tässä osassa fokuksen backendiin eli palvelimella olevaan toiminnal
 
 Backendin toteutusympäristönä käytämme [Node.js](https://nodejs.org/en/):ää, joka on melkein missä vaan, erityisesti palvelimilla ja omalla koneellasikin toimiva Googlen [V8](https://developers.google.com/v8/)-JavaScript-moottoriin perustuva JavaScriptin suoritusympäristö.
 
-Kurssimateriaalia tehtäessä on ollut käytössä Node.js:n versio <i>v18.13.02</i>. Suosittelen, että omasi on vähintään yhtä tuore (ks. komentoriviltä _node -v_).
+Kurssimateriaalia tehtäessä on ollut käytössä Node.js:n versio <i>v22.3.0</i>. Suosittelen, että omasi on vähintään yhtä tuore (ks. komentoriviltä _node -v_).
 
 Kuten [osassa 1](/osa1/java_scriptia) todettiin, selaimet eivät vielä osaa kaikkia uusimpia JavaScriptin ominaisuuksia, ja siksi selainpuolen koodi täytyy kääntää eli <i>transpiloida</i> esim [Babel](https://babeljs.io/):illa. Backendissa tilanne on kuitenkin toinen, koska uusin Node hallitsee riittävissä määrin myös JavaScriptin uusia versioita, joten suoritamme Nodella kirjoittamaamme koodia suoraan ilman transpilointivaihetta.
 
 Tavoitteenamme on tehdä [osan 2](/osa2) muistiinpanosovellukseen sopiva backend. Aloitetaan kuitenkin ensin perusteiden läpikäyminen toteuttamalla perinteinen "hello world" ‑sovellus.
 
-**Huomaa**, että tässä osassa ja sen tehtävissä luotavat sovellukset eivät ole Reactia, eli emme käytä <i>create-react-app</i>-sovellusta tämän osan sovellusten rungon alustamiseen.
+**Huomaa**, että tässä osassa ja sen tehtävissä luotavat sovellukset eivät ole Reactia, eli emme käytä viteä tämän osan sovellusten rungon alustamiseen.
 
 Osassa 2 oli jo puhe [npm](/osa2/palvelimella_olevan_datan_hakeminen#npm):stä, eli JavaScript-projektien hallintaan liittyvästä, alun perin Node-ekosysteemistä kotoisin olevasta työkalusta. 
 
@@ -41,7 +41,7 @@ Tiedosto määrittelee mm., että ohjelmamme käynnistyspiste on tiedosto <i>ind
 
 Tehdään kenttään <i>scripts</i> pieni lisäys:
 
-```bash
+```json
 {
   // ...
   "scripts": {
@@ -72,7 +72,7 @@ npm start
 
 npm-skripti <i>start</i> toimii koska määrittelimme sen tiedostoon <i>package.json</i>:
 
-```bash
+```json
 {
   // ...
   "scripts": {
@@ -93,7 +93,7 @@ echo "Error: no test specified" && exit 1
 
 ### Yksinkertainen web-palvelin
 
-Muutetaan sovellus web-palvelimeksi:
+Muutetaan sovellus web-palvelimeksi asettamalla _index.js_-tiedoston sisällöksi seuraava koodi:
 
 ```js
 const http = require('http')
@@ -150,9 +150,9 @@ ottaa käyttöön Noden sisäänrakennetun [web-palvelimen](https://nodejs.org/d
 import http from 'http'
 ```
 
-Selaimen puolella käytetään (nykyään) ES6:n moduuleita, eli moduulit määritellään [exportilla](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/export) ja otetaan käyttöön [importilla](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import).
+Selaimen puolella käytetään nykyään ES6:n moduuleita, eli moduulit määritellään [exportilla](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/export) ja otetaan käyttöön [importilla](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import).
 
-Node.js kuitenkin käyttää ns. [CommonJS](https://en.wikipedia.org/wiki/CommonJS)-moduuleja. Syy tälle on siinä, että Node-ekosysteemillä oli tarve moduuleihin jo kauan ennen kuin JavaScript tuki moduuleja kielen tasolla. Node tukee myös ES-moduuleja, mutta koska tuki ei ole vielä kaikilta osin [täydellinen](https://nodejs.org/api/esm.html#modules-ecmascript-modules), pitäydymme CommonJS-moduuleissa.
+Node.js käyttää oletusarvoisesti ns. [CommonJS](https://en.wikipedia.org/wiki/CommonJS)-moduuleja. Syy tälle on siinä, että Node-ekosysteemillä oli tarve moduuleihin jo kauan ennen kuin JavaScript tuki moduuleja kielen tasolla. Nykyään Node tukee myös ES-moduuleja, mutta koska tuki ei ole vielä kaikilta osin täydellinen, pitäydymme CommonJS-moduuleissa.
 
 CommonJS-moduulit toimivat melko samaan tapaan kuin ES6-moduulit, ainakin tämän kurssin tarpeiden puitteissa.
 
@@ -185,17 +185,17 @@ const http = require('http')
 // highlight-start
 let notes = [
   {
-    id: 1,
+    id: "1",
     content: "HTML is easy",
     important: true
   },
   {
-    id: 2,
+    id: "2",
     content: "Browser can execute only JavaScript",
     important: false
   },
   {
-    id: 3,
+    id: "3",
     content: "GET and POST are the most important methods of HTTP protocol",
     important: true
   }
@@ -238,7 +238,7 @@ Riippuvuus tulee nyt määritellyksi tiedostoon <i>package.json</i>:
 {
   // ...
   "dependencies": {
-   "express": "^4.18.2"
+   "express": "^5.1.0"
   }
 }
 
@@ -250,13 +250,13 @@ Riippuvuuden koodi asentuu kaikkien projektin riippuvuuksien tapaan projektin ju
 
 Kyseessä ovat Expressin riippuvuudet ja niiden riippuvuudet jne. eli projektimme [transitiiviset riippuvuudet](https://lexi-lambda.github.io/blog/2016/08/24/understanding-the-npm-dependency-model/).
 
-Projektiin asentui Expressin versio 4.18.2. </i>package.json:issa</i> versiomerkinnän edessä on väkänen, eli muoto on
+Projektiin asentui Expressin versio 5.1.0. </i>package.json:issa</i> versiomerkinnän edessä on väkänen, eli muoto on
 
 ```json
-"express": "^4.18.2"
+"express": "^5.1.0"
 ```
   
-npm:n yhteydessä käytetään ns. [semanttista versiointia](https://docs.npmjs.com/getting-started/semantic-versioning). Merkintä <i>^4.18.2</i> tarkoittaa, että jos projektin riippuvuudet päivitetään, asennetaan Expressistä versio, joka on vähintään <i>4.18.2</i>, mutta asennetuksi voi tulla versio, jonka <i>patch</i> eli viimeinen numero tai <i>minor</i> eli keskimmäinen numero voi olla suurempi. Pääversio eli <i>major</i> täytyy kuitenkin olla edelleen sama.
+npm:n yhteydessä käytetään ns. [semanttista versiointia](https://docs.npmjs.com/getting-started/semantic-versioning). Merkintä <i>^5.1.0</i> tarkoittaa, että jos projektin riippuvuudet päivitetään, asennetaan Expressistä versio, joka on vähintään <i>5.1.0</i>, mutta asennetuksi voi tulla versio, jonka <i>patch</i> eli viimeinen numero tai <i>minor</i> eli keskimmäinen numero voi olla suurempi. Pääversio eli <i>major</i> täytyy kuitenkin olla edelleen sama.
 
 Voimme päivittää projektin riippuvuudet komennolla
 
@@ -270,7 +270,7 @@ Jos aloitamme projektin koodaamisen toisella koneella, saamme haettua ajantasais
 npm install
 ```
 
-Jos riippuvuuden <i>major</i>-versionumero ei muutu, uudempien versioiden pitäisi olla [taaksepäin yhteensopivia](https://en.wikipedia.org/wiki/Backward_compatibility), eli jos ohjelmamme käyttäisi tulevaisuudessa esim. Expressin versiota 4.99.175, tässä osassa tehtävän koodin pitäisi edelleen toimia ilman muutoksia. Sen sijaan tulevaisuudessa joskus julkaistava Express 5.0.0 [voi sisältää](https://expressjs.com/en/guide/migrating-5.html) sellaisia muutoksia, että koodimme ei enää toimisi.
+Jos riippuvuuden <i>major</i>-versionumero ei muutu, uudempien versioiden pitäisi olla [taaksepäin yhteensopivia](https://en.wikipedia.org/wiki/Backward_compatibility), eli jos ohjelmamme käyttäisi tulevaisuudessa esim. Expressin versiota 5.99.175, tässä osassa tehtävän koodin pitäisi edelleen toimia ilman muutoksia. Sen sijaan tulevaisuudessa joskus julkaistava Express 6.0.0 voi sisältää sellaisia muutoksia, että koodimme ei enää toimisi.
 
 ### Web ja Express
 
@@ -284,12 +284,12 @@ let notes = [
   ...
 ]
 
-app.get('/', (req, res) => {
-  res.send('<h1>Hello World!</h1>')
+app.get('/', (request, response) => {
+  response.send('<h1>Hello World!</h1>')
 })
 
-app.get('/api/notes', (req, res) => {
-  res.json(notes)
+app.get('/api/notes', (request, response) => {
+  response.json(notes)
 })
 
 const PORT = 3001
@@ -337,7 +337,7 @@ Pyyntöön vastataan _response_-olion metodilla [json](http://expressjs.com/en/4
 
 Pieni huomio JSON-muodossa palautettavasta datasta.
 
-Aiemmassa, pelkkää Nodea käyttämässä versiossa, jouduimme muuttamaan palautettavan datan JSON-muotoon metodilla _JSON.stringify_:
+Aiemmassa, pelkkää Nodea käyttävässä versiossa, jouduimme muuttamaan palautettavan datan JSON-muotoon metodilla _JSON.stringify_:
 
 ```js
 response.end(JSON.stringify(notes))
@@ -345,7 +345,7 @@ response.end(JSON.stringify(notes))
 
 Expressiä käytettäessä tämä ei ole tarpeen, sillä muunnos tapahtuu automaattisesti.
 
-Kannattaa huomata, että [JSON](https://en.wikipedia.org/wiki/JSON) on merkkijono, eikä JavaScript-olio kuten muuttuja _notes_.
+Kannattaa huomata, että [JSON](https://en.wikipedia.org/wiki/JSON) on tiedostomuoto, jota kuvataan usein merkkijonona. Se ei ole JavaScript-olio kuten muuttuja _notes_.
 
 Seuraava interaktiivisessa [node-repl](https://nodejs.org/docs/latest-v8.x/api/repl.html):issä suoritettu kokeilu havainnollistaa asiaa:
 
@@ -353,66 +353,31 @@ Seuraava interaktiivisessa [node-repl](https://nodejs.org/docs/latest-v8.x/api/r
 
 Saat käynnistettyä interaktiivisen node-repl:in kirjoittamalla komentoriville _node_. Komentojen toimivuutta on koodatessa kätevä kokeilla konsolissa, suosittelen!
 
-### nodemon
+### Muutoksien automaattinen seuraaminen
 
 Jos muutamme sovelluksen koodia, joudumme ensin sulkemaan sovelluksen konsolista (_ctrl_ + _c_) ja sitten käynnistämään sovelluksen uudelleen, jotta muutokset tulevat voimaan. Uudelleenkäynnistely tuntuu kömpelöltä verrattuna Reactin mukavaan workflow'hun, jossa selain päivittyi automaattisesti koodin muuttuessa.
 
-Ongelmaan on ratkaisu nimeltä [nodemon](https://github.com/remy/nodemon):
-
-> <i>nodemon will watch the files in the directory in which nodemon was started, and if any files change, nodemon will automatically restart your node application.</i>
-
-Asennetaan nodemon määrittelemällä se <i>kehitysaikaiseksi riippuvuudeksi</i> (development dependency) komennolla:
+Palvelimen saa seuraamaan tekemiämme muutoksia, kun sen käynnistää käyttäen _--watch_-optiota:
 
 ```bash
-npm install --save-dev nodemon
+node --watch index.js
 ```
-
-Tiedoston <i>package.json</i> sisältö muuttuu seuraavasti:
-
-```json
-{
-  //...
-  "dependencies": {
-    "express": "^4.18.2"
-  },
-  "devDependencies": {
-    "nodemon": "^2.0.20"
-  }
-}
-```
-
-Jos nodemon-riippuvuus kuitenkin meni sovelluksessasi normaaliin "dependencies"-ryhmään, päivitä <i>package.json</i> manuaalisesti vastaamaan yllä näkyvää (kuitenkin versiot säilyttäen).
-
-Kehitysaikaisilla riippuvuuksilla tarkoitetaan työkaluja, joita tarvitaan ainoastaan sovellusta kehitettäessä esim. testaukseen tai sovelluksen automaattiseen uudelleenkäynnistykseen kuten <i>nodemon</i>.
-
-Kun sovellusta suoritetaan tuotantomoodissa eli samoin kuin sitä tullaan suorittamaan tuotantopalvelimella (esim. Fly.io:ssa, johon tulemme kohta siirtämään sovelluksemme), ei kehitysaikaisia riippuvuuksia tarvita.
-
-Voimme käynnistää ohjelman <i>nodemonilla</i> seuraavasti:
-
-```bash
-node_modules/.bin/nodemon index.js
-```
-
-Huom: komennon tämä muoto ei välttämättä toimi Windowsilla. Se ei kuitenkaan haittaa sillä 5 sentin päästä kerrotaan komennosta parempi muoto.
 
 Sovelluksen koodin muutokset aiheuttavat nyt automaattisen palvelimen uudelleenkäynnistymisen. Kannattaa huomata, että vaikka palvelin uudelleenkäynnistyy automaattisesti, selain täytyy kuitenkin refreshata, sillä toisin kuin Reactin yhteydessä, meillä ei nyt ole eikä tässä skenaariossa (jossa palautamme JSON-muotoista dataa) edes voisikaan olla selainta päivittävää [hot reload](https://gaearon.github.io/react-hot-loader/getstarted/) ‑toiminnallisuutta.
 
+Määritellään kehityspalvelimen käynnistämistä varten oma <i>npm-skripti</i> tiedostoon <i>package.json</i>:
 
-Komento on ikävä, joten määritellään sitä varten <i>npm-skripti</i> tiedostoon <i>package.json</i>:
-
-```bash
+```json
 {
   // ..
   "scripts": {
     "start": "node index.js",
-    "dev": "nodemon index.js", // highlight-line
+    "dev": "node --watch index.js", // highlight-line
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   // ..
 }
 ```
-
-Skriptissä ei ole tarvetta käyttää nodemonin polusta sen täydellistä muotoa <i>node\_modules/.bin/nodemon</i> sillä _npm_ osaa etsiä automaattisesti suoritettavaa tiedostoa kyseisestä hakemistosta.
 
 Voimme nyt käynnistää palvelimen sovelluskehitysmoodissa komennolla
 
@@ -484,61 +449,7 @@ const id = request.params.id
 
 Jo tutuksi tulleella taulukon _find_-metodilla haetaan taulukosta parametria vastaava muistiinpano ja palautetaan se pyynnön tekijälle.
 
-Kun sovellusta testataan menemällä selaimella osoitteeseen <http://localhost:3001/api/notes/1>, havaitaan että se ei toimi, vaan selain näyttää tyhjältä. Tämä on tietenkin softadevaajan arkipäivää, ja on ruvettava debuggaamaan.
-
-Vanha hyvä keino on alkaa lisäillä koodiin _console.log_-komentoja:
-
-```js
-app.get('/api/notes/:id', (request, response) => {
-  const id = request.params.id
-  console.log(id)
-  const note = notes.find(note => note.id === id)
-  console.log(note)
-  response.json(note)
-})
-```
-
-Kun selaimella mennään jälleen osoitteeseen <http://localhost:3001/api/notes/1>, konsoliin (eli siihen terminaaliin, johon sovellus on käynnistetty) tulostuu
-
-![Konsoliin on tulostunut 'server running in port 3000' lisäksi 1 ja undefined](../../images/3/8.png)
-
-eli halutun muistiinpanon id välittyy sovellukseen aivan oikein, mutta _find_ komento ei löydä mitään.
-
-Päätetään tulostella konsoliin myös _find_-komennon sisällä olevasta vertailijafunktiosta, mikä onnistuu helposti kun tiiviissä muodossa oleva funktio <em>note => note.id === id</em> kirjoitetaan eksplisiittisen returnin sisältävässä muodossa:
-
-```js
-app.get('/api/notes/:id', (request, response) => {
-  const id = request.params.id
-  const note = notes.find(note => {
-    console.log(note.id, typeof note.id, id, typeof id, note.id === id)
-    return note.id === id
-  })
-  console.log(note)
-  response.json(note)
-})
-```
-
-Vierailtaessa jälleen yksittäisen muistiinpanon sivulla jokaisesta vertailufunktion kutsusta tulostetaan nyt monta asiaa. Konsolin tulostus on seuraava:
-
-<pre>
-1 'number' '1' 'string' false
-2 'number' '1' 'string' false
-3 'number' '1' 'string' false
-</pre>
-
-Ongelman syy selviää. Muuttujassa _id_ on tallennettuna merkkijono '1' kun taas muistiinpanojen id:t ovat numeroita. JavaScriptissä === vertailu katsoo kaikki eri tyyppiset arvot oletusarvoisesti erisuuriksi, joten 1 ei ole '1'.
-
-Korjataan ongelma muuttamalla parametrina oleva merkkijonomuotoinen id [numeroksi](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number):
-
-```js
-app.get('/api/notes/:id', (request, response) => {
-  const id = Number(request.params.id) // highlight-line
-  const note = notes.find(note => note.id === id)
-  response.json(note)
-})
-```
-
-Nyt yksittäisen resurssin hakeminen toimii.
+Testataan kokeilemalla selaimella osoittetta <http://localhost:3001/api/notes/2>:
 
 ![Yksittäistä muistiinpanoa vastaava json renderöityy](../../images/3/9new.png)
 
@@ -554,7 +465,7 @@ Tehdään koodiin muutos:
 
 ```js
 app.get('/api/notes/:id', (request, response) => {
-  const id = Number(request.params.id)
+  const id = request.params.id
   const note = notes.find(note => note.id === id)
   
   // highlight-start
@@ -579,7 +490,7 @@ Toteutetaan seuraavaksi resurssin poistava route. Poisto tapahtuu tekemällä HT
 
 ```js
 app.delete('/api/notes/:id', (request, response) => {
-  const id = Number(request.params.id)
+  const id = request.params.id
   notes = notes.filter(note => note.id !== id)
 
   response.status(204).end()
@@ -623,7 +534,7 @@ Klikkaamalla tekstiä <i>Send Request</i>, REST client suorittaa määritellyn H
 
 ### Datan vastaanottaminen
 
-Toteutetaan seuraavana uusien muistiinpanojen lisäys, joka siis tapahtuu tekemällä HTTP POST ‑pyyntö osoitteeseen http://localhost:3001/api/notes ja liittämällä pyynnön [bodyyn](https://www.w3.org/Protocols/rfc2616/rfc2616-sec7.html#sec7) luotavan muistiinpanon tiedot JSON-muodossa.
+Toteutetaan seuraavana uusien muistiinpanojen lisäys, joka siis tapahtuu tekemällä HTTP POST ‑pyyntö osoitteeseen http://localhost:3001/api/notes ja liittämällä pyynnön [bodyyn](https://fastapi.tiangolo.com/tutorial/body/) luotavan muistiinpanon tiedot JSON-muodossa.
 
 Jotta pääsisimme pyynnön mukana lähetettyyn dataan helposti käsiksi, tarvitsemme Expressin tarjoaman [json-parserin](https://expressjs.com/en/api.html) apua. Tämä tapahtuu lisäämällä koodiin komento _app.use(express.json())_.
 
@@ -659,11 +570,11 @@ Ennen toimintalogiikan viimeistelyä varmistetaan ensin Postmanilla, että lähe
 
 Sovellus tulostaa lähetetyn vastaanottamansa datan terminaaliin:
 
-![Konsoliin tulostuu palvelimen vastaanottama json-objekti](../../images/3/15new.png)
+![Konsoliin tulostuu palvelimen vastaanottama json-objekti](../../images/3/15c.png)
 
-**HUOM:** Kun ohjelmoit backendia, <i>pidä sovellusta suorittava konsoli koko ajan näkyvillä</i>. Nodemonin ansiosta sovellus käynnistyy uudelleen jos koodiin tehdään muutoksia. Jos seuraat konsolia, huomaat välittömästi jos sovelluksen koodiin tulee virhe:
+**HUOM:** Kun ohjelmoit backendia, <i>pidä sovellusta suorittava konsoli koko ajan näkyvillä</i>. Kehityspalvelin käynnistyy uudelleen, jos koodiin tehdään muutoksia, joten jos seuraat konsolia, huomaat välittömästi jos sovelluksen koodiin tulee virhe:
 
-![konsoliin tulostuu epävalidista javascriptistä johtuva parse error ‑virheilmoitus](../../images/3/16.png)
+![konsoliin tulostuu epävalidista javascriptistä johtuva parse error ‑virheilmoitus](../../images/3/16_25.png)
 
 Konsolista kannattaa seurata myös, reagoiko backend odotetulla tavalla esim. kun sovellukselle lähetetään dataa metodilla HTTP POST. Backendiin kannattaa luonnollisesti lisäillä runsaat määrät <em>console.log</em>-komentoja kun sovellus on kehitysvaiheessa. 
 
@@ -677,7 +588,7 @@ Headerin <i>Content-Type</i> arvoksi asettuu <i>text/plain</i>:
 
 Palvelin näyttää vastaanottavan ainoastaan tyhjän olion:
 
-![Konsoliin tulostuu tyhjä json](../../images/3/19.png)
+![Konsoliin tulostuu tyhjä json](../../images/3/19_25.png)
 
 Ilman oikeaa headerin arvoa palvelin ei osaa parsia dataa oikeaan muotoon. Se ei edes yritä arvailla missä muodossa data on, sillä potentiaalisia datan siirtomuotoja eli <i>Content-Typejä</i> on olemassa [suuri määrä](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types).
 
@@ -702,11 +613,11 @@ Palataan taas sovelluksen pariin. Kun tiedämme, että sovellus vastaanottaa tie
 ```js
 app.post('/api/notes', (request, response) => {
   const maxId = notes.length > 0
-    ? Math.max(...notes.map(n => n.id)) 
+    ? Math.max(...notes.map(n => Number(n.id))) 
     : 0
 
   const note = request.body
-  note.id = maxId + 1
+  note.id = String(maxId + 1)
 
   notes = notes.concat(note)
 
@@ -714,16 +625,16 @@ app.post('/api/notes', (request, response) => {
 })
 ```
 
-Uudelle muistiinpanolle tarvitaan uniikki id. Ensin selvitetään olemassa olevista id:istä suurin muuttujaan _maxId_. Uuden muistiinpanon id:ksi asetetaan sitten _maxId + 1_. Tämä tapa ei ole kovin hyvä, mutta emme nyt välitä siitä, sillä tulemme pian korvaamaan tavan, jolla muistiinpanot talletetaan.
+Uudelle muistiinpanolle tarvitaan uniikki id. Ensin selvitetään olemassa olevista id:istä suurin muuttujaan _maxId_. Uuden muistiinpanon id:ksi asetetaan sitten _maxId + 1_ merkkijonomuodossa. Tämä tapa ei ole kovin hyvä, mutta emme nyt välitä siitä, sillä tulemme pian korvaamaan tavan, jolla muistiinpanot talletetaan.
 
 Tämänhetkisessä versiossa on vielä se ongelma, että voimme HTTP POST ‑pyynnöllä lisätä mitä tahansa kenttiä sisältäviä olioita. Parannellaan sovellusta siten, että kenttä <i>content</i> ei saa olla tyhjä. Kentälle <i>important</i> asetetaan oletusarvo false jos sen arvoa ei ole määritelty. Kaikki muut kentät hylätään:
 
 ```js
 const generateId = () => {
   const maxId = notes.length > 0
-    ? Math.max(...notes.map(n => n.id))
+    ? Math.max(...notes.map(n => Number(n.id)))
     : 0
-  return maxId + 1
+  return String(maxId + 1)
 }
 
 app.post('/api/notes', (request, response) => {
@@ -784,19 +695,19 @@ Vielä pieni huomio ennen tehtäviä. Uuden id:n generoiva funktio näyttää se
 ```js
 const generateId = () => {
   const maxId = notes.length > 0
-    ? Math.max(...notes.map(n => n.id))
+    ? Math.max(...notes.map(n => Number(n.id)))
     : 0
-  return maxId + 1
+  return String(maxId + 1)
 }
 ```
 
 Koodi sisältää hieman erikoisen näköisen rivin:
 
 ```js
-Math.max(...notes.map(n => n.id))
+Math.max(...notes.map(n => Number(n.id)))
 ```
 
-Mitä rivillä tapahtuu? <em>notes.map(n => n.id)</em> muodostaa taulukon, joka koostuu muistiinpanojen id-kentistä. [Math.max](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/max) palauttaa maksimin sille parametrina annetuista luvuista. <em>notes.map(n => n.id)</em> on kuitenkin <i>taulukko</i>, joten se ei kelpaa parametriksi komennolle _Math.max_. Taulukko voidaan muuttaa yksittäisiksi luvuiksi käyttäen taulukon [spread](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Spread_syntax)-syntaksia, eli kolmea pistettä <em>...taulukko</em>.
+Mitä rivillä tapahtuu? <em>notes.map(n => Number(n.id))</em> muodostaa taulukon, joka koostuu muistiinpanojen id-kenttiä vastaavasta numeroarvosta. [Math.max](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/max) palauttaa maksimin sille parametrina annetuista luvuista. <em>notes.map(n => Number(n.id))</em> on kuitenkin <i>taulukko</i>, joten se ei kelpaa parametriksi komennolle _Math.max_. Taulukko voidaan muuttaa yksittäisiksi luvuiksi käyttäen taulukon [spread](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Spread_syntax)-syntaksia, eli kolmea pistettä <em>...taulukko</em>.
 
 </div>
 
@@ -804,9 +715,7 @@ Mitä rivillä tapahtuu? <em>notes.map(n => n.id)</em> muodostaa taulukon, joka 
 
 ### Tehtävät 3.1.-3.6.
 
-**HUOM:** tämän osan tehtäväsarja kannattaa tehdä omaan Git-repositorioon ja suoraan repositorion juureen! Jos et tee näin, joudut ongelmiin tehtävässä 3.10
-
-**HUOM2:** Koska nyt ei ole kyse frontendista ja Reactista, sovellusta <strong>ei luoda</strong> create-react-app:illa vaan komennolla <em>npm init</em>, kuten ylempänä tämän osan materiaalissa.
+**HUOM:** Koska nyt ei ole kyse frontendista ja Reactista, sovellusta <strong>ei luoda</strong> Vitellä vaan komennolla <em>npm init</em>, kuten ylempänä tämän osan materiaalissa.
 
 
 **Vahva suositus:** kun teet backendin koodia, pidä koko ajan silmällä, mitä palvelimen koodia suorittavassa konsolissa tapahtuu.
@@ -947,7 +856,7 @@ Sovelluksen tämän hetkinen koodi on kokonaisuudessaan [GitHubissa](https://git
 
 Lisää sovellukseesi loggausta tekevä middleware [morgan](https://github.com/expressjs/morgan). Konfiguroi se logaamaan konsoliin <i>tiny</i>-konfiguraation mukaisesti.
 
-Morganin ohjeet eivät ole ehkä kaikkein selvimmät, ja joudut kenties miettimään hiukan. Toisaalta juuri koskaan dokumentaatio ei ole aivan itsestäänselvää, joten kryptisempiäkin asioita on hyvä oppia tulkitsemaan.
+Morganin ohjeet eivät ole ehkä kaikkein selvimmät, ja joudut kenties miettimään hiukan. Toisaalta dokumentaatio ei ole juuri koskaan aivan itsestäänselvää, joten kryptisempiäkin asioita on hyvä oppia tulkitsemaan.
 
 Morgan asennetaan kuten muutkin kirjastot, eli komennolla _npm install_ ja sen käyttöönotto tapahtuu kaikkien middlewarejen tapaan komennolla _app.use_
 

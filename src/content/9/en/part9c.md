@@ -77,32 +77,41 @@ The *target* configuration tells the compiler which *ECMAScript* version to use 
 *module* tells the compiler that we want to use *CommonJS* modules in the compiled code. This means we can use the old *require* syntax instead of the *import* one, which is not supported in older versions of *Node*.
 
 *strict* is a shorthand for multiple separate options:
-*noImplicitAny, noImplicitThis, alwaysStrict, strictBindCallApply, strictNullChecks, strictFunctionTypes and strictPropertyInitialization*.
+- noImplicitAny
+- noImplicitThis
+- alwaysStrict
+- strictBindCallApply
+- strictNullChecks
+- strictFunctionTypes
+- strictPropertyInitialization
+
 They guide our coding style to use the TypeScript features more strictly.
 For us, perhaps the most important is the already-familiar [noImplicitAny](https://www.staging-typescript.org/tsconfig#noImplicitAny). It prevents implicitly setting type *any*, which can for example happen if you don't type the parameters of a function.
 Details about the rest of the configurations can be found in the [tsconfig documentation](https://www.staging-typescript.org/tsconfig#strict).
 Using *strict* is suggested by the official documentation.
 
-*noUnusedLocals* prevents having unused local variables, and *noUnusedParameters* throws an error if a function has unused parameters.
+- *noUnusedLocals* prevents having unused local variables, and *noUnusedParameters* throws an error if a function has unused parameters.
 
-*noImplicitReturns* checks all code paths in a function to ensure they return a value.
+- *noImplicitReturns* checks all code paths in a function to ensure they return a value.
 
-*noFallthroughCasesInSwitch* ensures that, in a *switch case*, each case ends either with a *return* or a *break* statement.
+- *noFallthroughCasesInSwitch* ensures that, in a *switch case*, each case ends either with a *return* or a *break* statement.
 
-*esModuleInterop* allows interoperability between CommonJS and ES Modules; see more in the [documentation](https://www.staging-typescript.org/tsconfig#esModuleInterop).
+- *esModuleInterop* allows interoperability between CommonJS and ES Modules
+
+See more in the [documentation](https://www.staging-typescript.org/tsconfig#esModuleInterop).
 
 Now that we have set our configuration, we can continue by installing *express* and, of course, also *@types/express*. Also, since this is a real project, which is intended to be grown over time, we will use ESlint from the very beginning:
 
 ```shell
 npm install express
-npm install --save-dev eslint @types/express @typescript-eslint/eslint-plugin @typescript-eslint/parser
+npm install --save-dev eslint @eslint/js typescript-eslint @stylistic/eslint-plugin @types/express @types/eslint__js
 ```
 
 Now our *package.json* should look like this:
 
 ```json
 {
-  "name": "flight-diary",
+  "name": "flights",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -111,52 +120,57 @@ Now our *package.json* should look like this:
   },
   "author": "",
   "license": "ISC",
-  "dependencies": {
-    "express": "^4.18.2"
-  },
   "devDependencies": {
-    "@types/express": "^4.17.18",
-    "@typescript-eslint/eslint-plugin": "^6.7.3",
-    "@typescript-eslint/parser": "^6.7.3",
-    "eslint": "^8.50.0",
-    "typescript": "^5.2.2"
+    "@eslint/js": "^9.8.0",
+    "@stylistic/eslint-plugin": "^2.6.1",
+    "@types/eslint__js": "^8.42.3",
+    "@types/express": "^4.17.21",
+    "eslint": "^9.8.0",
+    "typescript": "^5.5.4",
+    "typescript-eslint": "^8.0.0"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
   }
 }
 ```
 
-We also create a *.eslintrc* file with the following content:
+We also create a *eslint.config.mjs* file with the following content:
 
-```json
-{
-  "extends": [
-    "eslint:recommended",
-    "plugin:@typescript-eslint/recommended",
-    "plugin:@typescript-eslint/recommended-requiring-type-checking"
+```js
+import eslint from '@eslint/js';
+import tseslint from 'typescript-eslint';
+import stylistic from "@stylistic/eslint-plugin";
+
+export default tseslint.config({
+  files: ['**/*.ts'],
+  extends: [
+    eslint.configs.recommended,
+    ...tseslint.configs.recommendedTypeChecked,
   ],
-  "plugins": ["@typescript-eslint"],
-  "env": {
-    "browser": true,
-    "es6": true,
-    "node": true
+  languageOptions: {
+    parserOptions: {
+      project: true,
+      tsconfigRootDir: import.meta.dirname,
+    },
   },
-  "rules": {
-    "@typescript-eslint/semi": ["error"],
-    "@typescript-eslint/explicit-function-return-type": "off",
-    "@typescript-eslint/explicit-module-boundary-types": "off",
-    "@typescript-eslint/restrict-template-expressions": "off",
-    "@typescript-eslint/restrict-plus-operands": "off",
-    "@typescript-eslint/no-unsafe-member-access": "off",
-    "@typescript-eslint/no-unused-vars": [
-      "error",
-      { "argsIgnorePattern": "^_" }
+  plugins: {
+    "@stylistic": stylistic,
+  },
+  rules: {
+    '@stylistic/semi': 'error',
+    '@typescript-eslint/no-unsafe-assignment': 'error',
+    '@typescript-eslint/no-explicit-any': 'error',
+    '@typescript-eslint/explicit-function-return-type': 'off',
+    '@typescript-eslint/explicit-module-boundary-types': 'off',
+    '@typescript-eslint/restrict-template-expressions': 'off',
+    '@typescript-eslint/restrict-plus-operands': 'off',
+    '@typescript-eslint/no-unused-vars': [
+      'error',
+      { 'argsIgnorePattern': '^_' }
     ],
-    "no-case-declarations": "off"
   },
-  "parser": "@typescript-eslint/parser",
-  "parserOptions": {
-    "project": "./tsconfig.json"
-  }
-}
+});
 ```
 
 Now we just need to set up our development environment, and we are ready to start writing some serious code.
@@ -175,7 +189,7 @@ We finally define a few more npm scripts, and voilà, we are ready to begin:
   "scripts": {
     "tsc": "tsc",
     "dev": "ts-node-dev index.ts", // highlight-line
-    "lint": "eslint --ext .ts ." // highlight-line
+    "lint": "eslint ." // highlight-line
   },
   // ...
 }
@@ -234,7 +248,31 @@ app.listen(PORT, () => {
 });
 ```
 
-Currently, if we run ESlint it will also interpret the files in the *build* directory. We don't want that, since the code there is compiler-generated. We can prevent this by creating a  *.eslintignore* file that lists the content we want ESlint to ignore, just like we do with git and *.gitignore*.
+Currently, if we run ESlint it will also interpret the files in the *build* directory. We don't want that, since the code there is compiler-generated. We can [prevent](https://eslint.org/docs/latest/use/configure/configuration-files#excluding-files-with-ignores) this in the file *eslint.config.mjs* as follows:
+
+```js
+// ...
+export default tseslint.config({
+  files: ['**/*.ts'],
+  extends: [
+    eslint.configs.recommended,
+    ...tseslint.configs.recommendedTypeChecked,
+  ],
+  languageOptions: {
+    parserOptions: {
+      project: true,
+      tsconfigRootDir: import.meta.dirname,
+    },
+  },
+  plugins: {
+    "@stylistic": stylistic,
+  },
+  ignores: ["build/*"], // highlight-line
+  rules: {
+    // ...
+  },
+});
+```
 
 Let's add an npm script for running the application in production mode:
 
@@ -244,7 +282,7 @@ Let's add an npm script for running the application in production mode:
   "scripts": {
     "tsc": "tsc",
     "dev": "ts-node-dev index.ts",
-    "lint": "eslint --ext .ts .",
+    "lint": "eslint .",
     "start": "node build/index.js" // highlight-line
   },
   // ...
@@ -309,7 +347,7 @@ Finally, we are ready to start writing some code.
 
 Let's start from the basics. Ilari wants to be able to keep track of his experiences on his flight journeys.
 
-He wants to be able to save *diary entries*, which contain:
+He wants to be able to save <i>diary entries</i>, which contain:
 
 - The date of the entry
 - Weather conditions (sunny, windy, cloudy, rainy or stormy)
@@ -390,13 +428,11 @@ app.listen(PORT, () => {
 });
 ```
 
-And now, if we make an HTTP GET request to <http://localhost:3000/api/diaries>, we should see the message: *Fetching all diaries!*
+And now, if we make an HTTP GET request to <http://localhost:3000/api/diaries>, we should see the message: <i>Fetching all diaries!</i>
 
 Next, we need to start serving the seed data (found [here](https://github.com/fullstack-hy2020/misc/blob/master/diaryentries.json)) from the app. We will fetch the data and save it to *data/entries.json*.
 
-We won't be writing the code for the actual data manipulations in the router. We will create a *service* that takes care of the data manipulation instead.
-It is quite a common practice to separate the "business logic" from the router code into modules, which are quite often called *services*.
-The name service originates from [Domain-driven design](https://en.wikipedia.org/wiki/Domain-driven_design) and was made popular by the [Spring](https://spring.io/) framework.
+We won't be writing the code for the actual data manipulations in the router. We will create a <i>service</i> that takes care of the data manipulation instead. It is quite a common practice to separate the "business logic" from the router code into modules, which are quite often called <i>services</i>. The name service originates from [Domain-driven design](https://en.wikipedia.org/wiki/Domain-driven_design) and was made popular by the [Spring](https://spring.io/) framework.
 
 Let's create a *src/services* directory and place the *diaryService.ts* file in it.
 The file contains two functions for fetching and saving diary entries:
@@ -420,7 +456,7 @@ export default {
 
 But something is not right:
 
-![vscode asking to consider using resolveJsonModule since can't find module](../../images/9/17c.png)
+![vscode asking to consider using resolveJsonModule since can't find module](../../images/9/17x.png)
 
 The hint says we might want to use *resolveJsonModule*. Let's add it to our tsconfig:
 
@@ -451,7 +487,7 @@ Due to this, the compiler warns us if we try to do something suspicious with the
 
 Even though the compiler is pretty good at making sure we don't do anything unwanted, it is safer to define the types for the data ourselves.
 
-Currently, we have a basic working TypeScript Express app, but there are barely any actual *typings* in the code. Since we know what type of data should be accepted for the *weather* and *visibility* fields, there is no reason for us not to include their types in the code.
+Currently, we have a basic working TypeScript Express app, but there are barely any actual <i>typings</i> in the code. Since we know what type of data should be accepted for the *weather* and *visibility* fields, there is no reason for us not to include their types in the code.
 
 Let's create a file for our types, *types.ts*, where we'll define all our types for this project.
 
@@ -533,7 +569,7 @@ We should never use type assertion unless there is no other way to proceed, as t
 While the compiler trusts you to know what you are doing when using *as*, by doing this, we are not using the full power of TypeScript but relying on the coder to secure the code.
 
 In our case, we could change how we export our data so we can type it within the data file.
-Since we cannot use typings in a JSON file, we should convert the JSON file to a ts file *diaries.ts* which exports the typed data like so:
+Since we cannot use typings in a JSON file, we should convert the JSON file to a ts file *entries.ts* which exports the typed data like so:
 
 ```js
 import { DiaryEntry } from "../src/types"; // highlight-line
@@ -552,7 +588,7 @@ const diaryEntries: DiaryEntry[] = [ // highlight-line
 export default diaryEntries; // highlight-line
 ```
 
-Now, when we import the array, the compiler interprets it correctly and the *weather* and *visibility* fields are understood right:
+Now, when we import the array, the compiler interprets it correctly:
 
 ```js
 import diaries from '../../data/entries'; // highlight-line
@@ -698,12 +734,12 @@ export default {
 };
 ```
 
-One thing in our application is a cause for concern. In *getNonSensitiveEntries*, we are returning the complete diary entries, and *no error is given* despite typing!
+One thing in our application is a cause for concern. In *getNonSensitiveEntries*, we are returning the complete diary entries, and <i>no error is given</i> despite typing!
 
 This happens because [TypeScript only checks](http://www.typescriptlang.org/docs/handbook/type-compatibility.html) whether we have all of the required fields or not, but excess fields are not prohibited. In our case, this means that it is *not prohibited* to return an object of type *DiaryEntry[]*, but if we were to try to access the *comment* field, it would not be possible because we would be accessing a field that TypeScript is unaware of even though it exists.
 
 Unfortunately, this can lead to unwanted behavior if you are not aware of what you are doing; the situation is valid as far as TypeScript is concerned, but you are most likely allowing a use that is not wanted.
-If we were now to return all of the diary entries from the *getNonSensitiveEntries* function to the frontend, we would be *leaking the unwanted fields to the requesting browser* - even though our types seem to imply otherwise!
+If we were now to return all of the diary entries from the *getNonSensitiveEntries* function to the frontend, we would be <i>leaking the unwanted fields to the requesting browser</i> - even though our types seem to imply otherwise!
 
 Because TypeScript doesn't modify the actual data but only its type, we need to exclude the fields ourselves:
 
@@ -776,6 +812,48 @@ export default router;
 The response is what we expect it to be:
 
 ![browser api/diaries shows three json objects](../../images/9/26.png)
+
+### Typing the request and response
+
+So far we have not discussed anything about the types of the route handler parameters. 
+
+If we hover eg. the parameter _res_, we notice it has the followng type:
+
+```js
+Response<any, Record<string, any>, number>
+```
+
+It looks a bit weird. The type _Response_ is a [generic type](https://www.typescriptlang.org/docs/handbook/2/generics.html#generic-types) that has three <i>type parameters</i>. If we open the type definition (by right clicking and selecting <i>Go to Type Definition</i> in the VS code) we see the following:
+
+```js
+export interface Response<
+    ResBody = any,
+    LocalsObj extends Record<string, any> = Record<string, any>,
+    StatusCode extends number = number,
+> extends http.ServerResponse, Express.Response {
+```
+
+The first type parameter is the most interesting for us, it corresponds <i>the response body</i> and has a default value _any_. So that is why TypeScript compiler accepts any type of response and we get no help to get the response right.
+
+We could and propably should give a proper type as the type variable. In our case it is an array of diary entries:
+
+```js
+import { Response } from 'express'
+import { NonSensitiveDiaryEntry } from "../types";
+// ...
+
+router.get('/', (_req, res: Response<NonSensitiveDiaryEntry[]>) => {
+  res.send(diaryService.getNonSensitiveEntries());
+});
+
+// ...
+```
+
+If we now try to respond with wrong type of data, the code does not compile
+
+![vscode error unsafe assignment of any value](../../images/9/ts1.png)
+
+Simillarly the request parameter has the type _Request_ that is also a generic type. We shall have a closer look on it later on.
 
 </div>
 
@@ -994,7 +1072,7 @@ app.listen(PORT, () => {
 
 Now the application is ready to receive HTTP POST requests for new diary entries of the correct type!
 
-### Proofing requests
+### Validating requests
 
 There are plenty of things that can go wrong when we accept data from outside sources.
 Applications rarely work completely on their own, and we are forced to live with the fact that data from sources outside of our system cannot be fully trusted.
@@ -1058,7 +1136,7 @@ export default toNewDiaryEntry;
 
 The function should parse each field and make sure that the return value is exactly of type *NewDiaryEntry*. This means we should check each field separately.
 
-Once again, we have a type issue: what is the  type of the parameter *object*? Since the *object* **is** the body of a request, Express has typed it as *any*. Since the idea of this function is to map fields of unknown type to fields of the correct type and check whether they are defined as expected, this might be the rare case in which we *want to allow the **any** type*.
+Once again, we have a type issue: what is the type of the parameter *object*? Since the *object* is the body of a request, Express has typed it as *any*. Since the idea of this function is to map fields of unknown type to fields of the correct type and check whether they are defined as expected, this might be the rare case in which we <i>want to allow the **any** type</i>.
 
 However, if we type the object as *any*, ESlint complains about that:
 
@@ -1085,7 +1163,7 @@ With the use of *unknown*, we also don't need to worry about the *@typescript-es
 
 > #### A sidenote from the editor
 >
-> *If you are like me and hate having a code in broken state for a long time due to incomplete typing, you could start by "faking" the function:*
+> <i>If you are like me and hate having a code in broken state for a long time due to incomplete typing, you could start by "faking" the function:</i>
 >
 >
 >```js
@@ -1103,7 +1181,7 @@ With the use of *unknown*, we also don't need to worry about the *@typescript-es
 >};
 >```
 >
-> *So before the real data and types are ready to use, I am just returning here something that has for sure the right type. The code stays in an operational state all the time and my blood pressure remains at normal levels.*
+> <i>So before the real data and types are ready to use, I am just returning here something that has for sure the right type. The code stays in an operational state all the time and my blood pressure remains at normal levels.</i>
 
 ### Type guards
 
@@ -1123,7 +1201,7 @@ const parseComment = (comment: unknown): string => {
 };
 ```
 
-The function gets a parameter of type *unknown* and returns it as type *string* if it exists and is of the right type.
+The function gets a parameter of type *unknown* and returns it as the type *string* if it exists and is of the right type.
 
 The string validation function looks like this:
 
@@ -1133,7 +1211,7 @@ const isString = (text: unknown): text is string => {
 };
 ```
 
-The function is a so-called [type guard](https://www.typescriptlang.org/docs/handbook/2/narrowing.html#using-type-predicates). That means it is a function that returns a boolean *and* has a *type predicate* as the return type. In our case, the type predicate is:
+The function is a so-called [type guard](https://www.typescriptlang.org/docs/handbook/2/narrowing.html#using-type-predicates). That means it is a function that returns a boolean *and* has a <i>type predicate</i> as the return type. In our case, the type predicate is:
 
 ```js
 text is string
@@ -1155,7 +1233,7 @@ The use of a type guard that returns a type predicate is one way to do [type nar
 
 > #### Side note: testing if something is a string
 >
-> *Why do we have two conditions in the string type guard?*
+> <i>Why do we have two conditions in the string type guard?</i>
 >
 >```js
 >const isString = (text: unknown): text is string => {
@@ -1163,7 +1241,7 @@ The use of a type guard that returns a type predicate is one way to do [type nar
 >}
 >```
 >
->*Would it not be enough to write the guard like this?*
+> <i>Would it not be enough to write the guard like this?</i>
 >
 >```js
 >const isString = (text: unknown): text is string => {
@@ -1171,7 +1249,7 @@ The use of a type guard that returns a type predicate is one way to do [type nar
 >}
 >```
 >
->*Most likely, the simpler form is good enough for all practical purposes. However, if we want to be sure, both conditions are needed. There are two different ways to create string in JavaScript, one as a primitive and the other as an object, which both work a bit differently when compared to the **typeof** and **instanceof** operators:*
+> <i>Most likely, the simpler form is good enough for all practical purposes. However, if we want to be sure, both conditions are needed. There are two different ways to create string in JavaScript, one as a primitive and the other as an object, which both work a bit differently when compared to the **typeof** and **instanceof** operators:</i>
 >
 >```js
 >const a = "I'm a string primitive";
@@ -1182,7 +1260,7 @@ The use of a type guard that returns a type predicate is one way to do [type nar
 >b instanceof String; --> returns true
 >```
 >
->*However, it is unlikely that anyone would create a string with a constructor function. Most likely the simpler version of the type guard would be just fine.*
+> <i>However, it is unlikely that anyone would create a string with a constructor function. Most likely the simpler version of the type guard would be just fine.</i>
 
 Next, let's consider the *date* field.
 Parsing and validating the date object is pretty similar to what we did with comments.
@@ -1361,7 +1439,7 @@ const toNewDiaryEntry = (object: unknown): NewDiaryEntry => {
 
 If the guard does not evaluate to true, an exception is thrown.
 
-The use of the operator *in* actually now guarantees that the fields indeed exist in the object. Because of that, the existence check in parsers is no more needed:
+The use of the operator *in* actually now guarantees that the fields indeed exist in the object. Because of that, the existence checks in the parsers are no longer needed:
 
 ```js
 const parseVisibility = (visibility: unknown): Visibility => {
@@ -1379,7 +1457,7 @@ If we now try to create a new diary entry with invalid or missing fields, we are
 
 ![postman showing 400 bad request with incorrect or missing visibility - awesome](../../images/9/62new.png)
 
-The source code of the application can be found on [GitHub](https://github.com/fullstack-hy2020/flight-diary).
+The source code of the application can be found on [GitHub](https://github.com/fullstack-hy2020/flight-diary/tree/part1).
 
 </div>
 
@@ -1401,5 +1479,302 @@ const id = uuid()
 Set up safe parsing, validation and type predicate to the POST */api/patients* request.
 
 Refactor the *gender* field to use an [enum type](http://www.typescriptlang.org/docs/handbook/enums.html).
+
+</div>
+
+<div class="content">
+
+### Using schema validation libraries
+
+Writing a validator to the request body can be a huge burden. Thankfully there exists several <i>schema validator libraries</i> that can help. Let us now have a look at [Zod](https://zod.dev/) that works pretty well with TypeScript.
+
+Let us get started:
+
+```bash
+npm install zod
+```
+
+Parsers of the primitive valued fields such as
+
+```js
+const isString = (text: unknown): text is string => {
+  return typeof text === 'string' || text instanceof String;
+};
+
+const parseComment = (comment: unknown): string => {
+  if (!isString(comment)) {
+    throw new Error('Incorrect comment');
+  }
+
+  return comment;
+};
+```
+
+are easy to replace as follows:
+
+```js
+const parseComment = (comment: unknown): string => {
+  return z.string().parse(comment);  // highlight-line
+};
+```
+
+First the [string](https://zod.dev/?id=strings) method of Zod is used to define the required type (or <i>schema</i> in Zod terms). After that the value (which is of the type _unknown_) is parsed with the method [parse](https://zod.dev/?id=parse), which returns the value in the required type or throws an exception.
+
+We do not actually need the helper function _parseComment_ anymore and can use the Zod parser directly:
+
+```js
+export const toNewDiaryEntry = (object: unknown): NewDiaryEntry => {
+  if ( !object || typeof object !== 'object' ) {
+    throw new Error('Incorrect or missing data');
+  }
+
+  if ('comment' in object && 'date' in object && 'weather' in object && 'visibility' in object)  {
+    const newEntry: NewDiaryEntry = {
+      weather: parseWeather(object.weather),
+      visibility: parseVisibility(object.visibility),
+      date: parseDate(object.date),
+      comment: z.string().parse(object.comment) // highlight-line
+    };
+
+    return newEntry;
+  }
+
+  throw new Error('Incorrect data: some fields are missing');
+};
+```
+
+Zod has a bunch of string specific validations, eg. one that validates if a string is a valid [date](https://zod.dev/?id=dates), so we get also rid of the date field parser:
+
+```js
+export const toNewDiaryEntry = (object: unknown): NewDiaryEntry => {
+  if ( !object || typeof object !== 'object' ) {
+    throw new Error('Incorrect or missing data');
+  }
+
+  if ('comment' in object && 'date' in object && 'weather' in object && 'visibility' in object)  {
+    const newEntry: NewDiaryEntry = {
+      weather: parseWeather(object.weather),
+      visibility: parseVisibility(object.visibility), 
+      date: z.string().date().parse(object.date), // highlight-line
+      comment: z.string().optional().parse(object.comment) // highlight-line
+    };
+
+    return newEntry;
+  }
+
+  throw new Error('Incorrect data: some fields are missing');
+};
+```
+
+We have also made the field comment [optional](https://zod.dev/?id=optional) since it is defined optional in the TypeScript definition.
+
+Zod has also support for [enums](https://zod.dev/?id=native-enums) and thanks to that our code simplifies further:
+
+```js
+export const toNewDiaryEntry = (object: unknown): NewDiaryEntry => {
+  if ( !object || typeof object !== 'object' ) {
+    throw new Error('Incorrect or missing data');
+  }
+
+  if ('comment' in object && 'date' in object && 'weather' in object && 'visibility' in object)  {
+    const newEntry: NewDiaryEntry = {
+      weather: z.nativeEnum(Weather).parse(object.weather), // highlight-line
+      visibility: z.nativeEnum(Visibility).parse(object.visibility), // highlight-line
+      date: z.string().date().parse(object.date),
+      comment: z.string().optional().parse(object.comment)
+    };
+
+    return newEntry;
+  }
+
+  throw new Error('Incorrect data: some fields are missing');
+};
+```
+
+We have so far just used Zod to parse the type or schema of individual fields, but we can go one step further and define the whole <i>new diary entry</i> as a Zod [object](https://zod.dev/?id=objects) schema:
+
+
+```js
+const newEntrySchema = z.object({
+  weather: z.nativeEnum(Weather),
+  visibility: z.nativeEnum(Visibility),
+  date: z.string().date(),
+  comment: z.string().optional()
+});
+```
+
+Now it is just enough to call _parse_ of the defined schema:
+
+```js
+export const toNewDiaryEntry = (object: unknown): NewDiaryEntry => {
+  return newEntrySchema.parse(object);
+};
+```
+
+With the help from [documentation](https://zod.dev/ERROR_HANDLING) we could also improve the error handling:
+
+```js
+router.post('/', (req, res) => {
+  try {
+    const newDiaryEntry = toNewDiaryEntry(req.body);
+    const addedEntry = diaryService.addDiary(newDiaryEntry);
+    res.json(addedEntry);
+
+  } catch (error: unknown) {
+    // highlight-start
+    if (error instanceof z.ZodError) {
+      res.status(400).send({ error: error.issues });
+    } else {
+      res.status(400).send({ error: 'unknown error' });
+    }
+    // highlight-end
+  }
+});
+```
+
+The response in case of error looks pretty good:
+
+![](../../images/9/ts-zod1.png)
+
+We could develop our solution still some steps further. Our type definitions currently look like this:
+
+```js
+export interface DiaryEntry {
+  id: number;
+  date: string;
+  weather: Weather;
+  visibility: Visibility;
+  comment?: string;
+}
+
+export type NewDiaryEntry = Omit<DiaryEntry, 'id'>;
+```
+
+So besides the type _NewDiaryEntry_ we have also the Zod schema _NewEntrySchema_ that defines the shape of a new entry. We can use the schema to [infer](https://zod.dev/?id=type-inference) the type:
+
+```js
+import { z } from 'zod';
+import { newEntrySchema } from './utils'
+
+export interface DiaryEntry {
+  id: number;
+  date: string;
+  weather: Weather;
+  visibility: Visibility;
+  comment?: string;
+}
+
+// infer the type from schema
+export type NewDiaryEntry = z.infer<typeof newEntrySchema>; 
+```
+
+We could take this even a bit further and define the _DiaryEntry_ based on _NewDiaryEntry_:
+
+```js
+export type NewDiaryEntry = z.infer<typeof newEntrySchema>;
+
+export interface DiaryEntry extends NewDiaryEntry {
+  id: number;
+}
+```
+
+This would remove all the duplication in the type and schema definitions but feels a bit backward so we decide to define the type _DiaryEntry_ explicitly with TypeScript.
+
+Unfortunately the opposite is not possible: we can not define the Zod schema based on TypeScript type definitions, and due to this, the duplication in the type and schema definitions is hard to avoid.
+
+The current state of the source code can be found in the part2 branch of [this](https://github.com/fullstack-hy2020/flight-diary/tree/part2) GitHub repository.
+
+### Parsing request body in middleware
+
+We can now get rid of this method altogether
+
+```js
+export const toNewDiaryEntry = (object: unknown): NewDiaryEntry => {
+  return newEntrySchema.parse(object);
+};
+```
+
+and just call the Zod-parser directly in the route handler:
+
+```js
+import express, { Request, Response } from 'express';
+import diaryService from '../services/diaryService';
+import { NewEntrySchema } from '../utils';
+
+router.post('/', (req, res) => { // highlight-line
+  try {
+    const newDiaryEntry = NewEntrySchema.parse(req.body); // highlight-line
+    const addedEntry = diaryService.addDiary(newDiaryEntry);
+    res.json(addedEntry);
+
+  } catch (error: unknown) {
+    if (error instanceof z.ZodError) {
+      res.status(400).send({ error: error.issues });
+    } else {
+      res.status(400).send({ error: 'unknown error' });
+    }
+  }
+});
+```
+
+Instead of calling the request body parsing method explicitly in the route handler, the validation of the input could also be done in a middleware function.
+
+We have also added the type definitions to the route handler parameters, and shall also use types in the middleware function _newDiaryParser_:
+
+```js
+const newDiaryParser = (req: Request, _res: Response, next: NextFunction) => { 
+  try {
+    NewEntrySchema.parse(req.body);
+    next();
+  } catch (error: unknown) {
+    next(error);
+  }
+};
+```
+
+The middleware just calls the schema parser to the request body. If the parsing throws an exception, that is passed to the error handling middleware.
+
+So after the request passes this middleware, it <i>is known that the request body is a proper new diary entry</i>. We can tell this fact to TypeScript compiler by giving a type parameter to the _Request_ type:
+
+```js
+router.post('/', newDiaryParser, (req: Request<unknown, unknown, NewDiaryEntry>, res: Response<DiaryEntry>) => { // highlight-line
+  const addedEntry = diaryService.addDiary(req.body); // highlight-line
+  res.json(addedEntry);
+});
+```
+
+Thanks to the middleware, the request body is now known to be of right type and it can be directly given as parameter to the function _diaryService.addDiary_.
+
+The syntax of the _Request<unknown, unknown, NewDiaryEntry>_ looks a bit odd. The _Request_ is a [generic type](https://www.typescriptlang.org/docs/handbook/2/generics.html#generic-types) with several type parameters. The third type parameter represents the request body, and in order to give it the value _NewDiaryEntry_ we have to give <i>some</i> value to the two first parameters. We decide to define those _unknown_ since we do not need those for now.
+
+Since the possible errors in validation are now handled in the error handling middleware, we need to define one that handles the Zod errors properly:
+
+```js
+const errorMiddleware = (error: unknown, _req: Request, res: Response, next: NextFunction) => { 
+  if (error instanceof z.ZodError) {
+    res.status(400).send({ error: error.issues });
+  } else {
+    next(error);
+  }
+};
+
+router.post('/', newDiaryParser, (req: Request<unknown, unknown, NewDiaryEntry>, res: Response<DiaryEntry>) => {
+  // ...
+});
+
+router.use(errorMiddleware);
+```
+
+The final version of the source code can be found in the part3 branch of [this](https://github.com/fullstack-hy2020/flight-diary/tree/part3) GitHub repository.
+
+</div>
+
+<div class="tasks">
+
+### Exercises 9.14
+
+#### 9.14: Patientor backend, step7
+
+Use Zod to validate the requests to the POST endpoint */api/patients*.
 
 </div>

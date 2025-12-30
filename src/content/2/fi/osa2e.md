@@ -46,7 +46,7 @@ Jos haluamme kohdistaa tyylejä esim. jokaiseen muistiinpanoon, voisimme käytt�
 const Note = ({ note, toggleImportance }) => {
   const label = note.important 
     ? 'make not important' 
-    : 'make important';
+    : 'make important'
 
   return (
     <li>
@@ -83,7 +83,7 @@ Reactissa tulee kuitenkin classin sijaan käyttää attribuuttia [className](htt
 const Note = ({ note, toggleImportance }) => {
   const label = note.important 
     ? 'make not important' 
-    : 'make important';
+    : 'make important'
 
   return (
     <li className='note'> // highlight-line
@@ -108,7 +108,7 @@ Jos nyt lisäät sovellukseen muita li-elementtejä, ne eivät saa muistiinpanoi
 
 ### Parempi virheilmoitus
 
-Aiemmin toteutimme olemassa olemattoman muistiinpanon tärkeyden muutokseen liittyvän virheilmoituksen <em>alert</em>-metodilla. Toteutetaan se nyt Reactilla omana komponenttinaan.
+Aiemmin toteutimme olemassa olemattoman muistiinpanon tärkeyden muutokseen liittyvän virheilmoituksen <em>alert</em>-metodilla. Toteutetaan se nyt Reactilla omana komponenttinaan tiedostossa <i>src/components/Notification.jsx</i>.
 
 Komponentti on yksinkertainen:
 
@@ -124,6 +124,8 @@ const Notification = ({ message }) => {
     </div>
   )
 }
+
+export default Notification
 ```
 
 Jos propsin <em>message</em> arvo on <em>null</em>, ei renderöidä mitään. Muussa tapauksessa renderöidään viesti div-elementtiin. Elementille on liitetty tyylien lisäämistä varten luokka <i>error</i>.
@@ -131,6 +133,11 @@ Jos propsin <em>message</em> arvo on <em>null</em>, ei renderöidä mitään. Mu
 Lisätään komponentin <i>App</i> tilaan kenttä <i>errorMessage</i> virheviestiä varten. Laitetaan kentälle heti jotain sisältöä, jotta pääsemme testaamaan komponenttia:
 
 ```js
+import { useState, useEffect } from 'react'
+import Note from './components/Note'
+import noteService from './services/notes'
+import Notification from './components/Notification' // highlight-line
+
 const App = () => {
   const [notes, setNotes] = useState([]) 
   const [newNote, setNewNote] = useState('')
@@ -207,13 +214,12 @@ React mahdollistaa tyylien kirjoittamisen myös suoraan komponenttien koodin jou
 
 Periaate inline-tyylien määrittelyssä on erittäin yksinkertainen. Mihin tahansa React-komponenttiin tai elementtiin voi liittää attribuutin [style](https://react.dev/reference/react-dom/components/common#applying-css-styles), jolle annetaan arvoksi JavaScript-oliona määritelty joukko CSS-sääntöjä.
 
-CSS-säännöt määritellään JavaScriptin avulla hieman eri tavalla kuin normaaleissa CSS-tiedostoissa. Jos haluamme asettaa jollekin elementille esimerkiksi vihreän, kursivoidun ja 16 pikselin korkuisen fontin, määrittely ilmaistaan CSS-syntaksilla seuraavasti:
+CSS-säännöt määritellään JavaScriptin avulla hieman eri tavalla kuin normaaleissa CSS-tiedostoissa. Jos haluamme asettaa jollekin elementille esimerkiksi vihreän ja kursivoidun fontin, määrittely ilmaistaan CSS-syntaksilla seuraavasti:
 
 ```css
 {
   color: green;
   font-style: italic;
-  font-size: 16px;
 }
 ```
 
@@ -222,30 +228,40 @@ Vastaava tyyli kirjoitetaan Reactin inline-tyylin määrittelevänä oliona seur
 ```js
 {
   color: 'green',
-  fontStyle: 'italic',
-  fontSize: 16
+  fontStyle: 'italic'
 }
 ```
 
 Jokainen CSS-sääntö on olion kenttä, joten ne erotetaan JavaScript-syntaksin mukaan pilkuilla. Pikseleinä ilmaistut numeroarvot voidaan määritellä kokonaislukuina. Merkittävin ero normaaliin CSS:ään on väliviivan sisältämien CSS-ominaisuuksien kirjoittaminen camelCase-muodossa.
 
-Voimme nyt lisätä sovellukseemme alapalkin muodostavan komponentin <i>Footer</i> ja määritellä sille inline-tyylit seuraavasti:
+Lisätään sovellukseemme alapalkin muodostava komponentti <i>Footer</i> ja määritellään sille inline-tyylit. Määritellään komponentti tiedostossa _components/Footer.jsx_ otetaan se käyttöön tiedostossa _App.jsx_ seuraavasti:
 
 ```js
 const Footer = () => {
   const footerStyle = {
     color: 'green',
-    fontStyle: 'italic',
-    fontSize: 16
+    fontStyle: 'italic'
   }
 
   return (
     <div style={footerStyle}>
       <br />
-      <em>Note app, Department of Computer Science, University of Helsinki 2023</em>
+      <p>
+        Note app, Department of Computer Science, University of Helsinki 2025
+      </p>
     </div>
   )
 }
+
+export default Footer
+```
+
+```js
+import { useState, useEffect } from 'react'
+import Footer from './components/Footer' // highlight-line
+import Note from './components/Note'
+import Notification from './components/Notification'
+import noteService from './services/notes'
 
 const App = () => {
   // ...
@@ -306,9 +322,9 @@ Korjaa ongelma osan 2 esimerkin [promise ja virheet](/osa2/palvelimella_olevan_d
 
 Osan lopussa on vielä muutama hieman haastavampi tehtävä. Voit tässä vaiheessa jättää tehtävät tekemättä jos ne tuottavat liian paljon päänvaivaa, palaamme samoihin teemoihin uudelleen myöhemmin. Materiaali kannattanee jokatapauksessa lukea läpi.
 
-Eräs sovelluksessamme tekemä ratkaisu piilottaa yhden hyvin tyypillisen virhetilanteen, mihin tulet varmasti törmäämään monta kertaa.
+Eräs sovelluksessa tekemämme ratkaisu piilottaa yhden hyvin tyypillisen virhetilanteen, mihin tulet varmasti törmäämään monta kertaa.
 
-Alustimme muistiinpanot muistavan tilan alkuarvoksi tyhjän tauluon:
+Alustimme muistiinpanot muistavan tilan alkuarvoksi tyhjän taulukon:
 
 ```js
 const App = () => {
@@ -318,7 +334,7 @@ const App = () => {
 }
 ```
 
-Tämä on onkin luonnollinen tapa alustaa tila, muistiinpanot muodostavat joukon, joten tyhjä taulukko on luonteva alkuarvo muuttujalle.
+Tämä onkin luonnollinen tapa alustaa tila, muistiinpanot muodostavat joukon, joten tyhjä taulukko on luonteva alkuarvo muuttujalle.
 
 Niissä tilanteissa, missä tilaan talletetaan "yksi asia" tilan luonteva alkuarvo on usein _null_, joka kertoo että tilassa ei ole vielä mitään. Kokeillaan miten käy jos alustamme nyt tilan nulliksi: 
 
@@ -359,7 +375,7 @@ Muuttuja _notesToShow_ saa arvokseen tilan _notes_ arvon ja koodi yrittää kuts
 
 Mistä tämä johtuu?
 
-Efektohookki asettaa tilaan _notes_ palvelimen palauttamat muistiinpanot funktiolla _setNotes_:
+Effect-hook asettaa tilaan _notes_ palvelimen palauttamat muistiinpanot funktiolla _setNotes_:
 
 ```js
   useEffect(() => {
@@ -524,7 +540,7 @@ const App = () => {
 
 Efektifunktio siis suoritetaan ensimmäisen renderöinnin jälkeen, ja <i>aina</i> sen jälkeen kun sen toisena parametrina oleva taulukko eli esimerkin tapauksessa _[currency]_ muuttuu. Eli kun tila _currency_ saa uuden arvon, muuttuu taulukon sisältö ja efektifunktio suoritetaan.
 
-Efektiin on tehty ehto
+On luontevaa valita muuttujan _currency_ alkuarvoksi _null_, koska _currency_ kuvaa yksittäistä asiaa. Alkuarvo _null_ kertoo, että tilassa ei ole vielä mitään, ja tällöin on myös helppo tarkistaa yksinkertaisella if-lauseella, onko muuttujalle asetettu arvoa. Efektiin on tehty ehto
 
 ```js
 if (currency) { 
@@ -532,9 +548,9 @@ if (currency) {
 }
 ```
 
-joka estää valuuttakurssien hakemisen ensimmäisen renderöininin yhteydessä, eli siinä vaiheessa kuin muuttujalla _currency_ on vasta alkuarvo eli tyhjää merkkijono.
+joka estää valuuttakurssien hakemisen ensimmäisen renderöinnin yhteydessä, eli siinä vaiheessa kun muuttujalla _currency_ on vasta alkuarvo _null_. 
 
-Jos käyttäjä siis kirjoittaa hakukenttään esim. <i>eur</i>, suorittaa sovellus Axiosin avulla HTTP GET ‑pyynnön osoitteeseen https://open.er-api.com/v6/latest/eur ja tallentaa vastauksen tilaaan _rates_. 
+Jos käyttäjä siis kirjoittaa hakukenttään esim. <i>eur</i>, suorittaa sovellus Axiosin avulla HTTP GET ‑pyynnön osoitteeseen https://open.er-api.com/v6/latest/eur ja tallentaa vastauksen tilaan _rates_. 
 
 Kun käyttäjä tämän jälkeen kirjoittaa hakukenttään jonkin toisen arvon, esim. <i>usd</i> suoritetaan efekti jälleen ja uuden valuutan kurssit haetaan.
 
@@ -604,7 +620,7 @@ Lisää yksittäisen maan näkymään pääkaupungin säätiedotus. Säätiedotu
 
 Jos käytät Open weather mapia, [täällä](https://openweathermap.org/weather-conditions#Icon-list) on ohje sääikonien generointiin.
 
-**Huom:** Tarvitset melkein kaikkia säätietoja tarjoavia palveluja käyttääksesi API-avaimen. Älä talleta avainta versionhallintaan eli älä kirjoita avainta suoraan koodiin. Avaimen arvo kannattaa määritellä ns. [ympäristömuuttujana](https://vitejs.dev/guide/env-and-mode.html).
+**Huom:** Tarvitset melkein kaikkia säätietoja tarjoavia palveluja käyttääksesi API-avaimen. Älä talleta avainta versionhallintaan eli älä kirjoita avainta suoraan koodiin. Avaimen arvo kannattaa tässä tehtävässä määritellä ns. [ympäristömuuttujana](https://vitejs.dev/guide/env-and-mode.html). Todellisissa sovelluksissa avaimien lähettäminen suoraan selaimesta ei kuitenkaan ole suositeltavaa, koska tällöin kuka tahansa sovelluksen käyttäjä voi saada API-avaimen tietoonsa. Käsittelemme erillisen backendin toteuttamista kurssin seuraavassa osassa. 
 
 Oletetaan että API-avaimen arvo on <i>54l41n3n4v41m34rv0</i>. Kun ohjelma käynnistetään seuraavasti
 
@@ -620,6 +636,10 @@ koodista päästään avaimen arvoon käsiksi olion _import.meta.env_ kautta:
 const api_key = import.meta.env.VITE_SOME_KEY
 // muuttujassa api_key on nyt käynnistyksessä annettu API-avaimen arvo
 ```
+
+Huomaa, että ympäristömuuttujan nimen täytyy alkaa merkkijonolla <i>VITE_</i>. 
+
+Muista myös, että jos teet muutoksia ympäristömuuttujiin, sinun on käynnistettävä kehityspalvelin uudelleen, jotta muutokset tulevat voimaan.
 
 Tämä oli osan viimeinen tehtävä ja on aika sekä puskea koodi GitHubiin että merkitä tehdyt tehtävät [palautussovellukseen](https://studies.cs.helsinki.fi/stats/courses/fullstackopen).
 

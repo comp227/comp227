@@ -68,7 +68,7 @@ app.listen(config.PORT, () => {
 
 O arquivo <i>index.js</i> somente importa a aplicação do arquivo <i>app.js</i> e depois inicia a aplicação. A função _info_ do módulo logger é usada para imprimir no console, informando que a aplicação está sendo executada.
 
-Agora, o app Express e o código encarregado de cuidar do servidor web estão separados, seguindo assim [as melhores](https://dev.to/nermineslimane/always-separate-app-and-server-files--1nc7) [práticas](https://nodejsbestpractices.com/sections/projectstructre/separateexpress). Uma das vantagens desse método é que a aplicação poderá agora ser testada a nível de chamadas de API HTTP, sem realizar chamadas via HTTP sobre a rede, o que resultará em execuções de testes mais rápidas.
+Agora, o app Express e o código encarregado de cuidar do servidor web estão separados, seguindo assim [as melhores](https://dev.to/nermineslimane/always-separate-app-and-server-files--1nc7) práticas. Uma das vantagens desse método é que a aplicação poderá agora ser testada a nível de chamadas de API HTTP, sem realizar chamadas via HTTP sobre a rede, o que resultará em execuções de testes mais rápidas.
 
 O gerenciamento de variáveis de ambiente é extraído em um arquivo separado <i>utils/config.js</i>:
 
@@ -325,7 +325,7 @@ As aplicações Express não requerem uma estrutura de diretórios pré-determin
 
 Você pode encontrar o código atual da nossa aplicação na branch <i>part4-1</i> [neste repositório GitHub](https://github.com/fullstack-hy2020/part3-notes-backend/tree/part4-1).
 
-Se você fizer o clone do projeto, execute o comando _npm install_ antes de iniciar a aplicação com o comando _npm start_.
+Se você fizer o clone do projeto, execute o comando _npm install_ antes de iniciar a aplicação com o comando _npm run dev_.
 
 ### Observação sobre os exports
 

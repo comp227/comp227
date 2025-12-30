@@ -692,8 +692,8 @@ module.exports = Membership
 <!-- So we have given the connection table a name that describes it well, <i>membership</i>. There is not always a relevant name for a connection table, in which case the name of the connection table can be a combination of the names of the tables that are joined, e.g. <i>user\_teams</i> could fit our situation.-->
  所以我们给连接表起了一个能很好描述它的名字，<i>membership</i>。连接表并不总是有一个相关的名字，在这种情况下，连接表的名字可以是被连接的表的名字的组合，例如，<i>user/_teams</i>可以适合我们的情况。
 
-<!-- We make a small addition to the <i>models/index.js</i> file to connect teams and users at the code level using the [belongsToMany](https://sequelize.org/master/manual/assocs.html#implementation-3) method.-->
- 我们对<i>models/index.js</i>文件做了一个小小的补充，使用[belongsToMany](https://sequelize.org/master/manual/assocs.html#implementation-3)方法在代码层连接团队和用户。
+<!-- We make a small addition to the <i>models/index.js</i> file to connect teams and users at the code level using the [belongsToMany](https://sequelize.org/docs/v6/core-concepts/assocs/#implementation-2) method.-->
+ 我们对<i>models/index.js</i>文件做了一个小小的补充，使用[belongsToMany](https://sequelize.org/docs/v6/core-concepts/assocs/#implementation-2)方法在代码层连接团队和用户。
 
 ```js
 const Note = require('./note')
@@ -1238,8 +1238,8 @@ router.get('/:id', async (req, res) => {
 }
 ```
 
-<!-- Note: there are several ways to implement this functionality. [This](https://sequelize.org/master/manual/advanced-many-to-many.html#the-best-of-both-worlds--the-super-many-to-many-relationship) should help.-->
- 注意：有几种方法来实现这个功能。[这](https://sequelize.org/master/manual/advanced-many-to-many.html#the-best-of-both-worlds--the-super-many-to-many-relationship)应该有帮助。
+<!-- Note: there are several ways to implement this functionality. [This](https://sequelize.org/docs/v6/advanced-association-concepts/advanced-many-to-many/#the-best-of-both-worlds-the-super-many-to-many-relationship) should help.-->
+ 注意：有几种方法来实现这个功能。[这](https://sequelize.org/docs/v6/advanced-association-concepts/advanced-many-to-many/#the-best-of-both-worlds-the-super-many-to-many-relationship)应该有帮助。
 
 #### Exercise 13.22.
 
@@ -1582,8 +1582,8 @@ module.exports = {
 <!-- However, the problem is that the definition of the model may change over time, for example the <i>name</i> field may change or its data type may change. Migrations must be able to be performed successfully at any time from start to end, and if the migrations are relying on the model to have certain content, it may no longer be true in a month or a year's time. Therefore, despite the "copy paste", the migration code should be completely separate from the model code.-->
  然而，问题是，模型的定义可能会随着时间的推移而改变，例如，<i>name</i>字段可能会改变或其数据类型可能会改变。迁移必须能够在任何时候从头到尾成功执行，如果迁移依赖于模型的某些内容，那么在一个月或一年后，它可能不再是真的。因此，尽管有 "复制粘贴"，迁移代码应该与模型代码完全分开。
 
-<!-- One solution would be to use Sequelize's [command line tool](https://sequelize.org/master/manual/migrations.html#creating-the-first-model--and-migration-), which generates both models and migration files based on commands given at the command line. For example, the following command would create a <i>User</i> model with <i>name</i>, <i>username</i>, and <i>admin</i> as attributes, as well as the migration that manages the creation of the database table:-->
- 一个解决方案是使用Sequelize's [命令行工具](https://sequelize.org/master/manual/migrations.html#creating-the-first-model--and-migration-)，它可以根据命令行给出的命令来生成模型和迁移文件。例如，下面的命令将创建一个<i>User</i>模型，并将<i>name</i>、<i>username</i>和<i>admin</i>作为属性，以及管理创建数据库表的迁移。
+<!-- One solution would be to use Sequelize's [command line tool](https://sequelize.org/docs/v6/other-topics/migrations/#creating-the-first-model-and-migration), which generates both models and migration files based on commands given at the command line. For example, the following command would create a <i>User</i> model with <i>name</i>, <i>username</i>, and <i>admin</i> as attributes, as well as the migration that manages the creation of the database table:-->
+ 一个解决方案是使用Sequelize's [命令行工具](https://sequelize.org/docs/v6/other-topics/migrations/#creating-the-first-model-and-migration)，它可以根据命令行给出的命令来生成模型和迁移文件。例如，下面的命令将创建一个<i>User</i>模型，并将<i>name</i>、<i>username</i>和<i>admin</i>作为属性，以及管理创建数据库表的迁移。
 
 ```
 npx sequelize-cli model:generate --name User --attributes name:string,username:string,admin:boolean
@@ -1604,7 +1604,7 @@ npx sequelize-cli model:generate --name User --attributes name:string,username:s
  大结局：[在第四章节的末尾](/en/part4/token_authentication#problems-of-token-based-authentication)提到了一个token-criticality问题：如果一个用户对系统的访问被决定撤销，该用户仍然可以使用手中的token来使用该系统。
 
 <!-- The usual solution to this is to store a record of each token issued to the client in the backend database, and to check with each request whether access is still valid. In this case, the validity of the token can be removed immediately if necessary. Such a solution is often referred to as a <i>server-side session</i>.-->
- 对此，通常的解决方案是在后台数据库中存储发给客户的每个令牌的记录，并在每次请求时检查访问是否仍然有效。在这种情况下，必要时可以立即删除令牌的有效性。这样的解决方案通常被称为<i>服务器端会话</i>。
+ 对此，通常的解决方案是在后端数据库中存储发给客户的每个令牌的记录，并在每次请求时检查访问是否仍然有效。在这种情况下，必要时可以立即删除令牌的有效性。这样的解决方案通常被称为<i>服务器端会话</i>。
 
 <!-- Now expand the system so that the user who has lost access will not be able to perform any actions that require login.-->
  现在扩展系统，使失去访问权的用户无法执行任何需要登录的操作。

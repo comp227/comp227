@@ -58,7 +58,7 @@ For a more detailed introduction to the Fetch API, read the [Using Fetch](https:
 
 Next, let's try the Fetch API in practice. The rate-repository-api server provides an endpoint for returning a paginated list of reviewed repositories. Once the server is running, you should be able to access the endpoint at [http://localhost:5000/api/repositories](http://localhost:5000/api/repositories) (unless you have changed the port). The data is paginated in a common [cursor based pagination format](https://graphql.org/learn/pagination/). The actual repository data is behind the <i>node</i> key in the <i>edges</i> array.
 
-Unfortunately, we can't access the server directly in our application by using the <i>http://localhost:5000/api/repositories</i> URL. To make a request to this endpoint in our application we need to access the server using its IP address in its local network. To find out what it is, open the Expo development tools by running <em>npm start</em>. In the console you should be able to see an URL starting with <i>exp://</i> below the QR code, after the "Metro waiting on" text:
+Unfortunately, if we´re using external device, we can't access the server directly in our application by using the <i>http://localhost:5000/api/repositories</i> URL. To make a request to this endpoint in our application we need to access the server using its IP address in its local network. To find out what it is, open the Expo development tools by running <em>npm start</em>. In the console you should be able to see an URL starting with <i>exp://</i> below the QR code, after the "Metro waiting on" text:
 
 ![metro console output with highlight over exp://<ip> url](../../images/10/26new.png)
 
@@ -180,7 +180,7 @@ npm install @apollo/client graphql
 Before we can start using Apollo Client, we will need to slightly configure the Metro bundler so that it handles the <i>.cjs</i> file extensions used by the Apollo Client. First, let's install the <i>@expo/metro-config</i> package which has the default Metro configuration:
 
 ```shell
-npm install @expo/metro-config@0.4.0
+npm install @expo/metro-config@0.17.4
 ```
 
 Then, we can add the following configuration to a <i>metro.config.js</i> in the root directory of our project:
@@ -200,16 +200,12 @@ Restart the Expo development tools so that changes in the configuration are appl
 Now that the Metro configuration is in order, let's create a utility function for creating the Apollo Client with the required configuration. Create a <i>utils</i> directory in the <i>src</i> directory and in that <i>utils</i> directory create a file <i>apolloClient.js</i>. In that file configure the Apollo Client to connect to the Apollo Server:
 
 ```javascript
-import { ApolloClient, InMemoryCache, createHttpLink } from '@apollo/client';
+import { ApolloClient, InMemoryCache } from '@apollo/client';
 
-const httpLink = createHttpLink({
-  // Replace the IP address part with your own IP address!
-  uri: 'http://192.168.1.33:4000/graphql',
-});
 
 const createApolloClient = () => {
   return new ApolloClient({
-    link: httpLink,
+    uri: 'http://192.168.1.100:4000/graphql',
     cache: new InMemoryCache(),
   });
 };
@@ -221,7 +217,7 @@ The URL used to connect to the Apollo Server is otherwise the same as the one yo
 
 ```javascript
 import { NativeRouter } from 'react-router-native';
-import { ApolloProvider } from '@apollo/client'; // highlight-line
+import { ApolloProvider } from '@apollo/client/react'; // highlight-line
 
 import Main from './src/components/Main';
 import createApolloClient from './src/utils/apolloClient'; // highlight-line
@@ -266,7 +262,7 @@ export const GET_REPOSITORIES = gql`
 We can import these variables and use them with the <em>useQuery</em> hook like this:
 
 ```javascript
-import { useQuery } from '@apollo/client';
+import { useQuery } from '@apollo/client/react';
 
 import { GET_REPOSITORIES } from '../graphql/queries';
 
@@ -336,11 +332,11 @@ Every application will most likely run in more than one environment. Two obvious
 
 We have previously learned that we can provide running programs with environment variables. These variables can be defined in the command line or using environment configuration files such as <i>.env</i> files and third-party libraries such as <i>Dotenv</i>. Unfortunately, React Native doesn't have direct support for environment variables. However, we can access the Expo configuration defined in the <i>app.json</i> file at runtime from our JavaScript code. This configuration can be used to define and access environment dependant variables.
 
-The configuration can be accessed by importing the <em>Constants</em> constant from the <i>expo-constants</i> module as we have done a few times before. Once imported, the <em>Constants.manifest</em> property will contain the configuration. Let's try this by logging <em>Constants.manifest</em> in the <em>App</em> component:
+The configuration can be accessed by importing the <em>Constants</em> constant from the <i>expo-constants</i> module as we have done a few times before. Once imported, the <em>Constants.expoConfig</em> property will contain the configuration. Let's try this by logging <em>Constants.expoConfig</em> in the <em>App</em> component:
 
 ```javascript
 import { NativeRouter } from 'react-router-native';
-import { ApolloProvider } from '@apollo/client';
+import { ApolloProvider } from '@apollo/client/react';
 import Constants from 'expo-constants'; // highlight-line
 
 import Main from './src/components/Main';
@@ -349,7 +345,7 @@ import createApolloClient from './src/utils/apolloClient';
 const apolloClient = createApolloClient();
 
 const App = () => {
-  console.log(Constants.manifest); // highlight-line
+  console.log(Constants.expoConfig); // highlight-line
 
   return (
     <NativeRouter>
@@ -385,7 +381,8 @@ export default {
 };
 ```
 
-Expo has reserved an [extra](https://docs.expo.dev/guides/environment-variables/#using-app-manifest--extra) property in the configuration for any application-specific configuration. To see how this works, let's add an <em>env</em> variable into our application's configuration:
+Expo has reserved an [extra](https://docs.expo.dev/guides/environment-variables/#using-app-manifest--extra) property in the configuration for any application-specific configuration. 
+ To see how this works, let's add an <em>env</em> variable into our application's configuration. Note, that the older versions used (now deprecated) manifest instead of expoConfig.
 
 ```javascript
 export default {
@@ -399,7 +396,15 @@ export default {
 };
 ```
 
-Restart Expo development tools to apply the changes and you should see that the value of <em>Constants.manifest</em> property has changed and now includes the <em>extra</em> property containing our application-specific configuration. Now the value of the <em>env</em> variable is accessible through the <em>Constants.manifest.extra.env</em> property.
+
+
+If you make changes in configuration, the restart may not be enough. You may need to start the application with cache cleared by command:
+
+```javascript
+npx expo start --clear
+```
+
+Now, restart Expo development tools to apply the changes and you should see that the value of <em>Constants.expoConfig</em> property has changed and now includes the <em>extra</em> property containing our application-specific configuration. Now the value of the <em>env</em> variable is accessible through the <em>Constants.expoConfig.extra.env</em> property.
 
 Because using hard coded configuration is a bit silly, let's use an environment variable instead:
 
@@ -421,7 +426,7 @@ As we have learned, we can set the value of an environment variable through the 
 ENV=test npm start
 ```
 
-If you take a look at the logs, you should see that the <em>Constants.manifest.extra.env</em> property has changed.
+If you take a look at the logs, you should see that the <em>Constants.expoConfig.extra.env</em> property has changed.
 
 We can also load environment variables from an <em>.env</em> file as we have learned in the previous parts. First, we need to install the [Dotenv](https://www.npmjs.com/package/dotenv) library:
 
@@ -463,7 +468,7 @@ Note that it is <i>never</i> a good idea to put sensitive data into the applicat
 
 Instead of the hardcoded Apollo Server's URL, use an environment variable defined in the <i>.env</i> file when initializing the Apollo Client. You can name the environment variable for example <em>APOLLO_URI</em>.
 
-<i>Do not</i> try to access environment variables like <em>process.env.APOLLO_URI</em> outside the <i>app.config.js</i> file. Instead use the <em>Constants.manifest.extra</em> object like in the previous example. In addition, do not import the dotenv library outside the <i>app.config.js</i> file or you will most likely face errors.
+<i>Do not</i> try to access environment variables like <em>process.env.APOLLO_URI</em> outside the <i>app.config.js</i> file. Instead use the <em>Constants.expoConfig.extra</em> object like in the previous example. In addition, do not import the dotenv library outside the <i>app.config.js</i> file or you will most likely face errors.
 
 </div>
 
@@ -630,7 +635,7 @@ Now that we have implemented storage for storing the user's access token, it is 
 
 ```javascript
 import { NativeRouter } from 'react-router-native';
-import { ApolloProvider } from '@apollo/client';
+import { ApolloProvider } from '@apollo/client/react';
 
 import Main from './src/components/Main';
 import createApolloClient from './src/utils/apolloClient';
@@ -660,7 +665,7 @@ import Constants from 'expo-constants';
 import { setContext } from '@apollo/client/link/context'; // highlight-line
 
 // You might need to change this depending on how you have configured the Apollo Server's URI
-const { apolloUri } = Constants.manifest.extra;
+const { apolloUri } = Constants.expoConfig.extra;
 
 const httpLink = createHttpLink({
   uri: apolloUri,
@@ -713,7 +718,7 @@ Now we can use the <em>AuthStorageContext.Provider</em> to provide the storage i
 
 ```javascript
 import { NativeRouter } from 'react-router-native';
-import { ApolloProvider } from '@apollo/client';
+import { ApolloProvider } from '@apollo/client/react';
 
 import Main from './src/components/Main';
 import createApolloClient from './src/utils/apolloClient';
@@ -771,7 +776,7 @@ The hook's implementation is quite simple but it improves the readability and ma
 
 ```javascript
 // ...
-import { useAuthStorage } from '../hooks/useAuthStorage'; // highlight-line
+import useAuthStorage from '../hooks/useAuthStorage'; // highlight-line
 
 const useSignIn = () => {
   const authStorage = useAuthStorage(); //highlight-line
@@ -791,9 +796,9 @@ To learn more about these use cases, read Kent C. Dodds' enlightening article [H
 
 #### Exercise 10.15: storing the access token step2
 
-Improve the <em>useSignIn</em> hook so that it stores the user's access token retrieved from the <i>authenticate</i> mutation. The return value of the hook should not change. The only change you should make to the <em>SignIn</em> component is that you should redirect the user to the reviewed repositories list view after a successful sign in. You can achieve this by using the [useNavigate](https://reactrouter.com/en/6.14.2/hooks/use-navigate) hook.
+Improve the <em>useSignIn</em> hook so that it stores the user's access token retrieved from the <i>authenticate</i> mutation. The return value of the hook should not change. The only change you should make to the <em>SignIn</em> component is that you should redirect the user to the reviewed repositories list view after a successful sign in. You can achieve this by using the [useNavigate](https://api.reactrouter.com/v7/functions/react_router.useNavigate.html)  hook.
 
-After the <i>authenticate</i> mutation has been executed and you have stored the user's access token to the storage, you should reset the Apollo Client's store. This will clear the Apollo Client's cache and re-execute all active queries. You can do this by using the Apollo Client's [resetStore](https://www.apollographql.com/docs/react/api/core/ApolloClient/#ApolloClient.resetStore) method. You can access the Apollo Client in the <em>useSignIn</em> hook using the [useApolloClient](https://www.apollographql.com/docs/react/api/react/hooks/#useapolloclient) hook. Note that the order of the execution is crucial and should be the following:
+After the <i>authenticate</i> mutation has been executed and you have stored the user's access token to the storage, you should reset the Apollo Client's store. This will clear the Apollo Client's cache and re-execute all active queries. You can do this by using the Apollo Client's [resetStore](https://www.apollographql.com/docs/react/api/core/ApolloClient#resetstore) method. You can access the Apollo Client in the <em>useSignIn</em> hook using the [useApolloClient](https://www.apollographql.com/docs/react/api/react/hooks/#useapolloclient) hook. Note that the order of the execution is crucial and should be the following:
 
 ```javascript
 const { data } = await mutate(/* options */);
@@ -818,7 +823,7 @@ You will probably end up with the <em>null</em> result. This is because the Apol
 
 Open the <em>AppBar</em> component in the <i>AppBar.jsx</i> file where you currently have the tabs "Repositories" and "Sign in". Change the tabs so that if the user is signed in the tab "Sign out" is displayed, otherwise show the "Sign in" tab. You can achieve this by using the <em>me</em> query with the [useQuery](https://www.apollographql.com/docs/react/api/react/hooks/#usequery) hook.
 
-Pressing the "Sign out" tab should remove the user's access token from the storage and reset the Apollo Client's store with the [resetStore](https://www.apollographql.com/docs/react/api/core/ApolloClient/#ApolloClient.resetStore) method. Calling the <em>resetStore</em> method should automatically re-execute all active queries which means that the <em>me</em> query should be re-executed. Note that the order of execution is crucial: access token must be removed from the storage <i>before</i> the Apollo Client's store is reset.
+Pressing the "Sign out" tab should remove the user's access token from the storage and reset the Apollo Client's store with the [resetStore](https://www.apollographql.com/docs/react/api/core/ApolloClient#resetstore) method. Calling the <em>resetStore</em> method should automatically re-execute all active queries which means that the <em>me</em> query should be re-executed. Note that the order of execution is crucial: access token must be removed from the storage <i>before</i> the Apollo Client's store is reset.
 
 This was the last exercise in this section. It's time to push your code to GitHub and mark all of your finished exercises to the [exercise submission system](https://studies.cs.helsinki.fi/stats/courses/fs-react-native-2020). Note that exercises in this section should be submitted to the part 3 in the exercise submission system.
 </div>

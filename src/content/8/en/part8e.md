@@ -351,7 +351,7 @@ Unfortunately, startStandaloneServer does not allow adding subscriptions to the 
 Let us install Express
 
 ```bash
-npm install express cors
+npm install express cors @as-integrations/express5
 ```
 
 and the file <i>index.js</i> changes to:
@@ -359,7 +359,7 @@ and the file <i>index.js</i> changes to:
 ```js
 const { ApolloServer } = require('@apollo/server')
 // highlight-start
-const { expressMiddleware } = require('@apollo/server/express4')
+const { expressMiddleware } = require('@as-integrations/express5')
 const { ApolloServerPluginDrainHttpServer } = require('@apollo/server/plugin/drainHttpServer')
 const { makeExecutableSchema } = require('@graphql-tools/schema')
 const express = require('express')
@@ -464,7 +464,7 @@ The file <i>index.js</i> is changed to:
 ```js
 // highlight-start
 const { WebSocketServer } = require('ws')
-const { useServer } = require('graphql-ws/lib/use/ws')
+const { useServer } = require('graphql-ws/use/ws')
 // highlight-end
 
 // ...
@@ -535,10 +535,10 @@ start()
 
 When queries and mutations are used, GraphQL uses the HTTP protocol in the communication. In case of subscriptions, the communication between client and server happens with [WebSockets](https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API).
 
-The above code registers a WebSocketServer object to listen the WebSocket connections, besides the usual HTTP connections that the server listens to. The second part of the definition registers a function that closes the WebSocket connection on server shutdown.
+The above code registers a WebSocketServer object to listen to WebSocket connections, besides the usual HTTP connections that the server listens to. The second part of the definition registers a function that closes the WebSocket connection on server shutdown.
 If you're interested in more details about configurations, Apollo's [documentation](https://www.apollographql.com/docs/apollo-server/data/subscriptions) explains in relative detail what each line of code does.
 
-WebSockets are a perfect match for communication in the case of GraphQL subscriptions since when WebSockets are used, also the server can initiate the communication.
+WebSockets are a perfect match for communication in the case of GraphQL subscriptions, since when WebSockets are used, the server can also initiate communication.
 
 The subscription *personAdded* needs a resolver. The *addPerson* resolver also has to be modified so that it sends a notification to subscribers.
 
@@ -589,7 +589,7 @@ const resolvers = {
   // highlight-start
   Subscription: {
     personAdded: {
-      subscribe: () => pubsub.asyncIterator('PERSON_ADDED')
+      subscribe: () => pubsub.asyncIterableIterator('PERSON_ADDED')
     },
   },
   // highlight-end
@@ -610,7 +610,7 @@ There are only a few lines of code added, but quite a lot is happening under the
 ```js
 Subscription: {
   personAdded: {
-    subscribe: () => pubsub.asyncIterator('PERSON_ADDED')
+    subscribe: () => pubsub.asyncIterableIterator('PERSON_ADDED')
   },
 },
 ```
@@ -637,7 +637,7 @@ If the subscription does not work, check that you have the correct connection se
 
 The backend code can be found on [GitHub](https://github.com/fullstack-hy2020/graphql-phonebook-backend/tree/part8-7), branch <i>part8-7</i>.
 
-Implementing subscriptions involves a lot of configurations. You will be able to cope with the few exercises of this course without worrying much about the details. If you are planning to use subscriptions in an production use application, you should definitely read Apollo's [documentation on subscriptions](https://www.apollographql.com/docs/apollo-server/data/subscriptions) carefully.
+Implementing subscriptions involves a lot of configurations. You will be able to cope with the few exercises of this course without worrying much about the details. If you are planning to use subscriptions in a production application, you should definitely read Apollo's [documentation on subscriptions](https://www.apollographql.com/docs/apollo-server/data/subscriptions) carefully.
 
 ### Subscriptions on the client
 
@@ -646,10 +646,11 @@ The configuration in <i>main.jsx</i> has to be modified like so:
 
 ```js
 import { 
-  ApolloClient, InMemoryCache, ApolloProvider, createHttpLink,
-  split  // highlight-line
+  ApolloClient, InMemoryCache, HttpLink,
+  ApolloLink  // highlight-line
 } from '@apollo/client'
-import { setContext } from '@apollo/client/link/context'
+import { ApolloProvider } from '@apollo/client/react'
+import { SetContextLink } from '@apollo/client/link/context'
 
 // highlight-start
 import { getMainDefinition } from '@apollo/client/utilities'
@@ -657,7 +658,7 @@ import { GraphQLWsLink } from '@apollo/client/link/subscriptions'
 import { createClient } from 'graphql-ws'
 // highlight-end
 
-const authLink = setContext((_, { headers }) => {
+const authLink = new SetContextLink((_, { headers }) => {
   const token = localStorage.getItem('phonenumbers-user-token')
   return {
     headers: {
@@ -667,7 +668,7 @@ const authLink = setContext((_, { headers }) => {
   }
 })
 
-const httpLink = createHttpLink({ uri: 'http://localhost:4000' })
+const httpLink = new HttpLink({ uri: 'http://localhost:4000' })
 
 // highlight-start
 const wsLink = new GraphQLWsLink(
@@ -676,7 +677,7 @@ const wsLink = new GraphQLWsLink(
 // highlight-end
 
 // highlight-start
-const splitLink = split(
+const splitLink = ApolloLink.split(
   ({ query }) => {
     const definition = getMainDefinition(query)
     return (
@@ -710,7 +711,7 @@ npm install graphql-ws
 The new configuration is due to the fact that the application must have an HTTP connection as well as a WebSocket connection to the GraphQL server.
 
 ```js
-const httpLink = createHttpLink({ uri: 'http://localhost:4000' })
+const httpLink = new HttpLink({ uri: 'http://localhost:4000' })
 
 const wsLink = new GraphQLWsLink(
   createClient({
@@ -739,7 +740,7 @@ and do the subscription in the App component:
 
 ```js
 
-import { useQuery, useMutation, useSubscription } from '@apollo/client' // highlight-line
+import { useQuery, useMutation, useSubscription } from '@apollo/client/react' // highlight-line
 
 
 const App = () => {
@@ -981,14 +982,14 @@ friendOf: async (root) => {
 
 and considering we have 5 persons saved, and we query *allPersons* without *phone* as argument, we see an absurd amount of queries like below.
 
-<pre>
+```
 Person.find
 User.find
 User.find
 User.find
 User.find
 User.find
-</pre>
+```
 
 So even though we primarily do one query for all persons, every person causes one more query in their resolver.
 
@@ -1071,9 +1072,9 @@ GraphQL Foundation's [DataLoader](https://github.com/graphql/dataloader) library
 ### Epilogue
 
 The application we created in this part is not optimally structured: we did some cleanups but much would still need to be done. Examples for better structuring of GraphQL applications can be found on the internet. For example, for the server
-[here](https://blog.apollographql.com/modularizing-your-graphql-schema-code-d7f71d5ed5f2) and the client [here](https://medium.com/@peterpme/thoughts-on-structuring-your-apollo-queries-mutations-939ba4746cd8).
+[here](https://www.apollographql.com/blog/modularizing-your-graphql-schema-code) and the client [here](https://medium.com/@peterpme/thoughts-on-structuring-your-apollo-queries-mutations-939ba4746cd8).
 
-GraphQL is already a pretty old technology, having been used by Facebook since 2012, so we can see it as "battle-tested" already. Since Facebook published GraphQL in 2015, it has slowly gotten more and more attention, and might in the near future threaten the dominance of REST. The death of REST has also already been [predicted](https://www.stridenyc.com/podcasts/52-is-2018-the-year-graphql-kills-rest). Even though that will not happen quite yet, GraphQL is absolutely worth [learning](https://blog.graphqleditor.com/javascript-predictions-for-2019-by-npm/).
+GraphQL is already a pretty old technology, having been used by Facebook since 2012, so we can see it as "battle-tested" already. Since Facebook published GraphQL in 2015, it has slowly gotten more and more attention, and might in the near future threaten the dominance of REST. The death of REST has also already been [predicted](https://www.radiofreerabbit.com/podcast/52-is-2018-the-year-graphql-kills-rest). Even though that will not happen quite yet, GraphQL is absolutely worth [learning](https://blog.graphqleditor.com/javascript-predictions-for-2019-by-npm/).
 
 </div>
 

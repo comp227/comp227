@@ -9,7 +9,7 @@ lang: fr
 
 Tout au long du cours, nous avons un objectif et un besoin d'apprendre une quantité suffisante de JavaScript en plus du développement Web.
 
-JavaScript a progressé rapidement au cours des dernières années et dans ce cours, nous utilisons les fonctionnalités des versions les plus récentes. Le nom officiel de la norme JavaScript est [ECMAScript](https://en.wikipedia.org/wiki/ECMAScript). À l'heure actuelle, la dernière version est celle publiée en juin 2021 sous le nom [ECMAScript®2021](https://www.ecma-international.org/ecma-262/), également connue sous le nom d'ES12.
+JavaScript a progressé rapidement au cours des dernières années et dans ce cours, nous utilisons les fonctionnalités des versions les plus récentes. Le nom officiel de la norme JavaScript est [ECMAScript](https://en.wikipedia.org/wiki/ECMAScript). À l'heure actuelle, la dernière version est celle publiée en juin 2024 sous le nom [ECMAScript®2024](https://www.ecma-international.org/ecma-262/), également connue sous le nom d'ES15.
 
 Les navigateurs ne prennent pas encore en charge toutes les nouvelles fonctionnalités de JavaScript. De ce fait, une grande partie du code exécuté dans les navigateurs a été <i>transpilé</i> d'une version plus récente de JavaScript vers une version plus ancienne et plus compatible.
 
@@ -20,7 +20,7 @@ Aujourd'hui, la façon la plus populaire de transpiler est d'utiliser [Babel](ht
 
 Le code est écrit dans des fichiers se terminant par <i>.js</i> qui sont exécutés en émettant la commande <em>node name\_of\_file.js</em>
 
-Il est également possible d'écrire du code JavaScript dans la console Node.js, qui s'ouvre en tapant _node_ dans la ligne de commande, ainsi que dans la console de l'outil de développement du navigateur. [Les dernières révisions de Chrome gèrent assez bien les nouvelles fonctionnalités de JavaScript](http://kangax.github.io/compat-table/es2016plus/) sans transpiler le code. Vous pouvez également utiliser un outil tel que [JS Bin](https://jsbin.com/?js,console).
+Il est également possible d'écrire du code JavaScript dans la console Node.js, qui s'ouvre en tapant _node_ dans la ligne de commande, ainsi que dans la console de l'outil de développement du navigateur. [Les dernières révisions de Chrome gèrent assez bien les nouvelles fonctionnalités de JavaScript](https://compat-table.github.io/compat-table/es2016plus/) sans transpiler le code. Vous pouvez également utiliser un outil tel que [JS Bin](https://jsbin.com/?js,console).
 
 JavaScript rappelle en quelque sorte, à la fois par son nom et sa syntaxe, Java. Mais en ce qui concerne le mécanisme de base du langage, ils ne pourraient pas être plus différents. Venant d'un arrière-plan Java, le comportement de JavaScript peut sembler un peu étranger, surtout si l'on ne fait pas l'effort de rechercher ses fonctionnalités.
 
@@ -34,11 +34,11 @@ En JavaScript, il existe plusieurs façons de définir des variables :
 const x = 1
 let y = 5
 
-console.log(x, y)   // 1, 5 est affiché
+console.log(x, y)   // 1 5 est affiché
 y += 10
-console.log(x, y)   // 1, 15 est affiché
+console.log(x, y)   // 1 15 est affiché
 y = 'sometext'
-console.log(x, y)   // 1, sometext est affiché
+console.log(x, y)   // 1 sometext est affiché
 x = 4               // provoque une erreur
 ```
 
@@ -46,7 +46,7 @@ x = 4               // provoque une erreur
 
 Dans l'exemple ci-dessus, nous voyons également que le type des données affectées à la variable peut changer pendant l'exécution. Au début _y_ stocke un entier et à la fin une chaîne.
 
-Il est également possible de définir des variables en JavaScript à l'aide du mot clé [var](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/var). var a longtemps été le seul moyen de définir des variables. const et let n'ont été ajoutés que récemment dans la version ES6. Dans des situations spécifiques, var fonctionne différemment des définitions de variables dans la plupart des langages - voir [JavaScript Variables - Should You Use let, var or const? on Medium](https://medium.com/craft-academy/javascript-variables-should-you-use-let-var-or-const-394f7645c88f) ou [Keyword: var vs. let on JS Tips](http ://www.jstips.co/en/javascript/keyword-var-vs-let/) pour plus d'informations. Pendant ce cours, l'utilisation de var est déconseillée et vous devriez vous en tenir à const et let !
+Il est également possible de définir des variables en JavaScript à l'aide du mot clé [var](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/var). var a longtemps été le seul moyen de définir des variables. const et let n'ont été ajoutés que récemment dans la version ES6. Dans des situations spécifiques, var fonctionne différemment des définitions de variables dans la plupart des langages - voir [JavaScript Variables - Should You Use let, var or const? on Medium](https://medium.com/craft-academy/javascript-variables-should-you-use-let-var-or-const-394f7645c88f) ou [Keyword: var vs. let on JS Tips](https://www.jstips.co/en/javascript/keyword-var-vs-let/) pour plus d'informations. Pendant ce cours, l'utilisation de var est déconseillée et vous devriez vous en tenir à const et let !
 Vous pouvez en savoir plus sur ce sujet sur YouTube - par ex. [var, let et const - Fonctionnalités JavaScript ES6](https://youtu.be/sjyJBL5fkp8)
 
 ### Tableaux
@@ -119,7 +119,7 @@ const t = [1, 2, 3, 4, 5]
 
 const [first, second, ...rest] = t
 
-console.log(first, second)  // 1, 2 est affiché
+console.log(first, second)  // 1 2 est affiché
 console.log(rest)          // [3, 4, 5] est affiché
 ```
 
@@ -217,7 +217,7 @@ const tSquared = t.map(p => p * p)
 // tSquared est devenu [1, 4, 9]
 ```
 
-La fonctionnalité de fonction fléchée a été ajoutée à JavaScript il y a seulement quelques années, avec la version [ES6](http://es6-features.org/). Avant cela, la seule façon de définir des fonctions était d'utiliser le mot-clé _function_.
+La fonctionnalité de fonction fléchée a été ajoutée à JavaScript il y a seulement quelques années, avec la version [ES6](https://rse.github.io/es6-features/). Avant cela, la seule façon de définir des fonctions était d'utiliser le mot-clé _function_.
 
 Il existe deux façons de référencer la fonction ; on donne un nom dans une [déclaration de fonction](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/function).
 
@@ -486,7 +486,7 @@ Si vous souhaitez mieux comprendre comment _this_ fonctionne en JavaScript, Inte
 
 Comme mentionné précédemment, il n'y a pas de mécanisme de classe en JavaScript comme ceux des langages de programmation orientés objet. Il existe cependant des fonctionnalités permettant de "simuler" des [classes](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes) orientées objet.
 
-Jetons un coup d'œil à la <i>syntaxe de classe</i> qui a été introduite dans JavaScript avec ES6, qui simplifie considérablement la définition des classes (ou des choses semblables à des classes) en JavaScript.
+Jetons un coup d'oeil à la <i>syntaxe de classe</i> qui a été introduite dans JavaScript avec ES6, qui simplifie considérablement la définition des classes (ou des choses semblables à des classes) en JavaScript.
 
 Dans l'exemple suivant, nous définissons une "classe" appelée Person et deux objets Person :
 
@@ -508,7 +508,7 @@ const janja = new Person('Janja Garnbret', 22)
 janja.greet()
 ```
 
-En ce qui concerne la syntaxe, les classes et les objets créés à partir de celles-ci rappellent beaucoup les classes et objets Java. Leur comportement est également assez similaire aux objets Java. Au cœur, ce sont toujours des objets basés sur [l'héritage prototypal](https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Objects/Inheritance) de JavaScript . Le type des deux objets est en fait _Object_, puisque JavaScript ne définit essentiellement que les types [Boolean, Null, Undefined, Number, String, Symbol, BigInt et Object](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures).
+En ce qui concerne la syntaxe, les classes et les objets créés à partir de celles-ci rappellent beaucoup les classes et objets Java. Leur comportement est également assez similaire aux objets Java. Au coeur, ce sont toujours des objets basés sur [l'héritage prototypal](https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Objects/Inheritance) de JavaScript . Le type des deux objets est en fait _Object_, puisque JavaScript ne définit essentiellement que les types [Boolean, Null, Undefined, Number, String, Symbol, BigInt et Object](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures).
 
 L'introduction de la syntaxe de classe était un ajout controversé. Découvrez [Not Awesome: ES6 Classes](https://github.com/petsel/not-awesome-es6-classes) ou [Is "Class" In ES6 The New "Bad" Part ? sur Medium](https://medium.com/@rajaraodv/is-class-in-es6-the-new-bad-part-6c4e6fe1ee65) pour plus de détails.
 

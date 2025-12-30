@@ -17,17 +17,17 @@ Tehdään projektin juurihakemistoon tiedosto <i>db.json</i>:
 {
   "notes": [
     {
-      "id": 1,
+      "id": "1",
       "content": "HTML is easy",
       "important": true
     },
     {
-      "id": 2,
+      "id": "2",
       "content": "Browser can execute only JavaScript",
       "important": false
     },
     {
-      "id": 3,
+      "id": "3",
       "content": "GET and POST are the most important methods of HTTP protocol",
       "important": true
     }
@@ -35,12 +35,10 @@ Tehdään projektin juurihakemistoon tiedosto <i>db.json</i>:
 }
 ```
 
-JSON Server on mahdollista [asentaa](https://github.com/typicode/json-server#install) koneelle ns. globaalisti komennolla _npm install -g json-server_. Globaali asennus edellyttää kuitenkin pääkäyttäjän oikeuksia eli se ei ole mahdollista laitoksen koneilla tai uusilla fuksiläppäreillä.
-
-Globaali asennus ei ole kuitenkaan tarpeen, sillä voimme käynnistää JSON Serverin myös _npx_-komennon avulla:
+JSON Serverin voi käynnistää ilman erillistä asennusta suorittamalla seuraavan _npx_-komennon sovelluksen juurihakemistossa:
 
 ```bash
-npx json-server --port=3001 --watch db.json
+npx json-server --port 3001 db.json
 ```
 
 Oletusarvoisesti JSON Server käynnistyy porttiin 3000. Käytämme nyt kuitenkin porttia 3001.
@@ -49,7 +47,7 @@ Mennään selaimella osoitteeseen <http://localhost:3001/notes>. Kuten huomaamme
 
 ![](../../images/2/14new.png)
 
-Jos selaimesi ei osaa näyttää JSON-muotoista dataa formatoituna, asenna jokin sopiva plugin, esim. [JSONVue](https://chrome.google.com/webstore/detail/jsonview/chklaanhfefbnpoihckbnefhakgolnmc) helpottamaan elämääsi.
+Jos selaimesi ei osaa näyttää JSON-muotoista dataa formatoituna, asenna jokin sopiva plugin, esim. [JSONView](https://chromewebstore.google.com/detail/gmegofmjomhknnokphhckolhcffdaihd) helpottamaan elämääsi.
 
 Jatkossa ideana onkin se, että muistiinpanot talletetaan palvelimelle eli tässä vaiheessa JSON Serverille. React-koodi hakee muistiinpanot palvelimelta ja renderöi ne ruudulle. Kun sovellukseen lisätään uusi muistiinpano, React-koodi lähettää sen myös palvelimelle, jotta uudet muistiinpanot jäävät pysyvästi "muistiin".
 
@@ -139,61 +137,61 @@ Nykyään lähes kaikki JavaScript-projektit määritellään node "pakkausmanag
 
 ```json
 {
-  "name": "notes-frontend",
+  "name": "part2-notes-frontend",
   "private": true,
   "version": "0.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
+    "lint": "eslint .",
     "preview": "vite preview"
   },
   "dependencies": {
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
   },
   "devDependencies": {
-    "@types/react": "^18.2.15",
-    "@types/react-dom": "^18.2.7",
-    "@vitejs/plugin-react": "^4.0.3",
-    "eslint": "^8.45.0",
-    "eslint-plugin-react": "^7.32.2",
-    "eslint-plugin-react-hooks": "^4.6.0",
-    "eslint-plugin-react-refresh": "^0.4.3",
-    "vite": "^4.4.5"
+    "@eslint/js": "^9.17.0",
+    "@types/react": "^18.3.18",
+    "@types/react-dom": "^18.3.5",
+    "@vitejs/plugin-react": "^4.3.4",
+    "eslint": "^9.17.0",
+    "eslint-plugin-react": "^7.37.2",
+    "eslint-plugin-react-hooks": "^5.0.0",
+    "eslint-plugin-react-refresh": "^0.4.16",
+    "globals": "^15.14.0",
+    "vite": "^6.0.5"
   }
 }
 ```
 
 Tässä vaiheessa meitä kiinnostaa osa <i>dependencies</i>, joka määrittelee mitä <i>riippuvuuksia</i> eli ulkoisia kirjastoja projektilla on.
 
-Voisimme määritellä Axios-kirjaston suoraan tiedostoon <i>package.json</i>, mutta on parempi asentaa se komentoriviltä:
+Voisimme määritellä Axios-kirjaston suoraan tiedostoon <i>package.json</i>, mutta on parempi asentaa se komentoriviltä. **Huomaa, että _npm_-komennot tulee antaa aina projektin juurihakemistossa** eli siinä, jossa tiedosto <i>package.json</i> on.
 
 ```bash
 npm install axios
 ```
 
-**Huomaa, että _npm_-komennot tulee antaa aina projektin juurihakemistossa** eli siinä, jossa tiedosto <i>package.json</i> on.
-
 Nyt Axios on mukana riippuvuuksien joukossa:
 
 ```json
 {
-  "name": "notes-frontend",
+  "name": "part2-notes-frontend",
   "private": true,
   "version": "0.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
+    "lint": "eslint .",
     "preview": "vite preview"
   },
   "dependencies": {
-    "axios": "^1.4.0", // highlight-line
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "axios": "^1.7.9", // highlight-line
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
   },
   // ...
 }
@@ -215,9 +213,9 @@ ja tehdään tiedoston <i>package.json</i> osaan <i>scripts</i> pieni lisäys
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
+    "lint": "eslint .",
     "preview": "vite preview",
-    "server": "json-server -p3001 --watch db.json" // highlight-line
+    "server": "json-server -p 3001 db.json" // highlight-line
   },
 }
 ```
@@ -257,7 +255,7 @@ Axios on nyt valmis käyttöömme. Jatkossa oletetaan, että JSON Server on käy
 npm run dev
 ```
 
-Kirjaston voi ottaa käyttöön samaan tapaan kuin esim. React otetaan käyttöön eli sopivalla <em>import</em>-lauseella.
+Kirjaston voi ottaa käyttöön samaan tapaan kuin muutkin kirjastot eli sopivalla <em>import</em>-lauseella.
 
 Lisätään seuraava tiedostoon <i>main.jsx</i>:
 
@@ -284,8 +282,10 @@ Mozillan dokumentaatio kertoo promisesta seuraavaa:
 Promise siis edustaa asynkronista operaatiota. Promise voi olla kolmessa eri tilassa:
 
 - Aluksi promise on <i>pending</i>, eli promisea vastaava asynkroninen operaatio ei ole vielä tapahtunut.
-- Jos operaatio päättyy onnistuneesti, promise menee tilaan <i>fulfilled</i>, josta joskus käytetään myös nimitystä <i>resolved</i>.
+- Jos operaatio päättyy onnistuneesti, promise menee tilaan <i>fulfilled</i>.
 - Kolmas mahdollinen tila on <i>rejected</i>, ja se edustaa epäonnistunutta operaatiota.
+
+Promiseihin liittyy paljon yksityiskohtia, mutta näiden kolmen tilan ymmärtäminen riittää meille toistaiseksi hyvin. Voit halutessasi lukea promiseista tarkemmin [Mozillan dokumentaatiosta](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise).
 
 Esimerkkimme ensimmäinen promise on <i>fulfilled</i>, eli vastaa onnistunutta <em>axios.get('http://localhost:3001/notes')</em> pyyntöä. Promiseista toinen taas on <i>rejected</i>. Syy selviää konsolista, eli yritimme tehdä HTTP GET ‑pyyntöä osoitteeseen, jota ei ole olemassa.
 
@@ -352,7 +352,7 @@ Ei ole kuitenkaan ihan selvää, mihin kohtaan komponentin koodia komento <em>ax
 ### Effect-hookit
 
 Olemme jo käyttäneet Reactin version [16.8.0](https://www.npmjs.com/package/react/v/16.8.0) mukanaan tuomia [state hookeja](https://react.dev/learn/state-a-components-memory) tuomaan funktioina määriteltyihin React-komponentteihin tilan. Versio 16.8.0 tarjoaa kokonaan uutena ominaisuutena myös
-[effect-hookit](https://react.dev/reference/react#effect-hooks), joista dokumentaatio kertoo:
+[effect-hookit](https://react.dev/reference/react/hooks#effect-hooks), joista dokumentaatio kertoo:
 
 > <i>The Effect Hook lets you perform side effects in function components.</i>
 > <i><strong>Data fetching</strong>, setting up a subscription, and manually changing the DOM in React components are all examples of side effects. </i>
@@ -400,12 +400,12 @@ Koodiin on myös lisätty muutamia aputulostuksia, jotka auttavat hahmottamaan m
 
 Konsoliin tulostuu:
 
-<pre>
+```
 render 0 notes
 effect
 promise fulfilled
 render 3 notes
-</pre>
+```
 
 Ensin siis suoritetaan komponentin määrittelevän funktion runko ja renderöidään komponentti ensimmäistä kertaa. Tässä vaiheessa tulostuu <i>render 0 notes</i> eli dataa ei ole vielä haettu palvelimelta.
 
@@ -465,7 +465,7 @@ const hook = () => {
 useEffect(hook, [])
 ```
 
-Nyt huomaamme selvemmin, että funktiolle [useEffect]((https://react.dev/reference/react/useEffect) annetaan <i>kaksi parametria</i>. Näistä ensimmäinen on funktio eli itse <i>efekti</i>. Dokumentaation mukaan
+Nyt huomaamme selvemmin, että funktiolle [useEffect](https://react.dev/reference/react/useEffect) annetaan <i>kaksi parametria</i>. Näistä ensimmäinen on funktio eli itse <i>efekti</i>. Dokumentaation mukaan
 
 > <i>By default, effects run after every completed render, but you can choose to fire it only when certain values have changed.</i>
 
@@ -517,7 +517,7 @@ Sovelluksemme kokonaisuuden konfiguraatiosta on pikkuhiljaa muodostunut melko mo
 
 ![](../../images/2/18e.png)
 
-React-sovelluksen muodostavaa JavaScript-koodia siis suoritetaan selaimessa. Selain hakee JavaScriptin <i>React Development Serveriltä</i>, joka on se ohjelma, joka käynnistyy kun suoritetaan komento <em>npm start</em>. Development Server muokkaa sovelluksen JavaScriptin selainta varten sopivaan muotoon, se mm. yhdistelee eri tiedostoissa olevan JavaScript-koodin yhdeksi tiedostoksi. Puhumme enemmän Development Serveristä kurssin [osassa 7](/osa7).
+React-sovelluksen muodostavaa JavaScript-koodia siis suoritetaan selaimessa. Selain hakee JavaScriptin <i>React Development Serveriltä</i>, joka on se ohjelma, joka käynnistyy kun suoritetaan komento <em>npm run dev</em>. Development Server muokkaa sovelluksen JavaScriptin selainta varten sopivaan muotoon, se mm. yhdistelee eri tiedostoissa olevan JavaScript-koodin yhdeksi tiedostoksi. Puhumme enemmän Development Serveristä kurssin [osassa 7](/osa7).
 
 JSON-muodossa olevan datan selaimessa pyörivä React-sovellus hakee siis koneella portissa 3001 käynnissä olevalta JSON Serveriltä, joka taas saa JSON-datan tiedostosta <i>db.json</i>.
 
@@ -539,22 +539,22 @@ Jatketaan puhelinluettelon kehittämistä. Talleta sovelluksen alkutila projekti
     { 
       "name": "Arto Hellas", 
       "number": "040-123456",
-      "id": 1
+      "id": "1"
     },
     { 
       "name": "Ada Lovelace", 
       "number": "39-44-5323523",
-      "id": 2
+      "id": "2"
     },
     { 
       "name": "Dan Abramov", 
       "number": "12-43-234345",
-      "id": 3
+      "id": "3"
     },
     { 
       "name": "Mary Poppendieck", 
       "number": "39-23-6423122",
-      "id": 4
+      "id": "4"
     }
   ]
 }

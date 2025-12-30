@@ -44,7 +44,7 @@ host: example.com
 port: 80
 ```
 
-Quando você visita um site (ou seja, <http://catwebsites.com>), o navegador emite uma requisição para o servidor em que o site (catwebsites.com) está hospedado. A resposta enviada pelo servidor é um arquivo HTML que pode conter uma ou mais referências a recursos/ativos externos hospedados no mesmo servidor que <i>catwebsites.com</i> está hospedado ou em um site diferente. Quando o navegador vê referência(s) a uma URL no HTML de origem, ele emite uma requisição. Se a requisição for feita usando a URL na qual o HTML de origem foi obtido, o navegador processa a resposta sem problemas. No entanto, se o recurso for obtido usando uma URL que não compartilha a mesma origem (esquema, host, porta) que o HTML de origem, o navegador deverá verificar o cabeçalho de resposta _Access-Control-Allow-origin_ (CORS). Se ele contiver _*_ ou a URL do HTML de origem, o navegador processará a resposta, caso contrário, o navegador se recusará a processá-la e lançará um erro.
+Quando você visita um site (ou seja, <http://example.com>), o navegador emite uma requisição para o servidor em que o site (example.com) está hospedado. A resposta enviada pelo servidor é um arquivo HTML que pode conter uma ou mais referências a recursos/ativos externos hospedados no mesmo servidor que <i>example.com</i> está hospedado ou em um site diferente. Quando o navegador vê referência(s) a uma URL no HTML de origem, ele emite uma requisição. Se a requisição for feita usando a URL na qual o HTML de origem foi obtido, o navegador processa a resposta sem problemas. No entanto, se o recurso for obtido usando uma URL que não compartilha a mesma origem (esquema, host, porta) que o HTML de origem, o navegador deverá verificar o cabeçalho de resposta _Access-Control-Allow-origin_ (CORS). Se ele contiver _*_ ou a URL do HTML de origem, o navegador processará a resposta, caso contrário, o navegador se recusará a processá-la e lançará um erro.
   
 A <strong>Política de Mesma Origem</strong> é um mecanismo de segurança implementado pelos navegadores para impedir sequestro de sessão (session hijacking), entre outras vulnerabilidades de segurança.
 
@@ -173,7 +173,7 @@ fly deploy
 Se tudo correr bem, a aplicação deverá estar em funcionamento. Você pode abri-la no navegador com o comando
 
 ```bash
-fly open
+fly apps open
 ```
 
 Depois da configuração inicial, quando o código da aplicação for atualizado, poderá ser implantada na produção com o comando:

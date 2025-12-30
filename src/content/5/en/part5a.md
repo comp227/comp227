@@ -13,7 +13,7 @@ At the moment the frontend shows existing notes and lets users change the state 
 
 We'll now implement a part of the required user management functionality in the frontend. Let's begin with the user login. Throughout this part, we will assume that new users will not be added from the frontend.
 
-### Handling login
+### Adding a Login Form
 
 A login form has now been added to the top of the page:
 
@@ -51,28 +51,30 @@ const App = () => {
   return (
     <div>
       <h1>Notes</h1>
-
       <Notification message={errorMessage} />
-
+      
       // highlight-start
+      <h2>Login</h2>
       <form onSubmit={handleLogin}>
         <div>
-          username
+          <label>
+            username
             <input
-            type="text"
-            value={username}
-            name="Username"
-            onChange={({ target }) => setUsername(target.value)}
-          />
+              type="text"
+              value={username}
+              onChange={({ target }) => setUsername(target.value)}
+            />
+          </label>
         </div>
         <div>
-          password
+          <label>
+            password
             <input
-            type="password"
-            value={password}
-            name="Password"
-            onChange={({ target }) => setPassword(target.value)}
-          />
+              type="password"
+              value={password}
+              onChange={({ target }) => setPassword(target.value)}
+            />
+          </label>
         </div>
         <button type="submit">login</button>
       </form>
@@ -86,9 +88,9 @@ const App = () => {
 export default App
 ```
 
-The current application code can be found on [Github](https://github.com/fullstack-hy2020/part2-notes-frontend/tree/part5-1), branch <i>part5-1</i>. If you clone the repo, don't forget to run _npm install_ before attempting to run the frontend.
+The current application code can be found on [GitHub](https://github.com/fullstack-hy2020/part2-notes-frontend/tree/part5-1), in the branch <i>part5-1</i>. If you clone the repo, don't forget to run _npm install_ before attempting to run the frontend.
 
-The frontend will not display any notes if it's not connected to the backend. You can start the backend with _npm run dev_ in its folder from Part 4. This will run the backend on port 3001. While that is active, in a separate terminal window you can start the frontend with _npm start_, and now you can see the notes that are saved in your MongoDB database from Part 4.
+The frontend will not display any notes if it's not connected to the backend. You can start the backend with _npm run dev_ in its folder from Part 4. This will run the backend on port 3001. While that is active, in a separate terminal window you can start the frontend with _npm run dev_, and now you can see the notes that are saved in your MongoDB database from Part 4.
 
 Keep this in mind from now on.
 
@@ -100,6 +102,8 @@ The login form is handled the same way we handled forms in
 ```
 
 The method _handleLogin_, which is responsible for handling the data in the form, is yet to be implemented.
+
+### Adding Logic to the Login Form
 
 Logging in is done by sending an HTTP POST request to the server address <i>api/login</i>. Let's separate the code responsible for this request into its own module, to file <i>services/login.js</i>.
 
@@ -129,21 +133,20 @@ const App = () => {
 // highlight-start
   const [user, setUser] = useState(null)
 // highlight-end
-  
-  // highlight-start
-  const handleLogin = async (event) => {
+
+  // ...
+
+  const handleLogin = async event => { // highlight-line
     event.preventDefault()
     
+    // highlight-start
     try {
-      const user = await loginService.login({
-        username, password,
-      })
-
+      const user = await loginService.login({ username, password })
       setUser(user)
       setUsername('')
       setPassword('')
-    } catch (exception) {
-      setErrorMessage('Wrong credentials')
+    } catch {
+      setErrorMessage('wrong credentials')
       setTimeout(() => {
         setErrorMessage(null)
       }, 5000)
@@ -159,7 +162,9 @@ If the login is successful, the form fields are emptied <i>and</i> the server re
 
 If the login fails or running the function _loginService.login_ results in an error, the user is notified.
 
-The user is not notified about a successful login in any way. Let's modify the application to show the login form only <i>if the user is not logged-in</i> so when _user === null_. The form for adding new notes is shown only if the <i>user is logged-in</i>, so <i>user</i> contains the user details.
+### Conditional Rendering of the Login Form
+
+The user is not notified about a successful login in any way. Let's modify the application to show the login form only <i>if the user is not logged-in</i>, so when _user === null_. The form for adding new notes is shown only if the <i>user is logged-in</i>, so when <i>user</i> state contains the user's details.
 
 Let's add two helper functions to the <i>App</i> component for generating the forms:
 
@@ -170,35 +175,34 @@ const App = () => {
   const loginForm = () => (
     <form onSubmit={handleLogin}>
       <div>
-        username
+        <label>
+          username
           <input
-          type="text"
-          value={username}
-          name="Username"
-          onChange={({ target }) => setUsername(target.value)}
-        />
+            type="text"
+            value={username}
+            onChange={({ target }) => setUsername(target.value)}
+          />
+        </label>
       </div>
       <div>
-        password
+        <label>
+          password
           <input
-          type="password"
-          value={password}
-          name="Password"
-          onChange={({ target }) => setPassword(target.value)}
-        />
+            type="password"
+            value={password}
+            onChange={({ target }) => setPassword(target.value)}
+          />
+        </label>
       </div>
       <button type="submit">login</button>
-    </form>      
+    </form>
   )
 
   const noteForm = () => (
     <form onSubmit={addNote}>
-      <input
-        value={newNote}
-        onChange={handleNoteChange}
-      />
+      <input value={newNote} onChange={handleNoteChange} />
       <button type="submit">save</button>
-    </form>  
+    </form>
   )
 
   return (
@@ -224,11 +228,10 @@ const App = () => {
   return (
     <div>
       <h1>Notes</h1>
-
       <Notification message={errorMessage} />
 
-      {user === null && loginForm()} // highlight-line
-      {user !== null && noteForm()} // highlight-line
+      {!user && loginForm()} // highlight-line
+      {user && noteForm()} // highlight-line
 
       <div>
         <button onClick={() => setShowAll(!showAll)}>
@@ -236,13 +239,13 @@ const App = () => {
         </button>
       </div>
       <ul>
-        {notesToShow.map((note, i) => 
+        {notesToShow.map(note => (
           <Note
-            key={i}
-            note={note} 
+            key={note.id}
+            note={note}
             toggleImportance={() => toggleImportanceOf(note.id)}
           />
-        )}
+        ))}
       </ul>
 
       <Footer />
@@ -254,36 +257,10 @@ const App = () => {
 A slightly odd looking, but commonly used [React trick](https://react.dev/learn/conditional-rendering#logical-and-operator-) is used to render the forms conditionally:
 
 ```js
-{
-  user === null && loginForm()
-}
+{!user && loginForm()}
 ```
 
 If the first statement evaluates to false or is [falsy](https://developer.mozilla.org/en-US/docs/Glossary/Falsy), the second statement (generating the form) is not executed at all.
-
-We can make this even more straightforward by using the [conditional operator](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Conditional_Operator):
-
-```js
-return (
-  <div>
-    <h1>Notes</h1>
-
-    <Notification message={errorMessage}/>
-
-    {user === null ?
-      loginForm() :
-      noteForm()
-    }
-
-    <h2>Notes</h2>
-
-    // ...
-
-  </div>
-)
-```
-
-If _user === null_ is [truthy](https://developer.mozilla.org/en-US/docs/Glossary/Truthy), _loginForm()_ is executed. If not, _noteForm()_ is.
 
 Let's do one more modification. If the user is logged in, their name is shown on the screen:
 
@@ -291,29 +268,66 @@ Let's do one more modification. If the user is logged in, their name is shown on
 return (
   <div>
     <h1>Notes</h1>
-
     <Notification message={errorMessage} />
 
-    {!user && loginForm()} 
-    {user && <div>
-       <p>{user.name} logged in</p>
-         {noteForm()}
+    {!user && loginForm()}
+    // highlight-start
+    {user && (
+      <div>
+        <p>{user.name} logged in</p>
+        {noteForm()}
       </div>
-    }
+    )}
+    // highlight-end
 
-    <h2>Notes</h2>
-
+    <div>
+      <button onClick={() => setShowAll(!showAll)}>
     // ...
-
-  </div>
-)
 ```
 
-The solution isn't perfect, but we'll leave it for now.
+The solution isn't perfect, but we'll leave it like this for now.
 
 Our main component <i>App</i> is at the moment way too large. The changes we did now are a clear sign that the forms should be refactored into their own components. However, we will leave that for an optional exercise.
 
-The current application code can be found on [GitHub](https://github.com/fullstack-hy2020/part2-notes-frontend/tree/part5-2), branch <i>part5-2</i>.
+The current application code can be found on [GitHub](https://github.com/fullstack-hy2020/part2-notes-frontend/tree/part5-2), in the branch <i>part5-2</i>.
+
+### Note on Using the Label Element
+
+We used the [label](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/label) element for the <i>input</i> fields in the login form. The <i>input</i> field for the username is placed inside the corresponding <i>label</i> element:
+
+```js
+<div>
+  <label>
+    username
+    <input
+      type="text"
+      value={username}
+      onChange={({ target }) => setUsername(target.value)}
+    />
+  </label>
+</div>
+// ...
+```
+
+Why did we implement the form this way? Visually, the same result could be achieved with simpler code, without a separate <i>label</i> element:
+
+```js
+<div>
+  username
+  <input
+    type="text"
+    value={username}
+    onChange={({ target }) => setUsername(target.value)}
+  />
+</div>
+// ...
+```
+
+The <i>label</i> element is used in forms to describe and name <i>input</i> fields. It provides a description for the input field, helping the user understand what information should be entered into each field. This description is programmatically linked to the corresponding input field, improving the form's accessibility. 
+
+This way, screen readers can read the field's name to the user when the input field is selected, and clicking on the label's text automatically focuses on the correct input field. Using the <i>label</i> element with <i>input</i> fields is always recommended, even if the same visual result could be achieved without it.
+
+There are [several ways](https://react.dev/reference/react-dom/components/input#providing-a-label-for-an-input) to link a specific <i>label</i> to an <i>input</i> element. The easiest method is to place the <i>input</i> element inside the corresponding <i>label</i> element, as demonstrated in this material. This automatically associates the <i>label</i> with the correct input field, requiring no additional configuration.
 
 ### Creating new notes
 
@@ -357,10 +371,10 @@ const getAll = () => {
   return request.then(response => response.data)
 }
 
-// highlight-start
 const create = async newObject => {
+  // highlight-start
   const config = {
-    headers: { Authorization: token },
+    headers: { Authorization: token }
   }
 // highlight-end
 
@@ -376,23 +390,21 @@ const update = (id, newObject) => {
 export default { getAll, create, update, setToken } // highlight-line
 ```
 
-The noteService module contains a private variable _token_. Its value can be changed with a function _setToken_, which is exported by the module. _create_, now with async/await syntax, sets the token to the <i>Authorization</i> header. The header is given to axios as the third parameter of the <i>post</i> method.
+The noteService module contains a private variable called _token_. Its value can be changed with the _setToken_ function, which is exported by the module. _create_, now with async/await syntax, sets the token to the <i>Authorization</i> header. The header is given to axios as the third parameter of the <i>post</i> method.
 
 The event handler responsible for login must be changed to call the method <code>noteService.setToken(user.token)</code> with a successful login:
 
 ```js
 const handleLogin = async (event) => {
   event.preventDefault()
-  try {
-    const user = await loginService.login({
-      username, password,
-    })
 
+  try {
+    const user = await loginService.login({ username, password })
     noteService.setToken(user.token) // highlight-line
     setUser(user)
     setUsername('')
     setPassword('')
-  } catch (exception) {
+  } catch {
     // ...
   }
 }
@@ -420,7 +432,7 @@ The value of a key can be found with the method [getItem](https://developer.mozi
 window.localStorage.getItem('name')
 ```
 
-and [removeItem](https://developer.mozilla.org/en-US/docs/Web/API/Storage/removeItem) removes a key.
+while [removeItem](https://developer.mozilla.org/en-US/docs/Web/API/Storage/removeItem) removes a key.
 
 Values in the local storage are persisted even when the page is re-rendered. The storage is [origin](https://developer.mozilla.org/en-US/docs/Glossary/Origin)-specific so each web application has its own storage.
 
@@ -434,9 +446,7 @@ Changes to the login method are as follows:
   const handleLogin = async (event) => {
     event.preventDefault()
     try {
-      const user = await loginService.login({
-        username, password,
-      })
+      const user = await loginService.login({ username, password })
 
       // highlight-start
       window.localStorage.setItem(
@@ -453,13 +463,13 @@ Changes to the login method are as follows:
   }
 ```
 
-The details of a logged-in user are now saved to the local storage, and they can be viewed on the console (by typing _window.localStorage_ to the console):
+The details of a logged-in user are now saved to the local storage, and they can be viewed on the console (by typing _window.localStorage_ in it):
 
-![browser showing someone logged into notes](../../images/5/3e.png)
+![browser showing user data in console saved in local storage](../../images/5/3e.png)
 
-You can also inspect the local storage using the developer tools. On Chrome, go to the <i>Application</i> tab and select <i>Local Storage</i> (more details [here](https://developers.google.com/web/tools/chrome-devtools/storage/localstorage)). On Firefox go to the <i>Storage</i> tab and select <i>Local Storage</i> (details [here](https://developer.mozilla.org/en-US/docs/Tools/Storage_Inspector)).
+You can also inspect the local storage using the developer tools. On Chrome, go to the <i>Application</i> tab and select <i>Local Storage</i> (more details [here](https://developer.chrome.com/docs/devtools/storage/localstorage)). On Firefox go to the <i>Storage</i> tab and select <i>Local Storage</i> (details [here](https://firefox-source-docs.mozilla.org/devtools-user/storage_inspector/index.html)).
 
-We still have to modify our application so that when we enter the page, the application checks if user details of a logged-in user can already be found on the local storage. If they can, the details are saved to the state of the application and to <i>noteService</i>.
+We still have to modify our application so that when we enter the page, the application checks if user details of a logged-in user can already be found on the local storage. If they are there, the details are saved to the state of the application and to <i>noteService</i>.
 
 The right way to do this is with an [effect hook](https://react.dev/reference/react/useEffect): a mechanism we first encountered in [part 2](/en/part2/getting_data_from_server#effect-hooks), and used to fetch notes from the server.
 
@@ -467,21 +477,20 @@ We can have multiple effect hooks, so let's create a second one to handle the fi
 
 ```js
 const App = () => {
-  const [notes, setNotes] = useState([]) 
+  const [notes, setNotes] = useState([])
   const [newNote, setNewNote] = useState('')
   const [showAll, setShowAll] = useState(true)
   const [errorMessage, setErrorMessage] = useState(null)
-  const [username, setUsername] = useState('') 
-  const [password, setPassword] = useState('') 
-  const [user, setUser] = useState(null) 
+  const [username, setUsername] = useState('')
+  const [password, setPassword] = useState('')
+  const [user, setUser] = useState(null)
 
   useEffect(() => {
-    noteService
-      .getAll().then(initialNotes => {
-        setNotes(initialNotes)
-      })
+    noteService.getAll().then(initialNotes => {
+      setNotes(initialNotes)
+    })
   }, [])
-
+  
   // highlight-start
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem('loggedNoteappUser')
@@ -514,7 +523,7 @@ or with the command which empties <i>localstorage</i> completely:
 window.localStorage.clear()
 ```
 
-The current application code can be found on [GitHub](https://github.com/fullstack-hy2020/part2-notes-frontend/tree/part5-3), branch <i>part5-3</i>.
+The current application code can be found on [GitHub](https://github.com/fullstack-hy2020/part2-notes-frontend/tree/part5-3), in the branch <i>part5-3</i>.
 
 </div>
 
@@ -522,18 +531,18 @@ The current application code can be found on [GitHub](https://github.com/fullsta
 
 ### Exercises 5.1.-5.4.
 
-We will now create a frontend for the bloglist backend we created in the last part. You can use [this application](https://github.com/fullstack-hy2020/bloglist-frontend) from GitHub as the base of your solution. You need to connect your backend with proxy as shown in [part 3](https://fullstackopen.com/en/part3/deploying_app_to_internet#proxy).
+We will now create a frontend for the blog list backend we created in the last part. You can use [this application](https://github.com/fullstack-hy2020/bloglist-frontend) from GitHub as the base of your solution. You need to connect your backend with a proxy as shown in [part 3](/en/part3/deploying_app_to_internet#proxy).
 
-It is enough to submit your finished solution. You can do a commit after each exercise, but that is not necessary.
+It is enough to submit your finished solution. You can commit after each exercise, but that is not necessary.
 
 The first few exercises revise everything we have learned about React so far. They can be challenging, especially if your backend is incomplete.
 It might be best to use the backend that we marked as the answer for part 4.
 
 While doing the exercises, remember all of the debugging methods we have talked about, especially keeping an eye on the console.
 
-**Warning:** If you notice you are mixing in the functions _async/await_ and _then_ commands, it's 99.9%  certain you are doing something wrong. Use either or, never both.
+**Warning:** If you notice you are mixing in the _async/await_ and _then_ commands, it's 99.9%  certain you are doing something wrong. Use either or, never both.
 
-#### 5.1: bloglist frontend, step1
+#### 5.1: Blog List Frontend, step 1
 
 Clone the application from [GitHub](https://github.com/fullstack-hy2020/bloglist-frontend) with the command:
 
@@ -541,7 +550,7 @@ Clone the application from [GitHub](https://github.com/fullstack-hy2020/bloglist
 git clone https://github.com/fullstack-hy2020/bloglist-frontend
 ```
 
-<i>remove the git configuration of the cloned application</i>
+<i>Remove the git configuration of the cloned application</i>
 
 ```bash
 cd bloglist-frontend   // go to cloned repository
@@ -563,7 +572,7 @@ If a user is not logged in, <i>only</i> the login form is visible.
 
 If the user is logged-in, the name of the user and a list of blogs is shown.
 
-![browser showing notes and who is logged in](../../images/5/5e.png)
+![browser showing blogs and who is logged in](../../images/5/5e.png)
 
 User details of the logged-in user do not have to be saved to the local storage yet.
 
@@ -592,7 +601,7 @@ User details of the logged-in user do not have to be saved to the local storage 
 }
 ```
 
-#### 5.2: bloglist frontend, step2
+#### 5.2: Blog List Frontend, step 2
 
 Make the login 'permanent' by using the local storage. Also, implement a way to log out.
 
@@ -600,21 +609,21 @@ Make the login 'permanent' by using the local storage. Also, implement a way to 
 
 Ensure the browser does not remember the details of the user after logging out.
 
-#### 5.3: bloglist frontend, step3
+#### 5.3: Blog List Frontend, step 3
 
 Expand your application to allow a logged-in user to add new blogs:
 
 ![browser showing new blog form](../../images/5/7e.png)
 
-#### 5.4: bloglist frontend, step4
+#### 5.4: Blog List Frontend, step 4
 
 Implement notifications that inform the user about successful and unsuccessful operations at the top of the page. For example, when a new blog is added, the following notification can be shown:
 
-![browser showing successful operation](../../images/5/8e.png)
+![browser showing successful operation notification](../../images/5/8e.png)
 
 Failed login can show the following notification:
 
-![browser showing failed login attempt](../../images/5/9e.png)
+![browser showing failed login attempt notification](../../images/5/9e.png)
 
 The notifications must be visible for a few seconds. It is not compulsory to add colors.
 

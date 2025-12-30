@@ -121,7 +121,7 @@ const App = () => {
 }
 ```
 
-The <i>App</i> components state now contains the boolean <i>loginVisible</i>, which defines if the login form should be shown to the user or not.
+The <i>App</i> component state now contains the boolean <i>loginVisible</i>, which defines if the login form should be shown to the user or not.
 
 The value of _loginVisible_ is toggled with two buttons. Both buttons have their event handlers defined directly in the component:
 
@@ -284,7 +284,7 @@ React documentation says the [following](https://react.dev/learn/sharing-state-b
 If we think about the state of the forms, so for example the contents of a new note before it has been created, the _App_ component does not need it for anything.
 We could just as well move the state of the forms to the corresponding components.
 
-The component for a note changes like so:
+The component for creating a new note changes like so:
 
 ```js
 import { useState } from 'react'
@@ -322,7 +322,7 @@ export default NoteForm
 
 **NOTE** At the same time, we changed the behavior of the application so that new notes are important by default, i.e. the field <i>important</i> gets the value <i>true</i>.
 
-The <i>newNote</i> state attribute and the event handler responsible for changing it have been moved from the _App_ component to the component responsible for the note form.
+The <i>newNote</i> state variable and the event handler responsible for changing it have been moved from the _App_ component to the component responsible for the note form.
 
 There is only one prop left, the _createNote_ function, which the form calls when a new note is created.
 
@@ -352,16 +352,17 @@ const App = () => {
 
 We could do the same for the log in form, but we'll leave that for an optional exercise.
 
-The application code can be found on [GitHub](https://github.com/fullstack-hy2020/part2-notes-frontend/tree/part5-5),
-branch <i>part5-5</i>.
+The application code can be found on [GitHub](https://github.com/fullstack-hy2020/part2-notes-frontend/tree/part5-5), branch <i>part5-5</i>.
 
 ### References to components with ref
 
 Our current implementation is quite good; it has one aspect that could be improved.
 
-After a new note is created, it would make sense to hide the new note form. Currently, the form stays visible. There is a slight problem with hiding the form. The visibility is controlled with the <i>visible</i> variable inside of the <i>Togglable</i> component. How can we access it outside of the component?
+After a new note is created, it would make sense to hide the new note form. Currently, the form stays visible. There is a slight problem with hiding it, the visibility is controlled with the <i>visible</i> state variable inside of the <i>Togglable</i> component.
 
-There are many ways to implement closing the form from the parent component, but let's use the [ref](https://react.dev/learn/referencing-values-with-refs) mechanism of React, which offers a reference to the component.
+One solution to this would be to move control of the Togglable component's state outside the component. However, we won't do that now, because we want the component to be responsible for its own state. So we have to find another solution, and find a mechanism to change the state of the component externally.
+
+There are several different ways to implement access to a component's functions from outside the component, but let's use the [ref](https://react.dev/learn/referencing-values-with-refs) mechanism of React, which offers a reference to the component.
 
 Let's make the following changes to the <i>App</i> component:
 
@@ -382,14 +383,14 @@ const App = () => {
 }
 ```
 
-The [useRef](https://react.dev/reference/react/useRef) hook is used to create a <i>noteFormRef</i> ref, that is assigned to the <i>Togglable</i> component containing the creation note form. The <i>noteFormRef</i> variable acts as a reference to the component. This hook ensures the same reference (ref) that is kept throughout re-renders of the component.
+The [useRef](https://react.dev/reference/react/useRef) hook is used to create a <i>noteFormRef</i> reference, that is assigned to the <i>Togglable</i> component containing the creation note form. The <i>noteFormRef</i> variable acts as a reference to the component. This hook ensures that the same reference (ref) is kept throughout re-renders of the component.
 
 We also make the following changes to the <i>Togglable</i> component:
 
 ```js
-import { useState, forwardRef, useImperativeHandle } from 'react' // highlight-line
+import { useState, useImperativeHandle } from 'react' // highlight-line
 
-const Togglable = forwardRef((props, refs) => { // highlight-line
+const Togglable = (props) => { // highlight-line
   const [visible, setVisible] = useState(false)
 
   const hideWhenVisible = { display: visible ? 'none' : '' }
@@ -400,10 +401,8 @@ const Togglable = forwardRef((props, refs) => { // highlight-line
   }
 
 // highlight-start
-  useImperativeHandle(refs, () => {
-    return {
-      toggleVisibility
-    }
+  useImperativeHandle(props.ref, () => {
+    return { toggleVisibility }
   })
 // highlight-end
 
@@ -418,12 +417,10 @@ const Togglable = forwardRef((props, refs) => { // highlight-line
       </div>
     </div>
   )
-})  // highlight-line
+}
 
 export default Togglable
 ```
-
-The function that creates the component is wrapped inside of a [forwardRef](https://react.dev/reference/react/forwardRef) function call. This way the component can access the ref that is assigned to it.
 
 The component uses the [useImperativeHandle](https://react.dev/reference/react/useImperativeHandle) hook to make its <i>toggleVisibility</i> function available outside of the component.
 
@@ -492,19 +489,19 @@ The number of moving parts increases. At the same time, the likelihood of ending
 
 So we should once more extend our oath:
 
-Full stack development is <i> extremely hard</i>, that is why I will use all the possible means to make it easier
+Full stack development is <i>extremely hard</i>, that is why I will use all the possible means to make it easier
 
 - I will have my browser developer console open all the time
 - I will use the network tab of the browser dev tools to ensure that frontend and backend are communicating as I expect
 - I will constantly keep an eye on the state of the server to make sure that the data sent there by the frontend is saved there as I expect
 - I will keep an eye on the database: does the backend save data there in the right format
 - I progress with small steps
-- <i>when I suspect that there is a bug in the frontend, I make sure that the backend works for sure</i>
-- <i>when I suspect that there is a bug in the backend, I make sure that the frontend works for sure</i>
+- <i>when I suspect that there is a bug in the frontend, I'll make sure that the backend works as expected</i>
+- <i>when I suspect that there is a bug in the backend, I'll make sure that the frontend works as expected</i>
 - I will write lots of _console.log_ statements to make sure I understand how the code and the tests behave and to help pinpoint problems
-- If my code does not work, I will not write more code. Instead, I start deleting the code until it works or just return to a state when everything was still working
-- If a test does not pass, I make sure that the tested functionality for sure works in the application
-- When I ask for help in the course Discord or Telegram channel or elsewhere I formulate my questions properly, see [here](https://fullstackopen.com/en/part0/general_info#how-to-get-help-in-discord-telegram) how to ask for help
+- If my code does not work, I will not write more code. Instead, I'll start deleting it until it works or will just return to a state where everything was still working
+- If a test does not pass, I'll make sure that the tested functionality works properly in the application
+- When I ask for help in the course Discord channel or elsewhere I formulate my questions properly, see [here](/en/part0/general_info#how-to-get-help-in-discord) how to ask for help
 
 </div>
 
@@ -512,7 +509,7 @@ Full stack development is <i> extremely hard</i>, that is why I will use all the
 
 ### Exercises 5.5.-5.11.
 
-#### 5.5 Blog list frontend, step5
+#### 5.5 Blog List Frontend, step 5
 
 Change the form for creating blog posts so that it is only displayed when appropriate. Use functionality similar to what was shown [earlier in this part of the course material](/en/part5/props_children_and_proptypes#displaying-the-login-form-only-when-appropriate). If you wish to do so, you can use the <i>Togglable</i> component defined in part 5.
 
@@ -524,15 +521,15 @@ It expands when button <i>create new blog</i> is clicked
 
 ![browser showing form with create new](../../images/5/13be.png)
 
-The form closes when a new blog is created.
+The form hides again after a new blog is created or the <i>cancel</i> button is pressed.
 
-#### 5.6 Blog list frontend, step6
+#### 5.6 Blog List Frontend, step 6
 
 Separate the form for creating a new blog into its own component (if you have not already done so), and move all the states required for creating a new blog to this component.
 
-The component must work like the <i>NoteForm</i> component from the [material](/en/part5/props_children_and_proptypes) of this part.
+The component must work like the <i>NoteForm</i> component from the [material](/en/part5/props_children_and_proptypes#state-of-the-forms) of this part.
 
-#### 5.7 Blog list frontend, step7
+#### 5.7 Blog List Frontend, step 7
 
 Let's add a button to each blog, which controls whether all of the details about the blog are shown or not.
 
@@ -568,17 +565,9 @@ const Blog = ({ blog }) => {
 )}
 ```
 
-**NB:** even though the functionality implemented in this part is almost identical to the functionality provided by the <i>Togglable</i> component, the component can not be used directly to achieve the desired behavior. The easiest solution will be to add a state to the blog post that controls the displayed form of the blog post.
+**NB:** Even though the functionality implemented in this part is almost identical to the functionality provided by the <i>Togglable</i> component, it can't be used directly to achieve the desired behavior. The easiest solution would be to add a state to the blog component that controls if the details are being displayed or not.
 
-#### 5.8: Blog list frontend, step8
-
-We notice that something is wrong. When a new blog is created in the app, the name of the user that added the blog is not shown in the details of the blog:
-
-![browser showing missing name underneath like button](../../images/5/59new.png)
-
-When the browser is reloaded, the information of the person is displayed. This is not acceptable, find out where the problem is and make the necessary correction.
-
-#### 5.9: Blog list frontend, step9
+#### 5.8: Blog List Frontend, step 8
 
 Implement the functionality for the like button. Likes are increased by making an HTTP _PUT_ request to the unique address of the blog post in the backend.
 
@@ -613,13 +602,21 @@ You would have to make an HTTP PUT request to the address <i>/api/blogs/5a43fde2
 
 The backend has to be updated too to handle the user reference.
 
-**One last warning:** if you notice that you are using async/await and the _then_-method in the same code, it is almost certain that you are doing something wrong. Stick to using one or the other, and never use both at the same time "just in case".
+#### 5.9: Blog List Frontend, step 9
 
-#### 5.10: Blog list frontend, step10
+We notice that something is wrong. When a blog is liked in the app, the name of the user that added the blog is not shown in its details:
 
-Modify the application to list the blog posts by the number of <i>likes</i>. Sorting the blog posts can be done with the array [sort](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort) method.
+![browser showing missing name underneath like button](../../images/5/59put.png)
 
-#### 5.11: Blog list frontend, step11
+When the browser is reloaded, the information of the person is displayed. This is not acceptable, find out where the problem is and make the necessary correction.
+
+Of course, it is possible that you have already done everything correctly and the problem does not occur in your code. In that case, you can move on.
+
+#### 5.10: Blog List Frontend, step 10
+
+Modify the application to sort the blog posts by the number of <i>likes</i>. The Sorting can be done with the array [sort](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort) method.
+
+#### 5.11: Blog List Frontend, step 11
 
 Add a new button for deleting blog posts. Also, implement the logic for deleting blog posts in the frontend.
 
@@ -635,179 +632,76 @@ Show the button for deleting a blog post only if the blog post was added by the 
 
 <div class="content">
 
-### PropTypes
-
-The <i>Togglable</i> component assumes that it is given the text for the button via the <i>buttonLabel</i> prop. If we forget to define it to the component:
-
-```js
-<Togglable> buttonLabel forgotten... </Togglable>
-```
-
-The application works, but the browser renders a button that has no label text.
-
-We would like to enforce that when the <i>Togglable</i> component is used, the button label text prop must be given a value.
-
-The expected and required props of a component can be defined with the [prop-types](https://github.com/facebook/prop-types) package. Let's install the package:
-
-```shell
-npm install prop-types
-```
-
-We can define the <i>buttonLabel</i> prop as a mandatory or <i>required</i> string-type prop as shown below:
-
-```js
-import PropTypes from 'prop-types'
-
-const Togglable = React.forwardRef((props, ref) => {
-  // ..
-})
-
-Togglable.propTypes = {
-  buttonLabel: PropTypes.string.isRequired
-}
-```
-
-The console will display the following error message if the prop is left undefined:
-
-![console error stating buttonLabel is undefined](../../images/5/15.png)
-
-The application still works and nothing forces us to define props despite the PropTypes definitions. Mind you, it is extremely unprofessional to leave <i>any</i> red output in the browser console.
-
-Let's also define PropTypes to the <i>LoginForm</i> component:
-
-```js
-import PropTypes from 'prop-types'
-
-const LoginForm = ({
-   handleSubmit,
-   handleUsernameChange,
-   handlePasswordChange,
-   username,
-   password
-  }) => {
-    // ...
-  }
-
-LoginForm.propTypes = {
-  handleSubmit: PropTypes.func.isRequired,
-  handleUsernameChange: PropTypes.func.isRequired,
-  handlePasswordChange: PropTypes.func.isRequired,
-  username: PropTypes.string.isRequired,
-  password: PropTypes.string.isRequired
-}
-```
-
-If the type of a passed prop is wrong, e.g. if we try to define the <i>handleSubmit</i> prop as a string, then this will result in the following warning:
-
-![console error saying handleSubmit expected a function](../../images/5/16.png)
-
 ### ESlint
 
 In part 3 we configured the [ESlint](/en/part3/validation_and_es_lint#lint) code style tool to the backend. Let's take ESlint to use in the frontend as well.
 
-Vite has installed ESlint to the project by default, so all that's left for us to do is define our desired configuration in the <i>.eslintrc.cjs</i> file.
+Vite has installed ESlint to the project by default, so all that's left for us to do is define our desired configuration in the <i>eslint.config.js</i> file.
 
-Next, we will start testing the frontend and in order to avoid undesired and irrelevant linter errors we will install the [eslint-plugin-jest](https://www.npmjs.com/package/eslint-plugin-jest) package:
-
-```bash
-npm install --save-dev eslint-plugin-jest
-```
-
-Let's create a <i>.eslintrc.cjs</i> file with the following contents:
+Let's create a <i>eslint.config.js</i> file with the following contents:
 
 ```js
-module.exports = {
-  root: true,
-  env: {
-    browser: true,
-    es2020: true,
-    "jest/globals": true
-  },
-  extends: [
-    'eslint:recommended',
-    'plugin:react/recommended',
-    'plugin:react/jsx-runtime',
-    'plugin:react-hooks/recommended',
-  ],
-  ignorePatterns: ['dist', '.eslintrc.cjs'],
-  parserOptions: { ecmaVersion: 'latest', sourceType: 'module' },
-  settings: { react: { version: '18.2' } },
-  plugins: ['react-refresh', 'jest'],
-  rules: {
-    "indent": [
-        "error",
-        2  
-    ],
-    "linebreak-style": [
-        "error",
-        "unix"
-    ],
-    "quotes": [
-        "error",
-        "single"
-    ],
-    "semi": [
-        "error",
-        "never"
-    ],
-    "eqeqeq": "error",
-    "no-trailing-spaces": "error",
-    "object-curly-spacing": [
-        "error", "always"
-    ],
-    "arrow-spacing": [
-        "error", { "before": true, "after": true }
-    ],
-    "no-console": 0,
-    "react/react-in-jsx-scope": "off",
-    "react/prop-types": 0,
-    "no-unused-vars": 0    
-  },
-}
+import js from '@eslint/js'
+import globals from 'globals'
+import reactHooks from 'eslint-plugin-react-hooks'
+import reactRefresh from 'eslint-plugin-react-refresh'
+
+export default [
+  { ignores: ['dist'] },
+  {
+    files: ['**/*.{js,jsx}'],
+    languageOptions: {
+      ecmaVersion: 2020,
+      globals: globals.browser,
+      parserOptions: {
+        ecmaVersion: 'latest',
+        ecmaFeatures: { jsx: true },
+        sourceType: 'module'
+      }
+    },
+    plugins: {
+      'react-hooks': reactHooks,
+      'react-refresh': reactRefresh
+    },
+    rules: {
+      ...js.configs.recommended.rules,
+      ...reactHooks.configs.recommended.rules,
+      'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
+      'react-refresh/only-export-components': [
+        'warn',
+        { allowConstantExport: true }
+      // highlight-start
+      ],
+      indent: ['error', 2],
+      'linebreak-style': ['error', 'unix'],
+      quotes: ['error', 'single'],
+      semi: ['error', 'never'],
+      eqeqeq: 'error',
+      'no-trailing-spaces': 'error',
+      'object-curly-spacing': ['error', 'always'],
+      'arrow-spacing': ['error', { before: true, after: true }],
+      'no-console': 'off'
+      //highlight-end
+    }
+  }
+]
 ```
 
-NOTE: If you are using Visual Studio Code together with ESLint plugin, you might need to add a workspace setting for it to work. If you are seeing ```Failed to load plugin react: Cannot find module 'eslint-plugin-react'``` additional configuration is needed. Adding the line ```"eslint.workingDirectories": [{ "mode": "auto" }]``` to settings.json in the workspace seems to work. See [here](https://github.com/microsoft/vscode-eslint/issues/880#issuecomment-578052807) for more information.
+NOTE: If you are using Visual Studio Code together with ESLint plugin, you might need to add a workspace setting for it to work. If you are seeing <i>Failed to load plugin react: Cannot find module 'eslint-plugin-react'</i> additional configuration is needed. Adding the following line to settings.json may help: 
 
-Let's create [.eslintignore](https://eslint.org/docs/user-guide/configuring#ignoring-files-and-directories) file with the following contents to the repository root
-
-```bash
-node_modules
-dist
-.eslintrc.cjs
+```js
+"eslint.workingDirectories": [{ "mode": "auto" }]
 ```
 
-Now the directories <em>dist</em> and <em>node_modules</em> will be skipped when linting.
+See [here](https://github.com/microsoft/vscode-eslint/issues/880#issuecomment-578052807) for more information.
 
 As usual, you can perform the linting either from the command line with the command
 
 ```bash
-npm run Lint
+npm run lint
 ```
 
 or using the editor's Eslint plugin.
-
-Component _Togglable_ causes a nasty-looking warning <i>Component definition is missing display name</i>:
-
-![vscode showing component definition error](../../images/5/25x.png)
-
-The react-devtools also reveals that the component does not have a name:
-
-![react devtools showing forwardRef as anonymous](../../images/5/26ea.png)
-
-Fortunately, this is easy to fix
-
-```js
-import { useState, useImperativeHandle } from 'react'
-import PropTypes from 'prop-types'
-
-const Togglable = React.forwardRef((props, ref) => {
-  // ...
-})
-
-Togglable.displayName = 'Togglable' // highlight-line
-
-export default Togglable
-```
 
 You can find the code for our current application in its entirety in the <i>part5-7</i> branch of [this GitHub repository](https://github.com/fullstack-hy2020/part2-notes-frontend/tree/part5-7).
 
@@ -817,10 +711,10 @@ You can find the code for our current application in its entirety in the <i>part
 
 ### Exercise 5.12.
 
-#### 5.12: Blog list frontend, step12
+#### 5.12: Blog List Frontend, step 12
 
-Define PropTypes for one of the components of your application, and add ESlint to the project. Define the configuration according to your liking. Fix all of the linter errors.
+Add ESlint to the project. Define the configuration according to your liking. Fix all of the linter errors.
 
-Vite has installed ESlint to the project by default, so all that's left for you to do is define your desired configuration in the <i>.eslintrc.cjs</i> file.
+Vite has installed ESlint to the project by default, so all that's left for you to do is define your desired configuration in the <i>eslint.config.js</i> file.
 
 </div>

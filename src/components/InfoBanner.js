@@ -45,22 +45,11 @@ const InfoBanner = ({ visible, onHide }) => {
   return (
     <div style={style}>
       <div style={textStyle}>
-        <p>
-          There are some changes in part 9. The <i>Patientor</i> example app
-          structure has been refactored to a less complex form to make it easier
-          to concentrate on learning TypeScript.
+        <p style={{ marginBottom: 20 }}>
+          A new exercise has been added at the end of Part 9 "Typing an Express
+          app" at 28th August 2024. Because of that numbering of the Exercises
+          9.14- has changed.
         </p>
-        <div style={{ marginTop: 10 }}>
-          If you are just working with the old Patientor, no worries, the old
-          material shall stay online for a couple of weeks.
-        </div>
-
-        <div style={{ marginTop: 10 }}>
-          <i>
-            If you have already completed the part 9, this change has absolutely
-            no effect on your progress.
-          </i>
-        </div>
       </div>
       <div style={buttonDiv}>
         <button style={buttonStyle} onClick={onHide}>

@@ -287,7 +287,7 @@ Inicializa un nuevo proyecto de backend que será utilizado por el frontend. Con
 
 El proyecto debería poder ejecutarse con scripts npm, tanto en modo de desarrollo y como código compilado, en modo de producción.
 
-#### 9.8: Patientor backend, paso 2
+#### 9.9: Patientor backend, paso 2
 
 Haz un fork y clona el proyecto [patientor](https://github.com/fullstack-hy2020/patientor). Inicia el proyecto con la ayuda del archivo README. 
 
@@ -402,7 +402,7 @@ Vamos a crear un directorio *src/services* y coloquemos el archivo *diaryService
 El archivo contiene dos funciones para buscar y guardar entradas del diario:
 
 ```js
-import diaryData from '../../data/diaries.json'
+import diaryData from '../../data/entries.json'
 
 const getEntries = () => {
   return diaryData;
@@ -443,7 +443,7 @@ La sugerencia dice que podríamos querer usar *resolveJsonModule*. Agreguémoslo
 
 Y nuestro problema está resuelto.
 
-> **NB**: Por alguna razón, VSCode tiende a quejarse de que no puede encontrar el archivo *../../data/entries.json* desde el servicio a pesar de que el archivo existe. Eso es un error en el editor y desaparece cuando se reinicia el editor.
+> **NB**: Por alguna razón, VSCode tiende a quejarse de que no puede encontrar el archivo *../../data/diaries.json* desde el servicio a pesar de que el archivo existe. Eso es un error en el editor y desaparece cuando se reinicia el editor.
 
 Anteriormente vimos cómo el compilador puede decidir el tipo de variable por el valor que se le asigna.
 De manera similar, el compilador puede interpretar grandes conjuntos de datos que constan de objetos y arrays.
@@ -996,7 +996,7 @@ app.listen(PORT, () => {
 
 ### Solicitudes de revisión
 
-Hay muchas cosas que pueden malir sal cuando aceptamos datos de fuentes externas.
+Hay muchas cosas que pueden salir mal cuando aceptamos datos de fuentes externas.
 Las aplicaciones rara vez funcionan completamente por sí solas y, nos vemos obligados a vivir con el hecho de que no se puede confiar plenamente en los datos de fuentes externas a nuestro sistema.
 Cuando recibimos datos de una fuente externa, no hay forma de que ya estén tipados cuando los recibimos. Necesitamos tomar decisiones sobre cómo manejar la incertidumbre que viene con esto.
 

@@ -243,7 +243,7 @@ module.exports = usersRouter
 
 A senha enviada na solicitação <i>não</i> é armazenada no banco de dados. Armazenamos o <i>hash</i> da senha que é gerada com a função _bcrypt.hash_.
 
-Os fundamentos do [armazenamento de senhas](https://codahale.com/how-to-safely-store-a-password/) estão fora do escopo deste material do curso. Não discutiremos o que significa o número mágico 10 atribuído à variável [saltRounds](https://github.com/kelektiv/node.bcrypt.js/#a-note-on-rounds), mas você pode ler mais sobre isso no material vinculado.
+Os fundamentos do [armazenamento de senhas](https://bytebytego.com/guides/how-to-store-passwords-in-the-database/) estão fora do escopo deste material do curso. Não discutiremos o que significa o número mágico 10 atribuído à variável [saltRounds](https://github.com/kelektiv/node.bcrypt.js/#a-note-on-rounds), mas você pode ler mais sobre isso no material vinculado.
 
 Nosso código atual não contém nenhum tratamento de erro ou validação de entrada para verificar se o nome de usuário e a senha estão no formato desejado.
 
@@ -378,18 +378,6 @@ userSchema.plugin(uniqueValidator) // highlight-line
 
 // ...
 ```
-
-Nota: ao instalar a biblioteca mongoose-unique-validator, você pode encontrar a seguinte mensagem de erro:
-
-![mensagem erro instalacao biblioteca](../../images/4/uniq.png)
-
-A razão para isso é que a biblioteca ainda não é compatível com a versão 7 do Mongoose no momento da redação (13 de março de 2023). Se você encontrar um erro, poderá fazer o downgrade para uma versão mais antiga do Mongoose executando o comando
-
-```js
-npm install mongoose@7.6.5
-```
-
-Depois disso, você pode instalar a biblioteca mongoose-unique-validator sem problemas.
 
 Também poderíamos implementar outras validações na criação do usuário. Poderíamos verificar se o nome de usuário é longo o suficiente, se o nome de usuário consiste apenas em caracteres permitidos ou se a senha é forte o suficiente. A implementação dessas funcionalidades é deixada como um exercício opcional.
 

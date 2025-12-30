@@ -118,9 +118,8 @@ client.query({ query })
 import ReactDOM from 'react-dom'
 import App from './App'
 
-import {
-  ApolloClient, ApolloProvider, HttpLink, InMemoryCache // highlight-line
-} from '@apollo/client'
+import { ApolloClient, HttpLink, InMemoryCache } from '@apollo/client'
+import { ApolloProvider } from '@apollo/client/react' // highlight-line
 
 const client = new ApolloClient({
   cache: new InMemoryCache(),
@@ -151,7 +150,8 @@ ReactDOM.render(
 查询是由<i>App</i>组件进行的，其代码如下。
 
 ```js
-import { gql, useQuery } from '@apollo/client'
+import { gql } from '@apollo/client'
+import { useQuery } from '@apollo/client/react'
 
 const ALL_PERSONS = gql`
 query {
@@ -302,7 +302,8 @@ query findPersonByName($nameToSearch: String!) {
 
 ```js
 import { useState } from 'react'
-import { gql, useQuery } from '@apollo/client'
+import { gql } from '@apollo/client'
+import { useQuery } from '@apollo/client/react'
 
 const FIND_PERSON = gql`
   query findPersonByName($nameToSearch: String!) {
@@ -422,7 +423,7 @@ if (nameToSearch && result.data) {
 ### Cache
 
 <!-- When we do multiple queries, for example with the address details of Arto Hellas, we notice something interesting: the query to the backend is done only the first time around. After this, despite the same query being done again by the code, the query is not sent to the backend.-->
- 当我们进行多次查询时，例如查询Arto Hellas的详细地址，我们注意到一些有趣的事情：向后端查询只在第一次进行。在这之后，尽管代码再次进行相同的查询，但查询不会被发送到后台。
+ 当我们进行多次查询时，例如查询Arto Hellas的详细地址，我们注意到一些有趣的事情：向后端查询只在第一次进行。在这之后，尽管代码再次进行相同的查询，但查询不会被发送到后端。
 
 ![](../../images/8/12.png)
 
@@ -474,7 +475,8 @@ mutation createPerson($name: String!, $street: String!, $city: String!, $phone: 
 
 ```js
 import { useState } from 'react'
-import { gql, useMutation } from '@apollo/client'
+import { gql } from '@apollo/client'
+import { useMutation } from '@apollo/client/react'
 
 const CREATE_PERSON = gql`
   // ...
@@ -790,7 +792,7 @@ export const EDIT_NUMBER = gql`
 
 ```js
 import { useState } from 'react'
-import { useMutation } from '@apollo/client'
+import { useMutation } from '@apollo/client/react'
 
 import { EDIT_NUMBER } from '../queries'
 
@@ -1001,8 +1003,8 @@ useEffect(() => {
 
 #### 8.12: Authors birth year advanced
 
-<!-- Change the birth year form so that a birth year can be set only for an existing author. Use [select tag](https://reactjs.org/docs/forms.html#the-select-tag), [react select](https://github.com/JedWatson/react-select), or some other mechanism.-->
- 改变出生年月表，使出生年月只能为现有作者设置。使用[选择标签](https://reactjs.org/docs/forms.html#the-select-tag)、[反应选择](https://github.com/JedWatson/react-select)，或其他机制。
+<!-- Change the birth year form so that a birth year can be set only for an existing author. Use [select tag](https://react.dev/reference/react-dom/components/select), [react select](https://github.com/JedWatson/react-select), or some other mechanism.-->
+ 改变出生年月表，使出生年月只能为现有作者设置。使用[选择标签](https://react.dev/reference/react-dom/components/select)、[反应选择](https://github.com/JedWatson/react-select)，或其他机制。
 
 
 <!-- A solution using the react select library looks as follows:-->

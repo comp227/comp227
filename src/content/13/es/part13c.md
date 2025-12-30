@@ -417,7 +417,7 @@ Ahora, un administrador puede volver a habilitar al usuario <i>jakousa</i> reali
 }
 ```
 
-Como se señaló en [el final de la Parte 4](/es/part4/autenticacion_de_token#limitacion-de-la-creacion-de-nuevas-notas-a-los-usuarios-registrados), la forma en que implementamos la desactivación de usuarios aquí es problemática. Si el usuario está deshabilitado o no, solo se verifica en _login_, si el usuario tiene un token en el momento en que se deshabilita, el usuario puede continuar usando el mismo token, ya que no se ha establecido una vida útil para el token y el estado deshabilitado. El usuario no se comprueba al crear notas.
+Como se señaló en [el final de la Parte 4](/es/part4/autenticacion_basada_en_token#limitacion-de-la-creacion-de-nuevas-notas-a-los-usuarios-registrados), la forma en que implementamos la desactivación de usuarios aquí es problemática. Si el usuario está deshabilitado o no, solo se verifica en _login_, si el usuario tiene un token en el momento en que se deshabilita, el usuario puede continuar usando el mismo token, ya que no se ha establecido una vida útil para el token y el estado deshabilitado. El usuario no se comprueba al crear notas.
 
 Antes de continuar, hagamos un script npm para la aplicación, que nos permita deshacer la migración anterior. Después de todo, no todo sale bien la primera vez cuando se desarrollan migraciones.
 
@@ -644,7 +644,7 @@ module.exports = Membership
 
 Así que le hemos dado a la tabla de conexiones un nombre que la describe bien, <i>membership</i>. No siempre hay un nombre relevante para una tabla de conexión, en cuyo caso el nombre de la tabla de conexión puede ser una combinación de los nombres de las tablas que se unen, p. <i>user\_teams</i> podría encajar en nuestra situación.
 
-Realizamos una pequeña adición al archivo <i>models/index.js</i> para conectar equipos y usuarios a nivel de código mediante el método [belongsToMany](https://sequelize.org/master/manual/assocs.html#implementation-3).
+Realizamos una pequeña adición al archivo <i>models/index.js</i> para conectar equipos y usuarios a nivel de código mediante el método [belongsToMany](https://sequelize.org/docs/v6/core-concepts/assocs/#implementation-2).
 
 ```js
 const Note = require('./note')
@@ -1152,7 +1152,7 @@ Por ejemplo, la información podría tener la siguiente forma:
 }
 ```
 
-Nota: hay varias formas de implementar esta funcionalidad. [Esto](https://sequelize.org/master/manual/advanced-many-to-many.html#the-best-of-both-worlds--the-super-many-to-many-relationship) debería ayuda.
+Nota: hay varias formas de implementar esta funcionalidad. [Esto](https://sequelize.org/docs/v6/advanced-association-concepts/advanced-many-to-many/#the-best-of-both-worlds-the-super-many-to-many-relationship) debería ayuda.
 
 Tenga en cuenta también que a pesar de tener un campo de matriz <i>listas de lectura</i> en el ejemplo, siempre debe contener exactamente un objeto, la entrada de la tabla de unión que conecta el libro con la lista de lectura del usuario en particular.
 
@@ -1472,7 +1472,7 @@ module.exports = {
 
 Sin embargo, el problema es que la definición del modelo puede cambiar con el tiempo, por ejemplo, el campo <i>name</i> puede cambiar o su tipo de datos puede cambiar. Las migraciones deben poder realizarse correctamente en cualquier momento de principio a fin, y si las migraciones dependen del modelo para tener cierto contenido, es posible que ya no sea cierto en un mes o un año. Por lo tanto, a pesar del "copiar y pegar", el código de migración debe estar completamente separado del código del modelo.
 
-Una solución sería usar la [herramienta de línea de comandos  de Sequelize ](https://sequelize.org/master/manual/migrations.html#creating-the-first-model--and-migration-), que genera modelos y migración archivos basados ​​en comandos dados en la línea de comandos. Por ejemplo, el siguiente comando crearía un modelo <i>Users</i> con <i>name</i>, <i>username</i> y <i>admin</i> como atributos, como así como la migración que gestiona la creación de la tabla de la base de datos: 
+Una solución sería usar la [herramienta de línea de comandos  de Sequelize ](https://sequelize.org/docs/v6/other-topics/migrations/#creating-the-first-model-and-migration), que genera modelos y migración archivos basados ​​en comandos dados en la línea de comandos. Por ejemplo, el siguiente comando crearía un modelo <i>Users</i> con <i>name</i>, <i>username</i> y <i>admin</i> como atributos, como así como la migración que gestiona la creación de la tabla de la base de datos: 
 
 ```
 npx sequelize-cli model:generate --name User --attributes name:string,username:string,admin:boolean
@@ -1488,7 +1488,7 @@ Desde la línea de comandos, también puede ejecutar reversiones, es decir, desh
 
 #### Ejercicio 13.24.
 
-Gran final: [hacia el final de la parte 4](/es/part4/autenticacion_de_token#limitacion-de-la-creacion-de-nuevas-notas-a-los-usuarios-registrados) se mencionó un problema crítico del token: si se decide que el acceso de un usuario al sistema revocado, el usuario aún puede usar el token en posesión para usar el sistema.
+Gran final: [hacia el final de la parte 4](/es/part4/autenticacion_basada_en_token#limitacion-de-la-creacion-de-nuevas-notas-a-los-usuarios-registrados) se mencionó un problema crítico del token: si se decide que el acceso de un usuario al sistema revocado, el usuario aún puede usar el token en posesión para usar el sistema.
 
 La solución habitual a esto es almacenar un registro de cada token emitido al cliente en la base de datos del servidor y comprobar con cada solicitud si el acceso sigue siendo válido. En este caso, la validez del token se puede eliminar de inmediato si es necesario. Esta solución a menudo se denomina <i>sesión del lado del servidor</i>.
 

@@ -347,10 +347,10 @@ startStandaloneServer(server, {
 
 startStandaloneServer ei kuitenkaan mahdollista subscriptioiden lisäämistä sovellukseen, joten siirrytään järeämmän [expressMiddleware](https://www.apollographql.com/docs/apollo-server/api/express-middleware/) funktion käyttöön. Kuten funktion nimi jo vihjaa, kyseessä on Expressin middleware, eli sovellukseen on konfiguroitava myös Express jonka middlewarena GraphQL-server tulee toimimaan.
 
-Asennetaan Express:
+Asennetaan Express ja Apollo Serverin integraatiopaketti:
 
 ```
-npm install express cors
+npm install express cors @as-integrations/express5
 ```
 
 ja muutetaan tiedosto <i>index.js</i> seuraavaan muotoon:
@@ -358,7 +358,7 @@ ja muutetaan tiedosto <i>index.js</i> seuraavaan muotoon:
 ```js
 const { ApolloServer } = require('@apollo/server')
 // highlight-start
-const { expressMiddleware } = require('@apollo/server/express4')
+const { expressMiddleware } = require('@as-integrations/express5')
 const { ApolloServerPluginDrainHttpServer } = require('@apollo/server/plugin/drainHttpServer')
 const { makeExecutableSchema } = require('@graphql-tools/schema')
 const express = require('express')
@@ -468,7 +468,7 @@ Tiedosto <i>index.js</i> muuttuu seuraavasti
 ```js
 // highlight-start
 const { WebSocketServer } = require('ws')
-const { useServer } = require('graphql-ws/lib/use/ws')
+const { useServer } = require('graphql-ws/use/ws')
 // highlight-end
 
 // ...
@@ -588,7 +588,7 @@ const resolvers = {
   // highlight-start
   Subscription: {
     personAdded: {
-      subscribe: () => pubsub.asyncIterator('PERSON_ADDED')
+      subscribe: () => pubsub.asyncIterableIterator('PERSON_ADDED')
     },
   },
   // highlight-end
@@ -608,7 +608,7 @@ Koodia on vähän mutta konepellin alla tapahtuu paljon. Tilauksen _personAdded_
 ```js
 Subscription: {
   personAdded: {
-    subscribe: () => pubsub.asyncIterator('PERSON_ADDED')
+    subscribe: () => pubsub.asyncIterableIterator('PERSON_ADDED')
   },
 },
 ```
@@ -638,7 +638,7 @@ subscription Subscription {
 }
 ```
 
-Kun tilauksen suorittavaa sinistä PersonAdded-painiketta painetaan, jää Explorer odottamaan tilaukseen tulevia vastauksia. Aina kun sovellukseen lisätään uusia käyttäjiä (joudut tekemään lisäyksen frontendista tai toisesta selainikkunasta), tulee tieto niistä Explorerin oikeaan reunaan.
+Kun tilauksen suorittavaa sinistä PersonAdded-painiketta painetaan, jää Explorer odottamaan tilaukseen tulevia vastauksia. Aina kun sovellukseen lisätään uusia henkilöitä (joudut tekemään lisäyksen frontendista tai toisesta selainikkunasta), tulee tieto niistä Explorerin oikeaan reunaan.
 
 Jos tilaus ei toimi, tarkasta, että yhteysasetukset on määritelty oikein:
 
@@ -655,9 +655,10 @@ Jotta saamme tilaukset käyttöön React-sovelluksessa, tarvitaan jonkin verran 
 
 ```js
 import { 
-  ApolloClient, InMemoryCache, ApolloProvider, createHttpLink, 
+  ApolloClient, InMemoryCache, createHttpLink,
   split  // highlight-line
 } from '@apollo/client'
+import { ApolloProvider } from '@apollo/client/react'
 import { setContext } from 'apollo-link-context'
 
 // highlight-start
@@ -745,7 +746,7 @@ export const PERSON_ADDED = gql`
 ja tehdään tilaus komponentissa App:
 
 ```js
-import { useQuery, useApolloClient, useSubscription } from '@apollo/client'
+import { useQuery, useApolloClient, useSubscription } from '@apollo/client/react'
 import { PERSON_ADDED } from './queries.js'
 
 const App = () => {
@@ -942,14 +943,14 @@ query {
 
 Sovelluksessa on nyt kuitenkin yksi ongelma, tietokantakyselyjä tehdään kohtuuttoman paljon. Jos lisäämme palvelimen jokaiseen tietokantakyselyn tekevään kohtaan konsoliin tehtävän tulostuksen, huomaamme että jos tietokannassa on viisi henkilöä, tehdään seuraavat tietokantakyselyt: 
 
-<pre>
+```
 Person.find
 User.find
 User.find
 User.find
 User.find
 User.find
-</pre>
+```
 
 Eli vaikka pääasiallisesti tehdään ainoastaan yksi kysely joka hakee kaikki henkilöt, aiheuttaa jokainen henkilö yhden kyselyn omassa resolverissaan.
 
@@ -1034,9 +1035,9 @@ Facebookin kehittämä [dataloader](https://github.com/facebook/dataloader)-kirj
 ### Loppusanat
 
 Tässä osassa rakentamamme sovellus ei ole optimaalisella tavalla strukturoitu, teimme pientä siivousta siirtämällä skeeman ja resolverit omiin tiedostoihin mutta parantamisen varaa jäi edelleen paljon. Esimerkkejä GraphQL-sovellusten parempaan strukturointiin löytyy internetistä, esim. serveriin
-[täältä](https://blog.apollographql.com/modularizing-your-graphql-schema-code-d7f71d5ed5f2) ja clientiin [täältä](https://medium.com/@peterpme/thoughts-on-structuring-your-apollo-queries-mutations-939ba4746cd8).
+[täältä](https://www.apollographql.com/blog/modularizing-your-graphql-schema-code) ja clientiin [täältä](https://medium.com/@peterpme/thoughts-on-structuring-your-apollo-queries-mutations-939ba4746cd8).
 
-GraphQL on jo melko iäkäs teknologia, se on ollut Facebookin sisäisessä käytössä jo vuodesta 2012 lähtien, teknologian voi siis todeta olevan "battle tested". Facebook julkaisi GraphQL:n vuonna 2015 ja se on pikkuhiljaa saanut enenevissä määrin huomiota ja nousee ehkä lähivuosina uhmaamaan REST:in valta-asemaa. REST:in [kuolemaakin](https://www.stridenyc.com/podcasts/52-is-2018-the-year-graphql-kills-rest) on jo ennusteltu. Vaikka se ei tulekaan ihan heti tapahtumaan, on GraphQL ehdottomasti [tutustumisen arvoinen](https://blog.graphqleditor.com/javascript-predictions-for-2019-by-npm/).
+GraphQL on jo melko iäkäs teknologia, se on ollut Facebookin sisäisessä käytössä jo vuodesta 2012 lähtien, teknologian voi siis todeta olevan "battle tested". Facebook julkaisi GraphQL:n vuonna 2015 ja se on pikkuhiljaa saanut enenevissä määrin huomiota ja nousee ehkä lähivuosina uhmaamaan REST:in valta-asemaa. REST:in [kuolemaakin](https://www.radiofreerabbit.com/podcast/52-is-2018-the-year-graphql-kills-rest) on jo ennusteltu. Vaikka se ei tulekaan ihan heti tapahtumaan, on GraphQL ehdottomasti [tutustumisen arvoinen](https://blog.graphqleditor.com/javascript-predictions-for-2019-by-npm/).
 
 </div>
 

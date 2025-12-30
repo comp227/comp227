@@ -464,7 +464,7 @@ Note que a branch <i>main</i> do repositório contém o código para uma versão
 
 ![captura de tela da branch do GitHub](../../images/2/2e.png)
 
-Caso deseje clonar o projeto, execute o comando _npm install_ antes de iniciar a aplicação com _npm start_.
+Caso deseje clonar o projeto, execute o comando _npm install_ antes de iniciar a aplicação com _npm run dev_.
 
 ### Quando a Aplicação Quebra
 
@@ -571,7 +571,7 @@ Programar é difícil, e é por isso que eu usarei todos os meios possíveis par
 - Eu vou progredir aos poucos, passo a passo;
 - Eu escreverei muitas instruções _console.log_ para ter certeza de que estou entendendo como o código se comporta e para me ajudar a identificar os erros;
 - Se meu código não funcionar, não escreverei mais nenhuma linha no código. Em vez disso, começarei a excluir o código até que funcione ou retornarei ao estado em que tudo ainda estava funcionando; e
-- Quando eu pedir ajuda no canal do Discord ou Telegram do curso ou em outro lugar, formularei minhas perguntas de forma adequada. Veja [aqui](/ptbr/part0/informacoes_gerais#como-pedir-ajuda-no-discord-telegam) como pedir ajuda.
+- Quando eu pedir ajuda no canal do Discord do curso ou em outro lugar, formularei minhas perguntas de forma adequada. Veja [aqui](/ptbr/part0/informacoes_gerais#como-pedir-ajuda-no-discord) como pedir ajuda.
 
 </div>
 
@@ -591,7 +591,7 @@ Lembre-se: envie **todos** os exercícios de uma parte **de uma única vez**; is
 
 <h4>2.1: Course information — 6º passo</h4>
 
-Vamos finalizar o código para que possamos renderizar os conteúdos do curso dos exercícios 1.1 a 1.5. Você pode começar com o código das respostas-modelo. As respostas-modelo da Parte 1 podem ser encontradas no [sistema de envio de exercícios]https://studies.cs.helsinki.fi/stats/courses/fullstackopen), clicando em <i>"my submissions"</i> em cima; vá até a linha correspondente à Parte 1 na coluna <i>"solutions"</i> e clique em <i>show</i>. Para ver a solução para o exercício <i>course info</i>, clique em _index.js_ abaixo de <i>kurssitiedot</i> ("kurssitiedot" significa "course info" ou "informações do curso").
+Vamos finalizar o código para que possamos renderizar os conteúdos do curso dos exercícios 1.1 a 1.5. Você pode começar com o código das respostas-modelo. As respostas-modelo da Parte 1 podem ser encontradas no [sistema de envio de exercícios](https://studies.cs.helsinki.fi/stats/courses/fullstackopen), clicando em <i>"my submissions"</i> em cima; vá até a linha correspondente à Parte 1 na coluna <i>"solutions"</i> e clique em <i>show</i>. Para ver a solução para o exercício <i>course info</i>, clique em _index.js_ abaixo de <i>kurssitiedot</i> ("kurssitiedot" significa "course info" ou "informações do curso").
 
 **Note que se você copiar um projeto de um lugar para outro, é provável que terá de excluir o diretório <i>node\_modules</i> e instalar as dependências novamente com o comando _npm install_ antes de iniciar a aplicação.** Em geral, não é recomendado que você copie todo o conteúdo de um projeto e/ou adicione o diretório <i>node\_modules</i> ao sistema de controle de versão.
 
@@ -631,7 +631,7 @@ Crie um componente chamado <i>Course</i> que será responsável por formatar/exi
 
 A estrutura do componente da aplicação pode ser a seguinte, por exemplo:
 
-<pre>
+```
 App
   Course
     Header
@@ -639,7 +639,7 @@ App
       Part
       Part
       ...
-</pre>
+```
 
 Desta forma, o componente <i>Course</i> conterá os componentes definidos na parte anterior, responsáveis por renderizar o nome do curso e suas partes.
 

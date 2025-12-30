@@ -153,7 +153,7 @@ La suscripción _personAdded_ necesita un solucionador. El solucionador _addPers
 Los cambios requeridos son los siguientes:
 
 ```js
-const { PubSub } = require('apollo-server') // highlight-line
+const { PubSub } = require('graphql-subscriptions') // highlight-line
 const pubsub = new PubSub() // highlight-line
 
   Mutation: {
@@ -183,7 +183,7 @@ const pubsub = new PubSub() // highlight-line
   // highlight-start
   Subscription: {
     personAdded: {
-      subscribe: () => pubsub.asyncIterator(['PERSON_ADDED'])
+      subscribe: () => pubsub.asyncIterableIterator(['PERSON_ADDED'])
     },
   },
   // highlight-end
@@ -228,9 +228,10 @@ La configuración en <i>index.js</i> tiene que ser modificada así:
 
 ```js
 import { 
-  ApolloClient, ApolloProvider, HttpLink, InMemoryCache, 
+  ApolloClient, HttpLink, InMemoryCache, 
   split  // highlight-line
 } from '@apollo/client'
+import { ApolloProvider } from '@apollo/client/react'
 import { setContext } from 'apollo-link-context'
 
 // highlight-start
@@ -323,7 +324,7 @@ export const PERSON_ADDED = gql`
 
 import {
   useQuery, useMutation, useSubscription, useApolloClient // highlight-line
-} from '@apollo/client'
+} from '@apollo/client/react'
 
 const App = () => {
   // ...
@@ -478,14 +479,14 @@ query {
 
 Sin embargo, hay un problema con nuestra solución, hace una cantidad irrazonable de consultas a la base de datos. Si registramos todas las consultas en la base de datos y tenemos 5 personas guardadas, vemos lo siguiente:
 
-<pre>
+```
 Person.find
 User.find
 User.find
 User.find
 User.find
 User.find
-</pre>
+```
 
 Así que aunque principalmente hacen una consulta para todas las personas, cada persona genera una consulta más en su resolución.
 
@@ -569,9 +570,9 @@ Más sobre el uso de DataLoader con el servidor Apollo [aquí](https://www.robin
 
 ### Epílogo
 
-La aplicación que creamos en esta parte no está estructurada de manera óptima: el esquema, las consultas y las mutaciones deben al menos moverse fuera del código de la aplicación. En Internet se pueden encontrar ejemplos para una mejor estructuración de las aplicaciones GraphQL. Por ejemplo, para el servidor [aquí](https://blog.apollographql.com/modularizing-your-graphql-schema-code-d7f71d5ed5f2) y el cliente [aquí](https://medium.com/@peterpme/thoughts-on-structuring-your-apollo-queries-mutations-939ba4746cd8).
+La aplicación que creamos en esta parte no está estructurada de manera óptima: el esquema, las consultas y las mutaciones deben al menos moverse fuera del código de la aplicación. En Internet se pueden encontrar ejemplos para una mejor estructuración de las aplicaciones GraphQL. Por ejemplo, para el servidor [aquí](https://www.apollographql.com/blog/modularizing-your-graphql-schema-code) y el cliente [aquí](https://medium.com/@peterpme/thoughts-on-structuring-your-apollo-queries-mutations-939ba4746cd8).
 
-GraphQL ya es una tecnología bastante antigua, que ha sido utilizada por Facebook desde 2012, por lo que ya podemos verla como "probada en batalla". Desde que Facebook publicó GraphQL en 2015, poco a poco ha recibido más y más atención, y en un futuro cercano podría amenazar el dominio de REST. La muerte de REST también ha sido [predicha](https://www.stridenyc.com/podcasts/52-is-2018-the-year-graphql-kills-rest). Aunque eso no sucederá todavía, GraphQL es absolutamente digno de [aprender](https://blog.graphqleditor.com/javascript-predictions-for-2019-by-npm/).
+GraphQL ya es una tecnología bastante antigua, que ha sido utilizada por Facebook desde 2012, por lo que ya podemos verla como "probada en batalla". Desde que Facebook publicó GraphQL en 2015, poco a poco ha recibido más y más atención, y en un futuro cercano podría amenazar el dominio de REST. La muerte de REST también ha sido [predicha](https://www.radiofreerabbit.com/podcast/52-is-2018-the-year-graphql-kills-rest). Aunque eso no sucederá todavía, GraphQL es absolutamente digno de [aprender](https://blog.graphqleditor.com/javascript-predictions-for-2019-by-npm/).
 
 </div>
 

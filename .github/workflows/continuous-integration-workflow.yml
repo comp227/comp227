@@ -22,7 +22,7 @@ jobs:
           npm run build
       - name: git status
         run: |
-          git status          
+          git status
       - name: working dir
         run: |
           cd public 

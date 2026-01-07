@@ -221,9 +221,13 @@ tasksRouter.post("/", async (request, response) => {
   const user = await User.findById(decodedToken.id);
 //highlight-end
 
+  if (!user) {
+    return response.status(400).json({ error: "UserId missing or not valid" })
+  }
+
   const task = new Task({
     content: body.content,
-    important: body.important === undefined ? false : Boolean(body.important), // highlight-line
+    important: body.important || false, // highlight-line
     date: new Date(),
     user: user._id
   });
@@ -244,10 +248,29 @@ The method also decodes the token or returns the Object that the token was based
 const decodedToken = jwt.verify(token, process.env.SECRET);
 ```
 
+If the token is missing or it is invalid, the exception *`JsonWebTokenError`* is raised.
+We need to extend the error handling middleware to take care of this particular case:
+
+```js
+const errorHandler = (error, request, response, next) => {
+  if (error.name === "CastError") {
+    return response.status(400).send({ error: "malformatted id" })
+  } else if (error.name === "ValidationError") {
+    return response.status(400).json({ error: error.message })
+  } else if (error.name === "MongoServerError" && error.message.includes("E11000 duplicate key error")) {
+    return response.status(400).json({ error: "expected `username` to be unique" })
+  } else if (error.name ===  "JsonWebTokenError") { // highlight-line
+    return response.status(401).json({ error: "token invalid" }) // highlight-line
+  }
+
+  next(error)
+}
+```
+
 The object decoded from the token contains the `username` and `id` fields, which tell the server who made the request.
 
 If the object decoded from the token does not contain the user's identity (`decodedToken.id` is *`undefined`*),
-error status code [401 unauthorized](https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.4.2)
+error status code [401 unauthorized](https://www.rfc-editor.org/rfc/rfc9110.html#name-401-unauthorized)
 is returned and the reason for the failure is explained in the response body.
 
 ```js
@@ -383,6 +406,10 @@ const errorHandler = (error, request, response, next) => {
     return response.status(400).send({ error: "malformatted id" });
   } else if (error.name === "ValidationError") {
     return response.status(400).json({ error: error.message });
+  } else if (error.name === "MongoServerError" && error.message.includes("E11000 duplicate key error")) {
+    return response.status(400).json({
+      error: "expected `username` to be unique"
+    });
   } else if (error.name === "JsonWebTokenError") {
     return response.status(401).json({
       error: "invalid token"
@@ -399,9 +426,9 @@ const errorHandler = (error, request, response, next) => {
 }
 ```
 
-The *shorter the expiration time, the more safe the solution is*.
-So if the token gets into the wrong hands or user access to the system needs to be revoked, the token is only usable for a limited amount of time.
-On the other hand, a short expiration time forces a potential pain to a user, one must login to the system more frequently.
+The *shorter the expiration time, the safer the solution is*.
+If the token falls into the wrong hands or user access to the system needs to be revoked, the token is only usable for a limited amount of time.
+However, a short expiration time forces a potential pain for the user, as it requires them to log in more frequently.
 
 The other solution is to save info about each token to backend database
 and to check for each API request if the access right corresponding to the token is still valid.
@@ -412,7 +439,7 @@ The negative aspect of server-side sessions is the increased complexity in the b
 since the token validity needs to be checked for each API request to the database.
 Database access is considerably slower compared to checking the validity of the token itself.
 That is why it is quite common to save the session corresponding to a token to a **key-value database** such as [***Redis***](https://redis.io/)
-that is limited in functionality compared to a MongoDB or relational databases but extremely fast in some usage scenarios.
+that is limited in functionality compared to a MongoDB or a relational database but extremely fast in some usage scenarios.
 
 When server-side sessions are used, the ***token is a random string*** (quite often).
 The token does not include any information about the user as it is quite often the case when jwt-tokens are used.
@@ -425,14 +452,12 @@ There have been many changes to the code which have caused a typical problem for
 Because this part of the course is already jammed with new information, we will leave fixing the tests to a non-compulsory exercise.
 
 Usernames, passwords and applications using token authentication must always be used over [HTTPS](https://en.wikipedia.org/wiki/HTTPS).
-We could use a Node [HTTPS](https://nodejs.org/api/https.html) server in our application instead of the
-[HTTP](https://nodejs.org/docs/latest-v8.x/api/http.html) server (it requires more configuration).
+We could use a Node [HTTPS](https://nodejs.org/docs/latest-v22.x/api/https.htm) server in our application instead of the
+[HTTP](https://nodejs.org/docs/latest-v22.x/api/http.html) server (it requires more configuration).
 On the other hand, the production version of our application is on Render, so our application stays secure.
 Render routes all traffic between a browser and the Render server over HTTPS.
 
 We will implement login to the frontend in the [next part](/part5).
-
-> **Pertinent:** At this stage, in the deployed tasks app, it is expected that the creating a task feature will stop working as the backend login feature is not yet linked to the frontend.
 
 </div>
 
@@ -441,20 +466,20 @@ We will implement login to the frontend in the [next part](/part5).
 ### Exercises 4.15-4.23
 
 In the next exercises, the basics of user management will be implemented for the Watchlist application.
-The safest way is to follow the story from part 4 chapter [User administration](/part4/user_administration)
+The safest way is to follow the course material from part 4 chapter [User administration](/part4/user_administration)
 to the chapter [Token-based authentication](/part4/token_authentication).
 You can of course also use your creativity.
 
 > **Warning:** If you notice you are mixing `async`/`await` and `then` calls, it is 99% certain you are doing something wrong.
 > Use either or, never both.
 
-#### 4.15: watchlist expansion, Step 3
+#### 4.15: Watchlist expansion, Step 3
 
 Implement a way to create new users by doing an HTTP POST request to address ***api/users***.
 Users have a *username, password and name*.
 
 **Do not save passwords to the database as clear text**,
-but use the ***bcrypt*** library like we did in part 4 chapter [Creating new users](/part4/user_administration#creating-users).
+but use the ***bcrypt*** library like we did in the part 4 chapter on [creating users](/part4/user_administration#creating-users).
 
 > **FYI:** Some Windows users have had problems with ***bcrypt***.
 > If you run into problems, remove the library with command
@@ -471,12 +496,12 @@ The list of users can, for example, look as follows:
 
 ![browser api/users shows JSON data of two users](../../images/4/22.png)
 
-#### 4.16*: watchlist expansion, Step 4
+#### 4.16*: Watchlist expansion, Step 4
 
 Add a feature which adds the following restrictions to creating new users:
 
 - Both username and password must be given.
-- Both username and password must be at least 3 characters long.
+- Both must be at least 3 characters long.
 - The username must be unique.
 
 The operation must respond with a suitable status code and some kind of an error message if an invalid user is created.
@@ -485,9 +510,16 @@ The operation must respond with a suitable status code and some kind of an error
 > It is not a good idea because the password received by the backend and the password hash saved to the database are not the same thing.
 > The password length should be validated in the controller as we did in [part 3](/part3/node_js_and_express) before using Mongoose validation.
 
-Also, implement tests that ensure invalid users are not created and that an invalid add user operation returns a suitable status code and error message.
+Also, **implement tests** that ensure invalid users are not created and that an invalid add user operation returns a suitable status code and error message.
 
-#### 4.17: watchlist expansion, Step 5
+> **Pertinent:** If you decide to define tests on multiple files,
+> you should notice that by default each test file is executed in its own process
+> (see **Test execution model** in the [documentation](https://nodejs.org/api/test.html#test-runner-execution-model)).
+> The consequence of this is that different test files are executed at the same time.
+> Since the tests share the same database, simultaneous execution may cause problems,
+> which can be avoided by executing the tests with the option *`--test-concurrency=1`*, i.e. defining them to be executed sequentially.
+
+#### 4.17: Watchlist expansion, Step 5
 
 Expand `show` so that *each show contains information on the recommender of that show*.
 
@@ -504,21 +536,22 @@ and listing all users also displays the shows they recommended:
 
 ![api/users embeds shows in JSON data](../../images/4/24e.png)
 
-#### 4.18: watchlist expansion, Step 6
+#### 4.18: Watchlist expansion, Step 6
 
 Implement token-based authentication according to part 4's [Token authentication section](/part4/token_authentication).
 
-#### 4.19: watchlist expansion, Step 7
+#### 4.19: Watchlist expansion, Step 7
 
 Modify adding new shows so that it is only possible if a valid token is sent with the HTTP POST request.
 The user identified by the token is designated as the recommender of that show.
 
-#### 4.20*: watchlist expansion, Step 8
+#### 4.20*: Watchlist expansion, Step 8
 
-[This example](/part4/token_authentication) from part 4 shows taking the token from the header with the `getTokenFrom` helper function in *controllers/shows.js*.
+[This example](/part4/token_authentication##limiting-creating-new-notes-to-logged-in-users)
+from part 4 shows taking the token from the header with the `getTokenFrom` helper function in *controllers/shows.js*.
 
 If you used the same solution, refactor taking the token to a [middleware](/part3/node_js_and_express#middleware).
-The middleware should take the token from the ***Authorization*** header and place it into the `token` field of the `request` object.
+The middleware should take the token from the ***Authorization*** header and assign it to the `token` field of the `request` object.
 
 In other words, if you register this middleware in the *app.js* file before all routes
 
@@ -547,9 +580,9 @@ const tokenExtractor = (request, response, next) => {
 };
 ```
 
-#### 4.21*: watchlist expansion, Step 9
+#### 4.21*: Watchlist expansion, Step 9
 
-***Change the delete show operation*** so that a show can be deleted only by the user who added the show.
+***Change the delete show operation*** so that a show can be deleted only by the user who added it.
 Therefore, deleting a show is possible only if the token sent with the request is the same as that of the show's recommender.
 
 If deleting a show is attempted without a token or by an invalid user, the operation should return a suitable status code.
@@ -561,27 +594,27 @@ const show = await Show.findById(...);
 ```
 
 the field `show.user` does not contain a `string`, but an `Object`.
-So if you want to compare the id of the object fetched from the database and a string id, a normal comparison operation does not work.
-The id fetched from the database must be parsed into a string first.
+So if you want to compare the id of the object fetched from the database and a string ID, a normal comparison operation does not work.
+The ID fetched from the database must be parsed into a string first.
 
 ```js
 if ( show.user.toString() === userid.toString() ) // ...
 ```
 
-#### 4.22*:  watchlist expansion, Step 10
+#### 4.22*: Watchlist expansion, Step 10
 
 Both the new show recommendation and show deletion need to find out the identity of the user who is doing the operation.
 The middleware `tokenExtractor` that we did in exercise 4.20 helps
 but still both the handlers of *post* and *delete* operations need to find out who the user holding a specific token is.
 
-Now create a new middleware `userExtractor`, that finds out the user and sets it to the request object.
-When you register the middleware in *app.js*
+Now create a new middleware called `userExtractor`, that identifies the user related to the request and attaches it to the request object.
+After registering the middleware in *app.js*:
 
 ```js
 app.use(middleware.userExtractor);
 ```
 
-the user will be set in the field `request.user`:
+the *`post`* and *`delete`* handlers should be able to access the user directly by referencing `request.user`:
 
 ```js
 showsRouter.post("/", async (request, response) => {
@@ -590,14 +623,14 @@ showsRouter.post("/", async (request, response) => {
   // ..
 });
 
-showsRouter.delete("/:id", async (request, response) => {
+showsRouter.delete("/:id", userExtractor, async (request, response) => {
   // get user from request object
   const user = request.user;
   // ..
 });
 ```
 
-Notice that it is possible to register a middleware only for a specific set of routes.
+Notice that in this case, the `userExtractor` middleware has been registered with individual routes, meaning it is only executed in certain cases.
 So instead of using `userExtractor` with all the routes,
 
 ```js
@@ -615,28 +648,24 @@ app.use("/api/login", loginRouter);
 we could register it to be only executed with path ***/api/shows*** routes:
 
 ```js
-const middleware = require("../utils/middleware");
-// ...
-
 // use the middleware only in /api/shows routes
 app.use("/api/shows", middleware.userExtractor, showsRouter); // highlight-line
 app.use("/api/users", usersRouter);
 app.use("/api/login", loginRouter);
 ```
 
-As can be seen, this happens by chaining multiple middlewares as the parameter of function `use`.
-It would also be possible to register a middleware only for a specific operation:
+This is done by chaining multiple middleware functions as parameters to the `use` function.
+In the same way, middleware can also be registered only for individual routes:
 
 ```js
-const middleware = require("../utils/middleware");
-// ...
-
 router.post("/", middleware.userExtractor, async (request, response) => {
   // ...
-};
+})
 ```
 
-#### 4.23*:  watchlist expansion, Step 11
+Make sure that fetching all shows with a GET request still works without a token.
+
+#### 4.23*: Watchlist expansion, Step 11
 
 After adding token-based authentication the tests for adding a new show broke down.
 **Fix the tests.**

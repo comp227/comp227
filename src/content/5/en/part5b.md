@@ -123,7 +123,7 @@ const App = () => {
 
 ***You'll see that there will be a warning with `LoginForm` because we did not import it.***
 Use WebStorm's context actions (hopefully using the keyboard shortcut) to select the option to *add the import statement*.
-The `App` components state now contains the boolean `loginVisible`, which defines if the login form should be shown to the user or not.
+The `App` component state now contains the boolean `loginVisible`, which defines if the login form should be shown to the user or not.
 
 The value of `loginVisible` is toggled with two buttons.
 Both buttons have their event handlers defined directly in the component:
@@ -345,10 +345,10 @@ const TaskForm = ({ createTask }) => {
 export default TaskForm
 ```
 
-> **NOTE** To make task creation work the same, we changed the application so that tasks are ***unimportant by default***.
+> **FYI** To make task creation work the same, we changed the application so that tasks are ***unimportant by default***.
 > The highlighted line above shows `important` now having the value `false`.
 
-The `newTask` state attribute and its change event handler have been moved from the `App` component to the component responsible for the task form.
+The `newTask` state variable and its change event handler have been moved from the `App` component to the component responsible for the task form.
 
 `TaskForm` has one prop left, the `createTask` function, which the form calls when a new task is created.
 
@@ -388,10 +388,10 @@ Our current implementation works; it does have one aspect that could be improved
 After a *new task is created, it would make sense to hide the new task form*.
 Currently, the form stays visible.
 There is a slight problem with hiding the form.
-*The visibility is controlled with the `visible` variable inside of the `Togglable` component*.
+*The visibility is controlled with the `visible` state variable inside of the `Togglable` component*.
 ***How can we access it outside of the component?***
 
-There are many ways to implement closing the form from the parent component,
+There are several ways to implement access to a component's functions from outside the component,
 but let's use the [**ref**](https://react.dev/learn/referencing-values-with-refs) mechanism of React, which *offers a reference to the component*.
 
 Let's make these changes to the `App` component:
@@ -416,14 +416,14 @@ const App = () => {
 The [`useRef` hook](https://react.dev/reference/react/useRef) is used to create a `taskFormRef` ref,
 that is assigned to the `Togglable` component containing the creation task form.
 The **`taskFormRef` variable acts as a reference to the component**.
-This hook ensures the same reference (*ref*) that is kept throughout re-renders of the component.
+This hook ensures that the same reference (*ref*) is kept throughout re-renders of the component.
 
 We also need to make the following changes to the `Togglable` component:
 
 ```js
-import { useState, forwardRef, useImperativeHandle } from 'react' // highlight-line
+import { useState, useImperativeHandle } from 'react' // highlight-line
 
-const Togglable = forwardRef((props, refs) => { // highlight-line
+const Togglable = (props) => { // highlight-line
   const [visible, setVisible] = useState(false)
 
   const hideWhenVisible = { display: visible ? 'none' : '' }
@@ -434,10 +434,8 @@ const Togglable = forwardRef((props, refs) => { // highlight-line
   }
 
 // highlight-start
-  useImperativeHandle(refs, () => {
-    return {
-      toggleVisibility
-    }
+  useImperativeHandle(props.ref, () => {
+    return { toggleVisibility }
   })
 // highlight-end
 
@@ -452,15 +450,12 @@ const Togglable = forwardRef((props, refs) => { // highlight-line
       </div>
     </div>
   )
-})  // highlight-line
+}
 
 export default Togglable
 ```
 
-The function that creates the component is wrapped inside of a [`forwardRef`](https://react.dev/reference/react/forwardRef) function call.
-This way the component can access the ref that is assigned to it.
-
-The component uses the [`useImperativeHandle`](https://react.dev/reference/react/useImperativeHandle) hook
+The component uses the [`useImperativeHandle` hook](https://react.dev/reference/react/useImperativeHandle)
 to make its `toggleVisibility` function available outside of the component.
 
 > **FYI:** If you add this code as is and you already have eslint configured,
@@ -585,14 +580,14 @@ It expands when the button ***Recommend New Show*** is clicked
 
 ![browser showing form with create new](../../images/5/13be.png)
 
-The form closes when a new show has been added.
+The form hides again after a now show is created or the *cancel* button is pressed.
 
 #### 5.6 Watchlist frontend, Step 6
 
 Separate the form for recommending a new show into its own component (if you have not already done so),
 and move all the states required for recommending a new show to this component.
 
-The component must work like the `TaskForm` component from this [previously covered part](/part5/props_children_and_proptypes).
+The component must work like the `TaskForm` component from this [previously covered part](/part5/props_children_and_proptypes#state-of-the-forms).
 
 #### 5.7* Watchlist frontend, Step 7
 
@@ -708,148 +703,61 @@ Show the button for deleting a recommended show ***only if the show was added by
 
 <div class="content">
 
-### PropTypes
-
-The `Togglable` component assumes that it is given the text for the button via the `buttonLabel` prop.
-If we forget to define it to the component:
-
-```js
-<Togglable> buttonLabel forgotten... </Togglable>
-```
-
-The application works, but the browser renders a button that has no label text.
-
-We would like to enforce that *when the `Togglable` component is used, the **`buttonLabel` text prop must be defined***.
-
-The expected and required props of a component can be defined with the [*prop-types* package](https://github.com/facebook/prop-types).
-Let's install the package:
-
-```shell
-npm i prop-types
-```
-
-We can define the `buttonLabel` prop as **required** for `Togglable` as shown below:
-
-```js
-import PropTypes from 'prop-types'
-// ..
-
-const Togglable = React.forwardRef((props, ref) => {
-  // ..
-})
-
-Togglable.displayName = "Togglable"
-// highlight-start
-Togglable.propTypes = {
-  buttonLabel: PropTypes.string.isRequired
-}
-// highlight-end
-```
-
-The console will display the following error message if the prop is left undefined:
-
-![console error stating buttonLabel is undefined](../../images/5/15.png)
-
-The application still works and nothing forces us to define props despite the `PropTypes` definitions.
-Mind you, *it is unprofessional to leave **any** red output in the browser console*.
-
-Let's also define `PropTypes` to the `LoginForm` component:
-
-```js
-import PropTypes from 'prop-types'
-
-const LoginForm = ({
-   handleSubmit,
-   handleUsernameChange,
-   handlePasswordChange,
-   username,
-   password
-  }) => {
-    // ...
-}
-
-LoginForm.propTypes = {
-  handleSubmit: PropTypes.func.isRequired,
-  handleUsernameChange: PropTypes.func.isRequired,
-  handlePasswordChange: PropTypes.func.isRequired,
-  username: PropTypes.string.isRequired,
-  password: PropTypes.string.isRequired
-}
-```
-
-If the type of a passed prop is wrong, e.g. if we try to define the `handleSubmit` prop as a string, then this will result in the following warning:
-
-![console error saying handleSubmit expected a function](../../images/5/16.png)
-
 ### ESlint
 
 In part 3 we configured the [ESlint](/part3/validation_and_es_lint#lint) code style tool to the backend.
 Let's take ESlint to use in the frontend as well.
 
-Vite has installed ESlint to the project by default, so all that's left for us to do is define our desired configuration in the *.eslintrc.cjs* file.
+Vite has installed ESlint to the project by default, so all that's left for us to do is define our desired configuration in the *.eslint.config.js* file.
 
-Next, we will start testing the frontend and to avoid undesired and irrelevant linter errors
-we will install the [eslint-plugin-jest](https://www.npmjs.com/package/eslint-plugin-jest) package:
-
-```bash
-npm i -D eslint-plugin-jest
-```
-
-Let's create a *.eslintrc.cjs* file with the following contents:
+Let's create a *.eslint.config.js* file with the following contents:
 
 ```js
-module.exports = {
-  root: true,
-  env: {
-    browser: true,
-    es2020: true,
-    "jest/globals": true
-  },
-  extends: [
-    'eslint:recommended',
-    'plugin:react/recommended',
-    'plugin:react/jsx-runtime',
-    'plugin:react-hooks/recommended',
-  ],
-  ignorePatterns: ['dist', '.eslintrc.cjs'],
-  parserOptions: { ecmaVersion: 'latest', sourceType: 'module' },
-  settings: { react: { version: '18.2' } },
-  plugins: ['react-refresh', 'jest'],
-  rules: {
-    "indent": [
-        "error",
-        4
-    ],
-    "linebreak-style": [
-        "error",
-        "unix"
-    ],
-    "quotes": [
-        "error",
-        "double"
-    ],
-    "semi": [
-        "error",
-        "always"
-    ],
-    "eqeqeq": "error",
-    "no-trailing-spaces": "error",
-    "object-curly-spacing": [
-        "error", "always"
-    ],
-    "arrow-spacing": [
-        "error", { "before": true, "after": true }
-    ],
-    'react-refresh/only-export-components': [
-      'warn',
-      { allowConstantExport: true },
-    ],
-    "no-console": 0,
-    "no-debugger": 0,
-    "react/react-in-jsx-scope": "off",
-    "react/prop-types": 0,
+import js from '@eslint/js'
+import globals from 'globals'
+import reactHooks from 'eslint-plugin-react-hooks'
+import reactRefresh from 'eslint-plugin-react-refresh'
+
+export default [
+  { ignores: ['dist', 'node_modules'] },
+  {
+    files: ['**/*.{js,jsx}'],
+    languageOptions: {
+      ecmaVersion: 2020,
+      globals: globals.browser,
+      parserOptions: {
+        ecmaVersion: 'latest',
+        ecmaFeatures: { jsx: true },
+        sourceType: 'module'
+      }
+    },
+    plugins: {
+      'react-hooks': reactHooks,
+      'react-refresh': reactRefresh
+    },
+    rules: {
+      ...js.configs.recommended.rules,
+      ...reactHooks.configs.recommended.rules,
+      'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
+      'react-refresh/only-export-components': [
+        'warn',
+        { allowConstantExport: true }
+      // highlight-start
+      ],
+      indent: ['error', 4],
+      'linebreak-style': ['error', 'unix'],
+      quotes: ['error', 'double'],
+      semi: ['error', 'never'],
+      eqeqeq: 'error',
+      'no-trailing-spaces': 'error',
+      'object-curly-spacing': ['error', 'always'],
+      'arrow-spacing': ['error', { before: true, after: true }],
+      'no-console': 'off',
+      'no-debugger': 'off'
+      //highlight-end
+    }
   }
-}
+]
 ```
 
 > Reminder: We may need to turn on our ESLint settings like we did in [part 3](/part3/validation_and_es_lint#configure-webstorm-with-eslint)
@@ -858,20 +766,10 @@ module.exports = {
 > You can also introduce a space anywhere in a file and then save and it should then fix all the errors.
 > We may update this with additional configurations, but for now, you can ask in discord if there are any issues.
 
-Let's also create [.eslintignore](https://eslint.org/docs/user-guide/configuring#ignoring-files-and-directories) file with the following contents to the repository root
-
-```bash
-node_modules
-dist
-.eslintrc.cjs
-```
-
-Now the directories *dist* and *node_modules* will be skipped when linting.
-
 As usual, you can perform the linting either from the command line with the command
 
 ```bash
-npm run Lint
+npm run lint
 ```
 
 or using the editor's Eslint plugin.
@@ -891,10 +789,10 @@ You can find the code for our current application in its entirety in the *part5-
 
 #### 5.12: Watchlist frontend, Step 12
 
-Define `PropTypes` for one of the components of your application, and ***Add ESlint to the project.***
+***Add ESlint to the project.***
 Define the configuration according to your liking.
 Fix all of the linter errors.
 
-Vite has installed ESlint to the project by default, so all that's left for you to do is define your desired configuration in the *.eslintrc.cjs* file.
+Vite has installed ESlint to the project by default, so all that's left for you to do is define your desired configuration in the *.eslint.config.js* file.
 
 </div>

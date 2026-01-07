@@ -32,478 +32,596 @@ This is bad for development because during coding it is beneficial to be able to
 Lastly, E2E tests can be [**flaky**](https://docs.cypress.io/guides/cloud/flaky-test-management).
 Flaky tests are undesired because they can change from passing to failing or vice-versa simply *by running the tests again, without even changing any code*.
 
-### Cypress
+Perhaps the two easiest libraries for End to End testing at the moment are [Cypress](https://www.cypress.io/) and [Playwright](https://playwright.dev/).
 
-E2E library [Cypress](https://www.cypress.io/) is the option we'll be using in this class.
-Cypress is exceptionally easy to use, and when compared to Selenium, for example, it requires a lot less hassle and headache.
-Its operating principle is radically different than most E2E testing libraries because Cypress tests are run completely within the browser.
-Other libraries run the tests in a Node process, which is connected to the browser through an API.
+From the statistics on [npmtrends.com](https://npmtrends.com/cypress-vs-playwright)
+we can see that Playwright surpassed Cypress in download numbers during 2024, and its popularity continues to grow:
 
-> **Pertinent:** While Cypress works well, we will have to make some changes to our ports in order to use Cypress.
-> Cypress uses port `3001` in its backend to run some of the tests.
-> If you recall, this is currently the port that we are using for our backend.
-> Instead of modifying Cypress's settings, let's just adjust our PORT for our backend.
-> We can do this by following these three steps.
->
-> 1. Open up the *.env* file **in your backend** and change the PORT from `3001` to `3002`.
-> 2. Open up *vite.config.js* **in your frontend**
->    and change the port listed in your *localhost*'s `target` property from *`3001`* to *`3002`*
-> 3. Ensure that your frontend and backend have restarted, otherwise stop and start them again.
-> 4. Now your backend will be on *3002* for the remainder of these exercises.
->
-> Now with the port changed, let's make some end-to-end tests using Cypress for our task application.
+![cypress vs playwright in npm trends](../../images/5/cvsp.png)
 
-We begin by installing Cypress to *the frontend* as a development dependency
+This course has been using Cypress for years.
+Now Playwright is a new addition.
+You can choose whether to complete the E2E testing part of the course with Cypress or Playwright.
+The operating principles of both libraries are very similar, so your choice is not very important.
+However, Playwright is now the preferred E2E library for the course.
+
+If your choice is Playwright, please proceed.
+If you end up using Cypress, [visit our older documentation](/en/part5/end_to_end_testing_cypress).
+
+### Playwright
+
+So [Playwright](https://playwright.dev/) is a newcomer to the End to End tests, which started to explode in popularity towards the end of 2023.
+Playwright is roughly on a par with Cypress in terms of ease of use.
+The libraries are slightly different in terms of how they work.
+Cypress is radically different from most libraries suitable for E2E testing, as Cypress tests are run entirely within the browser.
+Playwright's tests, on the other hand, are executed in the Node process, which is connected to the browser via programming interfaces.
+
+Many blogs have been written about library comparisons, e.g. [this](https://www.lambdatest.com/blog/cypress-vs-playwright/) and [this](https://www.browserstack.com/guide/playwright-vs-cypress).
+
+It is difficult to say which library is better.
+One advantage of Playwright is its browser support; Playwright supports Chrome, Firefox and Webkit-based browsers like Safari.
+Currently, Cypress includes support for all these browsers, although Webkit support is experimental and does not support all of Cypress features.
+
+Now let's explore Playwright.
+
+### Initializing tests
+
+Unlike the backend tests or unit tests done on the React front-end, End to End tests do not need to be located in the same npm project where the code is.
+Let's make a completely separate project for the E2E tests with the `npm init` command.
+Then install Playwright by running in the new project directory the command:
 
 ```js
-npm i -D cypress
+npm init playwright@latest
 ```
 
-and by adding an npm-script to run it:
+The installation script will ask a few questions, answer them as follows:
 
-```js
+![answer: javascript, tests, false, true](../../images/5/play0.png)
+
+Notice that when installing Playwright your operating system may not support all of the browsers Playwright offers and you may see an error message like below:
+
+```bash
+Webkit 18.0 (playwright build v2070) downloaded to /home/user/.cache/ms-playwright/webkit-2070
+Playwright Host validation warning: 
+╔══════════════════════════════════════════════════════╗
+║ Host system is missing dependencies to run browsers. ║
+║ Missing libraries:                                   ║
+║     libicudata.so.66                                 ║
+║     libicui18n.so.66                                 ║
+║     libicuuc.so.66                                   ║
+║     libjpeg.so.8                                     ║
+║     libwebp.so.6                                     ║
+║     libpcre.so.3                                     ║
+║     libffi.so.7                                      ║
+╚══════════════════════════════════════════════════════╝
+```
+
+If this is the case you can either specify specific browsers to test with `--project=` in your *package.json*:
+
+```json
+    "test": "playwright test --project=chromium --project=firefox",
+```
+
+or remove the entry for any problematic browsers from your *playwright.config.js* file:
+
+```json
+  projects: [
+    // ...
+    //{
+    //  name: "webkit",
+    //  use: { ...devices["Desktop Safari"] },
+    //},
+    // ...
+  ]
+```
+
+Let's define an npm script for running tests and test reports in *package.json*:
+
+```json
 {
   // ...
   "scripts": {
-    "dev": "vite --host",  // highlight-line
-    "build": "vite build",
-    "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
-    "preview": "vite preview",
-    "server": "json-server -p3001 --watch db.json",
-    "test": "jest",
-    "cypress:open": "cypress open"  // highlight-line
+    "test": "playwright test",
+    "test:report": "playwright show-report"
   },
   // ...
 }
 ```
 
-We also made a small change to the `dev` script that starts the application.
-Without the change, Cypress can not access the app.
+During installation, the following is printed to the console:
 
-Unlike the frontend's unit tests, *Cypress tests can be in the frontend or the backend repository*, or even in their separate repository.
+```text
+And check out the following files:
+  - ./tests/example.spec.js - Example end-to-end test
+  - ./tests-examples/demo-todo-app.spec.js - Demo Todo App end-to-end tests
+  - ./playwright.config.js - Playwright Test configuration
+```
 
-The tests require the tested system to be running.
-Unlike our backend integration tests, Cypress tests **do not start** the system when they are run.
+that is, the location of a few example tests for the project that the installation has created.
 
-Let's *add an npm script **to the backend's `package.json`*** which starts it in test mode, or so that `NODE_ENV` is `test`.
+Let's run the tests:
+
+```bash
+$ npm test
+
+> tasks-e2e@1.0.0 test
+> playwright test
+
+
+Running 6 tests using 5 workers
+  6 passed (3.9s)
+
+To open last HTML report run:
+
+  npx playwright show-report
+```
+
+The tests pass.
+A more detailed test report can be opened either with the command suggested by the output, or with the npm script we just defined:
+
+```bash
+npm run test:report
+```
+
+Tests can also be run via the graphical UI with the command:
+
+```bash
+npm run test -- --ui
+```
+
+Sample tests in the file tests/example.spec.js look like this:
+
+```js
+// @ts-check
+import { test, expect } from "@playwright/test";
+
+test("has title", async ({ page }) => {
+  await page.goto("https://playwright.dev/"); // highlight-line
+
+  // Expect a title "to contain" a substring.
+  await expect(page).toHaveTitle(/Playwright/);
+});
+
+test("get started link", async ({ page }) => {
+  await page.goto("https://playwright.dev/");
+
+  // Click the get started link.
+  await page.getByRole("link", { name: "Get started" }).click();
+
+  // Expects page to have a heading with the name of Installation.
+  await expect(page.getByRole("heading", { name: "Installation" })).toBeVisible();
+});
+```
+
+The first line of the test functions says that the tests are testing the page at <https://playwright.dev/>.
+
+### Testing our own code
+
+Now let's remove the sample tests and start testing our own application.
+
+Playwright tests assume that the system under test is running when the tests are executed.
+Unlike, for example, backend integration tests, Playwright tests **do not start** the system under test during testing.
+
+Let's make an npm script for the *backend*, which will enable it to be started in testing mode,
+i.e. so that `NODE_ENV` gets the value `test`.
 
 ```js
 {
   // ...
   "scripts": {
     "start": "cross-env NODE_ENV=production node index.js",
-    "dev": "cross-env NODE_ENV=development nodemon index.js",
-    "test": "cross-env NODE_ENV=test jest --verbose --runInBand --forceExit",
-    "start:test": "cross-env NODE_ENV=test node index.js", // highlight-line
-    "build:ui": "rm -rf dist && cd ../part2-tasks/ && npm run build && cp -r dist ../part3-tasks-backend",
-    "deploy": "npm run build:ui && git add . && git commit -m npm_generated_rebuild_of_the_UI && git push",
+    "dev": "cross-env NODE_ENV=development node --watch index.js",
+    "test": "cross-env NODE_ENV=test node --test",
     "lint": "eslint .",
-    "fixlint": "eslint . --fix"
+    // ...
+    "start:test": "cross-env NODE_ENV=test node --watch index.js" // highlight-line
   },
   // ...
 }
 ```
 
-> **FYI:** To get Cypress working with WSL2 one might need to do some additional configuring first.
-> These two links:
->
-> - [Official Cypress Guide](https://docs.cypress.io/guides/getting-started/installing-cypress#Windows-Subsystem-for-Linux)
-> - [Blog on GUI/Cypress](https://nickymeuleman.netlify.app/blog/gui-on-wsl2-cypress)
->
-> are great places to start.
-  
-***With the backend running via `npm run start:test`***, we can start Cypress via the frontend with the command
+Let's start the frontend and backend, and create the first test file for the application *tests/task_app.spec.js*:
 
 ```js
-npm run cypress:open
+const { test, expect } = require("@playwright/test");
+
+test("front page can be opened", async ({ page }) => {
+  await page.goto("http://localhost:5173");
+
+  const locator = page.getByText("Tasks");
+  await expect(locator).toBeVisible();
+  await expect(page.getByText("Task app, Department of Computer Science, University of the Pacific 2025")).toBeVisible();
+});
 ```
 
-When we first run Cypress, it will provide us with a guided process and show how it's the first time that we have run it.
-Once you reach the *Welcome to Cypress!* message, follow these steps:
+First, the test opens the application with the [method `page.goto`](https://playwright.dev/docs/writing-tests#navigation).
+After this, it uses [`page.getByText`](https://playwright.dev/docs/api/class-page#page-get-by-text)
+to get a [*`locator`*](https://playwright.dev/docs/locators) that corresponds to the element where the text *`Tasks`* is found.
 
-1. You may need to click on any firewall messages and watch or skip a video before getting to the Welcome to Cypress!* screen.
-2. Once at *Welcome to Cypress!*, click the ***E2E Testing*** option
-3. click ***Continue*** on the *Configuration Files* Screen
-4. click ***Start E2E Testing in Chrome*** on the *Choose a Browser* Screen
-5. select ***Create new spec*** on *Create Your First Spec* Screen
-6. Replace the spec filename from *spec.cy.js* to ***task_app.cy.js*** and click ***Create spec***
-    - The full path should be *cypress\e2e\task_app.cy.js*
-7. Close the next dialog box on the *spec successfully added screen*
-8. Now switch back to WebStorm and open the project explorer.
+The [method `toBeVisible`](https://playwright.dev/docs/api/class-locatorassertions#locator-assertions-to-be-visible)
+ensures that the element corresponding to the locator is visible at the page.
 
-Notice how in WebStorm there is now a *cypress/e2e* directory, along with our file *task_app.cy.js*.
-Locate it and open it in WebStorm and replace the contents with the code below.
+The second check is done without using the auxiliary variable.
+
+The test fails because an old year ended up in the test.
+Playwright opens the test report in the browser and it becomes clear that Playwright has actually performed the tests with three different browsers:
+Chrome, Firefox and Webkit, i.e. the browser engine used by Safari:
+
+![test report showing the test failing in three different browsers](../../images/5/play2.png)
+
+By clicking on the report of one of the browsers, we can see a more detailed error message:
+
+![test error message](../../images/5/play3a.png)
+
+In the big picture, it is of course a very good thing that the testing takes place with all three commonly used browser engines,
+but this is slow, and when developing the tests it is probably best to carry them out mainly with only one browser.
+You can define the browser engine to be used with the command line parameter:
+
+```bash
+npm test -- --project chromium
+```
+
+Now let's fix the test with the correct year and let's add a `describe` block to the tests:
 
 ```js
-describe("Task app", function() {
-  it("front page can be opened", function() {
-    cy.visit("http://localhost:5173");
-    cy.contains("Tasks");
-    cy.contains("Task app, Department of Computer Science, University of the Pacific");
+const { test, describe, expect } = require("@playwright/test");
+
+describe("Task app", () => {  // highlight-line
+  test("front page can be opened", async ({ page }) => {
+    await page.goto("http://localhost:5173");
+
+    const locator = page.getByText("Tasks");
+    await expect(locator).toBeVisible();
+    await expect(page.getByText("Task app, Department of Computer Science, University of the Pacific 2025")).toBeVisible();
   });
 });
 ```
 
-> **FYI:** You may need to clear some of the linting issues with the indentation in the files if you are copying, through again,
-> I recommend that you try to type the statements out instead.
-> We will cover how to address the cy linter error shortly.
+Before we move on, let's break the tests one more time.
+We notice that the execution of the tests is quite fast when they pass, but much slower if the they do not pass.
+The reason for this is that Playwright's policy is to wait for searched elements until [they are rendered and ready for action](https://playwright.dev/docs/actionability).
+If the element is not found, a `TimeoutError` is raised and the test fails.
+Playwright waits for elements by default for 5 or 30 seconds [depending on the functions used in testing](https://playwright.dev/docs/test-timeouts#introduction).
 
-Now, switch back to the Cypress chrome browser and click on our *task_app* file.
-We start the test from the opened window:
-
-Running the test shows how the application behaves as the test is run:
-
-> **FYI:** you may need to restart Cypress if you run into any issues.
-
-Running the test shows how the application behaves as the test is run:
-
-![cypress showing automation of task test](../../images/5/32x.png)
-
-The structure of the test should look familiar.
-They use `describe` blocks to group different test cases, just like Jest.
-The test cases have been defined with the `it` method.
-Cypress borrowed these parts from the [Mocha](https://mochajs.org/) testing library it uses under the hood.
-
-[`cy.visit`](https://docs.cypress.io/api/commands/visit.html) and [`cy.contains`](https://docs.cypress.io/api/commands/contains.html)
-are Cypress commands, and their purpose is quite obvious.
-[`cy.visit`](https://docs.cypress.io/api/commands/visit.html) opens the web address given to it as a parameter in the browser used by the test.
-[`cy.contains`](https://docs.cypress.io/api/commands/contains.html) searches for the string it received as a parameter from the page.
-
-We could have declared the test using an arrow function
+When developing tests, it may be wiser to reduce the waiting time to a few seconds.
+According to the [documentation](https://playwright.dev/docs/test-timeouts), this can be done by changing the file *playwright.config.js* as follows:
 
 ```js
-describe("Task app", () => { // highlight-line
-  it("front page can be opened", () => { // highlight-line
-    cy.visit("http://localhost:5173");
-    cy.contains("Tasks");
-    cy.contains("Task app, Department of Computer Science, University of the Pacific");
-  });
+export default defineConfig({
+  // ...
+  timeout: 3000, // highlight-line
+  fullyParallel: false, // highlight-line
+  workers: 1, // highlight-line
+  // ...
 });
 ```
 
-However, Mocha [recommends](https://mochajs.org/#arrow-functions) that **arrow functions are not used**,
-because they might cause some issues in certain situations.
+We also made two other changes to the file, specifying that all tests [be executed one at a time](https://playwright.dev/docs/test-parallel).
+With the default configuration, the execution happens in parallel, and since our tests use a database, parallel execution causes problems.
 
-If `cy.contains` does not find the text it is searching for, the test does not pass.
-So if we extend our test like so
+### Writing on the form
 
-```js
-describe("Task app", function() {
-  it("front page can be opened",  function() {
-    cy.visit("http://localhost:5173");
-    cy.contains("Tasks");
-    cy.contains("Task app, Department of Computer Science, University of the Pacific");
-  });
+Let's write a new test that tries to log into the application.
+Let's assume that a user is stored in the database, with username `powercat` and password `tigers`.
 
-// highlight-start
-  it("front page contains random text", function() {
-    cy.visit("http://localhost:5173");
-    cy.contains("this app sus");
-  });
-// highlight-end
-});
-```
-
-the test fails
-
-![cypress showing failure expecting to find wtf but no](../../images/5/33x.png)
-
-Let's ***remove the failing code from the test***.
-
-> If you are following along as you are working through this text, you may have noticed that the variable `cy` in our tests gives us an error:
->
-> ![vscode screenshot showing cy is not defined](../../images/5/30ea.png)
->
-> We can get rid of those errors by installing [eslint-plugin-cypress](https://github.com/cypress-io/eslint-plugin-cypress) as a development dependency
->
-> ```js
-> npm i -D eslint-plugin-cypress
-> ```
->
-> and changing the configuration in *.eslintrc.cjs* like so:
->
-> ```js
-> module.exports = {
->     "env": {
->         "browser": true,
->         "es6": true,
->         "jest/globals": true,
->         "cypress/globals": true // highlight-line
->     },
->     "extends": [ 
->       // ...
->     ],
->     "parserOptions": {
->       // ...
->     },
->     "plugins": [
->         "react", "jest", "cypress" // highlight-line
->     ],
->     "rules": {
->       // ...
->     }
-> }
-> ```
-
-### Writing to a form
-
-Let's extend our tests so that the test tries to login to our application.
-We assume our backend contains a user with the username `powercat` and password `tigers`.
-
-The test begins by opening the login form.
+Let's start by opening the login form.
 
 ```js
-describe("Task app",  function() {
+describe("Task app", () => {
   // ...
 
-  it("login form can be opened", function() {
-    cy.visit("http://localhost:5173");
-    cy.contains("login").click();
+  test("user can log in", async ({ page }) => {
+    await page.goto("http://localhost:5173");
+
+    await page.getByRole("button", { name: "login" }).click();
   });
 });
 ```
 
-The test
+The test first uses the [method `page.getByRole`](https://playwright.dev/docs/api/class-page#page-get-by-role) to retrieve the button based on its text.
+The method returns the [`Locator`](https://playwright.dev/docs/api/class-locator) corresponding to the `Button` element.
+Pressing the button is performed using the Locator [method `click`](https://playwright.dev/docs/api/class-locator#locator-click).
 
-1. *searches for the "login" button* by its text
-2. *clicks the button* with the command [`cy.click`](https://docs.cypress.io/api/commands/click.html#Syntax).
+When developing tests, you could use Playwright's [UI mode](https://playwright.dev/docs/test-ui-mode), i.e. the user interface version.
+Let's start the tests in UI mode as follows:
 
-Since both of our tests start by opening the page *<http://localhost:5173>*, we should
-separate that shared part into a `beforeEach` block run before each test:
-
-```js
-describe("Task app", function() {
-  // highlight-start
-  beforeEach(function() {
-    cy.visit("http://localhost:5173");
-  });
-  // highlight-end
-
-  it("front page can be opened", function() {
-    cy.contains("Tasks");
-    cy.contains("Task app, Department of Computer Science, University of the Pacific");
-  });
-
-  it("login form can be opened", function() {
-    cy.contains("login").click();
-  });
-});
+```bash
+npm test -- --ui
 ```
 
-The login field contains two *input* fields, which the test should write into.
+We now see that the test finds the button
 
-The [`cy.get`](https://docs.cypress.io/api/commands/get.html#Syntax) command allows for searching elements by CSS selectors.
+![playwright UI rendering the tasks app while testing it](../../images/5/play4.png)
 
-We can access the first and the last input field on the page,
-and write to them with the command [`cy.type`](https://docs.cypress.io/api/commands/type.html#Syntax) like so:
+After clicking, the form will appear
 
-```js
-it("user can login", function () {
-  cy.contains("login").click();
-  cy.get("input:first").type("root");
-  cy.get("input:last").type("tigers");
-});  
-```
+![playwright UI rendering the login form of the tasks app](../../images/5/play5.png)
 
-The test works, though our test is brittle.
-If we later add more input fields, the test will break because it expects the fields *username* and *password* to be the first and the last inputs on the page.
-
-It would be better to give our inputs unique *ids* and use those to find them.
-Let's modify our login form:
+When the form is opened, the test should look for the text fields and enter the username and password in them.
+Let's make the first attempt using the [method `page.getByRole`](https://playwright.dev/docs/api/class-page#page-get-by-role):
 
 ```js
-const LoginForm = ({ ... }); => {
-  return (
-    <div>
-      <h2>Login</h2>
-      <form onSubmit={handleSubmit}>
-        <div>
-          username
-          <input
-            id='username'  // highlight-line
-            value={username}
-            onChange={handleUsernameChange}
-          />
-        </div>
-        <div>
-          password
-          <input
-            id='password' // highlight-line
-            type="password"
-            value={password}
-            onChange={handlePasswordChange}
-          />
-        </div>
-        <button id="login-button" type="submit"> // highlight-line
-          login
-        </button>
-      </form>
-    </div>
-  )
-}
-```
+describe("Task app", () => {
+  // ...
 
-We also added an id to our submit button so we can access it in our tests.
+  test("user can log in", async ({ page }) => {
+    await page.goto("http://localhost:5173");
 
-The test becomes:
-
-```js
-describe("Task app",  function() {
-  // ..
-  it("user can login", function() {
-    cy.contains("login").click();
-    cy.get("#username").type("root");  // highlight-line    
-    cy.get("#password").type("tigers");  // highlight-line
-    cy.get("#login-button").click();  // highlight-line
-
-    cy.contains("Superuser logged in"); // highlight-line
+    await page.getByRole("button", { name: "login" }).click();
+    await page.getByRole("textbox").fill("powercat");  // highlight-line
   });
 });
 ```
 
-The last row ensures that the login was successful.
+This results in an error:
 
-Notice that the CSS [**id selector**](https://developer.mozilla.org/en-US/docs/Web/CSS/ID_selectors) is #,
-so if we want to search for an element with the id `username` the CSS selector is `#username`.
-
-### Some things to remember
-
-The test first clicks the button opening the login form:
-
-```js
-cy.contains("login").click();
+```bash
+Error: locator.fill: Error: strict mode violation: getByRole("textbox") resolved to 2 elements:
+  1) <input value=""/> aka locator("div").filter({ hasText: /^username$/ }).getByRole("textbox")
+  2) <input value="" type="password"/> aka locator("input[type="password"]")
 ```
 
-When the form has been filled, the form is submitted by clicking the submit button:
+The problem now is that `getByRole` finds two text fields, and calling the [`fill` method](https://playwright.dev/docs/api/class-locator#locator-fill) fails,
+because it assumes that there is only one text field found.
+One way around the problem is to use the methods [`first`](https://playwright.dev/docs/api/class-locator#locator-first) and [`last`](https://playwright.dev/docs/api/class-locator#locator-last):
 
 ```js
-cy.get("#login-button").click();
+describe("Task app", () => {
+  // ...
+
+  test("user can log in", async ({ page }) => {
+    await page.goto("http://localhost:5173");
+
+    await page.getByRole("button", { name: "login" }).click();
+    // highlight-start
+    await page.getByRole("textbox").first().fill("powercat");
+    await page.getByRole("textbox").last().fill("tigers");
+    await page.getByRole("button", { name: "login" }).click();
+  
+    await expect(page.getByText("Powercat logged in")).toBeVisible();
+    // highlight-end
+  });
+});
 ```
 
-Both buttons have the text ***login***, but they are two separate buttons.
-While both buttons are in the application's DOM the whole time, only one is visible at a time because of the `display:none` styling on one of them.
+After writing in the text fields, the test presses the `login` button and checks that the application renders the logged-in user's information on the screen.
 
-If we search for a button by its text, [cy.contains](https://docs.cypress.io/api/commands/contains.html#Syntax) will return the first of them, or the one opening the login form.
-This will happen even if the button is not visible.
-To avoid name conflicts, we gave the submit button the id `login-button` we can use to access it.
-
-Please note that passing the test at this stage *requires that in the backend test database*, there exists a user with the username *`root`* and password *`tigers`*.
-Create a user if needed!
-
-### Testing new task form
-
-Let's next add test methods to test the "new task" functionality:
+If there were more than two text fields, using the methods `first` and `last` would not be enough.
+One possibility would be to use the [`all` method](https://playwright.dev/docs/api/class-locator#locator-all), which turns the found locators into an array that can be indexed:
 
 ```js
-describe("Task app", function() {
-  // ..
-  // highlight-start
-  describe("when logged in", function() {
-    beforeEach(function() {
-      cy.contains("login").click();
-      cy.get("input:first").type("root");
-      cy.get("input:last").type("tigers");
-      cy.get("#login-button").click();
-    });
+describe("Task app", () => {
+  // ...
+  test("user can log in", async ({ page }) => {
+    await page.goto("http://localhost:5173");
+
+    await page.getByRole("button", { name: "login" }).click();
+    // highlight-start
+    const textboxes = await page.getByRole("textbox").all();
+
+    await textboxes[0].fill("test");
+    await textboxes[1].fill("pacific");
     // highlight-end
 
-    // highlight-start
-    it("a new task can be created", function() {
-      cy.contains("new task").click();
-      cy.get("input").type("a task created by cypress");
-      cy.contains("save").click();
-
-      cy.contains("a task created by cypress");
-    });
-  });
-  // highlight-end
+    await page.getByRole("button", { name: "login" }).click();
+  
+    await expect(page.getByText("Pacific Tests logged in")).toBeVisible();
+  });  
 });
 ```
 
-Our new test ***has been defined in its own `describe` block***.
-Only logged-in users can create new tasks, so we added logging in to the application to a `beforeEach` block.
+Both this and the previous version of the test work.
+However, both are problematic to the extent that if the registration form is changed, the tests may break, as they rely on the fields to be on the page in a certain order.
 
-The test trusts that when creating a new task the page contains only one input, so it searches for it like so:
+If an element is difficult to locate in tests, you can assign it a separate `test-id` attribute and find the element in tests using the [`getByTestId` method](https://playwright.dev/docs/api/class-page#page-get-by-test-id).
+
+Let's now take advantage of the existing elements of the login form.
+The input fields of the login form have been assigned unique *labels*:
 
 ```js
-cy.get("input");
+// ...
+<form onSubmit={handleSubmit}>
+  <div>
+    <label> // highlight-line
+      username // highlight-line
+      <input
+        type="text"
+        value={username}
+        onChange={handleUsernameChange}
+      />
+    </label> // highlight-line
+  </div>
+  <div>
+    <label> // highlight-line
+      password // highlight-line
+      <input
+        type="password"
+        value={password}
+        onChange={handlePasswordChange}
+      />
+    </label> // highlight-line
+  </div>
+  <button type="submit">login</button>
+</form>
+// ...
 ```
 
-> If you were following along closely however, our page contained [two inputs from the last part](/part5/testing_react_apps#about-finding-the-elements)),
-which breaks our tests.
->
-> ![cypress error - cy.type can only be called on a single element](../../images/5/31x.png)
->
-> Due to this problem, it would again be better to give the input an *id* and search for the element by its id in the test.
-We will leave it to you to remove the second input and to provide the text an input id like *`new-task`*,
-though because that would mean that currently we would make changes to our backend
-I will wait to make these changes to our form until we reach the [next section](#controlling-the-state-of-the-database-on-the-frontend).
-
-The structure of the tests looks like so:
+Input fields can and should be located in tests using *labels* with the [`getByLabel` method](https://playwright.dev/docs/api/class-page#page-get-by-label):
 
 ```js
-describe("Task app", function() {
+describe("Task app", () => {
   // ...
 
-  it("user can login", function() {
-    cy.contains("login").click();
-    cy.get("#username").type("root");
-    cy.get("#password").type("tigers");
-    cy.get("#login-button").click();
+  test("user can log in", async ({ page }) => {
+    await page.goto("http://localhost:5173");
 
-    cy.contains("Superuser logged in");
+    await page.getByRole("button", { name: "login" }).click();
+    await page.getByLabel("username").fill("root"); // highlight-line
+    await page.getByLabel("password").fill("tigers");  // highlight-line
+  
+    await page.getByRole("button", { name: "login" }).click(); 
+  
+    await expect(page.getByText("Superuser logged in")).toBeVisible();
+  });
+});
+```
+
+When locating elements, it makes sense to aim to utilize the content visible to the user in the interface,
+as this best simulates how a user would actually find the desired input field while navigating the application.
+
+Notice that passing the test at this stage requires that there is a user in the *test* database of the backend with username *`root`* and password *`tigers`*.
+Create a user if needed!
+
+### Test Initialization
+
+Since both tests start in the same way, i.e. by opening the page <http://localhost:5173>,
+it is recommended to isolate the common part in the `beforeEach` block that is executed before each test:
+
+```js
+const { test, describe, expect, beforeEach } = require("@playwright/test")
+
+describe("Task app", () => {
+  // highlight-start
+  beforeEach(async ({ page }) => {
+    await page.goto("http://localhost:5173");
+  });
+  // highlight-end
+
+  test("front page can be opened", async ({ page }) => {
+    const locator = page.getByText("Tasks");
+    await expect(locator).toBeVisible();
+    await expect(page.getByText("Task app, Department of Computer Science, University of the Pacific 2025")).toBeVisible();
   });
 
-  describe("when logged in", function() {
-    beforeEach(function() {
-      cy.contains("login").click();
-      cy.get("#username").type("root");
-      cy.get("#password").type("tigers");
-      cy.get("#login-button").click();
+  test("user can log in", async ({ page }) => {
+    await page.getByRole("button", { name: "login" }).click();
+    await page.getByLabel("username").fill("root");
+    await page.getByLabel("password").fill("tigers");
+    await page.getByRole("button", { name: "login" }).click();
+    await expect(page.getByText("Superuser logged in")).toBeVisible();
+  });
+});
+```
+
+### Testing task creation
+
+Next, let's create a test that adds a new task to the application:
+
+```js
+const { test, describe, expect, beforeEach } = require("@playwright/test");
+
+describe("Task app", () => {
+  // ...
+
+  describe("when logged in", () => {
+    beforeEach(async ({ page }) => {
+      await page.getByRole("button", { name: "login" }).click();
+      await page.getByLabel("username").fill("root");
+      await page.getByLabel("password").fill("tigers");
+      await page.getByRole("button", { name: "login" }).click();
     });
 
-    it("a new task can be created", function() {
-      // ...
+    test("a new task can be created", async ({ page }) => {
+      await page.getByRole("button", { name: "new task" }).click();
+      await page.getByRole("textbox").fill("a task created by playwright");
+      await page.getByRole("button", { name: "save" }).click();
+      await expect(page.getByText("a task created by playwright")).toBeVisible();
+    });
+  });  
+});
+```
+
+The test is defined in its own `describe` block.
+Creating a task requires that the user is logged in, which is handled in the `beforeEach` block.
+
+The test trusts that when creating a new task, there is only one input field on the page, so it searches for it as follows:
+
+```js
+page.getByRole("textbox");
+```
+
+If there were more fields, the test would break.
+Because of this, it could be better to add a *test-id* to the form input and search for it in the test based on this id.
+
+> **FYI:** the test will only pass the first time.
+> The reason for this is that its expectation
+>
+> ```js
+> await expect(page.getByText("a task created by playwright")).toBeVisible();
+> ```
+>
+> causes problems when the same task is created in the application more than once.
+> The problem will be solved in the next section.
+
+The structure of the tests looks like this:
+
+```js
+const { test, describe, expect, beforeEach } = require("@playwright/test");
+
+describe("Task app", () => {
+  // ....
+
+  test("user can log in", async ({ page }) => {
+    await page.getByRole("button", { name: "login" }).click();
+    await page.getByLabel("username").fill("root");
+    await page.getByLabel("password").fill("tigers");
+    await page.getByRole("button", { name: "login" }).click();
+    await expect(page.getByText("Superuser logged in")).toBeVisible();
+  });
+
+  describe("when logged in", () => {
+    beforeEach(async ({ page }) => {
+      await page.getByRole("button", { name: "login" }).click();
+      await page.getByLabel("username").fill("root");
+      await page.getByLabel("password").fill("tigers");
+      await page.getByRole("button", { name: "login" }).click();
+    });
+
+    test("a new task can be created", async ({ page }) => {
+      await page.getByRole("button", { name: "new task" }).click();
+      await page.getByRole("textbox").fill("a task created by playwright");
+      await page.getByRole("button", { name: "save" }).click();
+      await expect(page.getByText("a task created by playwright")).toBeVisible();
     });
   });
 });
 ```
 
-Cypress runs the tests in the order they are in the code.
-So first it runs `user can login`, where the user logs in.
-Then cypress will run `a new task can be created` for which a `beforeEach` block logs in as well.
-Why do this? Isn't the user logged in after the first test?
-No, because ***each*** test starts from zero as far as the browser is concerned.
-All changes to the browser's state are reversed after each test.
+Since we have prevented the tests from running in parallel, Playwright runs the tests in the order they appear in the test code.
+The first test, ***user can log in***, checks whether the user *`root`* can login to the application.
+Then, the test ***a new task can be created*** gets executed, which also performs a login (*shown in the `beforeEach` block*).
+
+> ***Pertinent:*** Why do we login again, *isn't the user already logged in because of the first test*?
+> No, because the execution of each test starts from the browser's **zero state**, *all changes made to the browser's state by the previous tests are reset*.
 
 ### Controlling the state of the database
 
 If the tests need to be able to modify the server's database, the situation immediately becomes more complicated.
-Ideally, the server's database should be the same each time we run the tests, so our tests can be reliably and easily repeatable.
+Ideally, the *server's database should be the same each time we run the tests*, so our tests can be reliably and easily repeatable.
 
 As with unit and integration tests, with E2E tests it is best to empty the database and possibly format it before the tests are run.
 The challenge with E2E tests is that they do not have access to the database.
 
-The solution is to create API endpoints for the backend tests.
+The solution is to ***create API endpoints for the backend tests***.
 We can empty the database using these endpoints.
 Let's create a new **router** for the tests in *controllers/testing.js*.
 
 ```js
-const testingRouter = require("express").Router()
+const router = require("express").Router();
 const Task = require("../models/task");
 const User = require("../models/user");
 
-testingRouter.post("/reset", async (request, response) => {
+router.post("/reset", async (request, response) => {
   await Task.deleteMany({});
   await User.deleteMany({});
 
   response.status(204).end();
 });
 
-module.exports = testingRouter;
+module.exports = router
 ```
 
-and add it to the backend only *if the application is run in test-mode*:
+Now, let's add this router to the backend only *if the application is run in test-mode*:
 
 ```js
 // ...
@@ -513,7 +631,7 @@ app.use("/api/users", usersRouter);
 app.use("/api/tasks", tasksRouter);
 
 // highlight-start
-if (process.env.NODE_ENV === 'test"); {
+if (process.env.NODE_ENV === "test"); {
   const testingRouter = require("./controllers/testing");
   app.use("/api/testing", testingRouter);
 }
@@ -525,389 +643,341 @@ app.use(middleware.errorHandler);
 module.exports = app
 ```
 
-After the changes, an HTTP POST request to the ***/api/testing/reset*** endpoint empties the database.
+After the changes, *an HTTP POST request to the **/api/testing/reset** endpoint empties the database*.
 Make sure your backend is running in test mode by starting it with this command (previously configured in the *package.json* file):
 
-```js
+```bash
   npm run start:test
 ```
 
-The modified backend code can be found on the [GitHub](https://github.com/comp227/part3-tasks-backend/tree/part5-9) branch *part5-9*.
+The modified backend code can be found on the [GitHub](https://github.com/comp227/tasks-e2e/tree/part5-1) branch *part5-1*.
 
 #### Controlling the state of the database on the frontend
 
 Next, we will change the `beforeEach` block so that it empties the server's database before tests are run.
 
-Currently, it is not possible to add new users through the frontend's UI, so we add a new user to the backend from the beforeEach block.
-While it may be a matter of preference, ***I'm going to make a different test user entirely*** (called *Pacific Tests*),
-which means that I'll also **change my tests slightly** to login with the new user.
-If you want to minimize your changes, just change our `Pacific Tests` user back to the same details as the `Superuser` below.
+Currently, it is not possible to add new users through the frontend's UI, so we add a new user to the backend from the `beforeEach` block.
+While it may be a matter of preference, ***I"m going to make a different test user entirely*** (called *Pacific Tests*),
+which means that I"ll also **change my tests slightly** to login with the new user.
+If you want to minimize your changes, just change our `Pacific Tests` user back to the previous details of our previous user in the code below.
 
 ```js
-describe("Task app", function() {
-   beforeEach(function() {
-    // highlight-start
-    cy.request("POST", 'http://localhost:3001/api/testing/reset");
-    const user = {
-      name: 'Pacific Tests",
-      username: 'test",
-      password: 'pacific'
-    }
-    cy.request("POST", 'http://localhost:3001/api/users/", user) 
-    // highlight-end
-    cy.visit("http://localhost:5173");
+describe("Task app", () => {
+  beforeEach(async ({ page, request }) => {
+    await request.post("http://localhost:3001/api/testing/reset");
+    await request.post("http://localhost:3001/api/users", {
+      data: {
+        name: "Pacific Tests",
+        username: "test",
+        password: "pacific"
+      }
+    });
+
+    await page.goto("http://localhost:5173")
   });
   
-  it("front page can be opened", function() {
+  test("front page can be opened",  () => {
     // ...
   });
 
-  it("user can login", function() {
+  test("user can login", () => {
     // ...
   });
 
-  describe("when logged in", function() {
+  describe("when logged in", () => {
     // ...
   });
 });
 ```
 
-During the formatting, the test does HTTP requests to the backend with [`cy.request`](https://docs.cypress.io/api/commands/request.html).
+During initialization, the test makes HTTP requests to the backend with the [method `post`](https://playwright.dev/docs/api/class-apirequestcontext#api-request-context-post)
+of the parameter `request`.
 
-Unlike earlier, now the testing starts with the backend in the same state every time.
-The backend will contain one user and no tasks.
+> Unlike before, now the testing of the backend *always starts from the same state*, i.e. there is one user and no tasks in the database.
 
-Let's add one more test for checking that we can change the importance of tasks.
-[In part 5b](/part5/props_children_and_proptypes/) we changed the frontend so that a new task has the value `false`, instead of randomly selecting it to be `true` or `false`.
-If we would have left it to be randomly set, then that would leave to a flaky test.
+Let's make a **test that checks that the importance of the tasks can be changed**.
+There are a few different approaches to taking the test.
 
-```js
-const TaskForm = ({ createTask }); => {
-  // ...
-
-  const addTask = (event) => {
-    event.preventDefault()
-    createTask({
-      content: newTask,
-      important: false // highlight-line
-    });
-
-    setNewTask("");
-  }
-  // ...
-} 
-```
-
-Back in our tests, we first search for a task and click its ***make important*** button.
-Then we check that the task now contains a ***make not important*** button.
-
-> Notice that at this point I am now using our new id that we were [changing previously](#testing-new-task-form), `#new-task`!
+In the following, we first look for a task and click on its button that has text ***make not important***.
+After this, we check that the task contains the button with ***make important***.
 
 ```js
-describe("Task app", function() {
+describe("Task app", () => {
   // ...
 
-  describe("when logged in", function() {
+  describe("when logged in", () => {
     // ...
 
-    describe("and a task exists", function () {
-      beforeEach(function () {
-        cy.contains("new task").click();
-        cy.get("#new-task").type("another task cypress");
-        cy.contains("save").click();
+    // highlight-start
+    describe("and a task exists", () => {
+      beforeEach(async ({ page }) => {
+        await page.getByRole("button", { name: "new task" }).click();
+        await page.getByRole("textbox").fill("a test task by playwright");
+        await page.getByRole("button", { name: "save" }).click();
+      })
+  
+      test("importance can be changed", async ({ page }) => {
+        await page.getByRole("button", { name: "make not important" }).click();
+        await expect(page.getByText("make important")).toBeVisible();
       });
-
-      it("it can be made important", function () {
-        cy.contains("another task cypress")
-          .contains("make important")
-          .click();
-
-        cy.contains("another task cypress")
-          .contains("make not important");
-      });
+    // highlight-end
     });
   });
 });
 ```
 
-The first command searches for a component containing the text `another task cypress`, and then for a ***make important*** button within it.
-It then clicks the button.
+This means that for our test `*importance can be changed*`, we execute the commands in the `beforeEach` block where playwright:
 
-The second command checks that the text on the button has changed to ***make not important***.
+1. Clicks on a button that has the name *`new task`*
+2. Fills the textbox with the text ***a test task by playwright*** and
+3. inside it the button ***make not important*** and clicks on it.
 
-The tests and the current frontend code can be found on the [GitHub](https://github.com/comp227/part2-tasks/tree/part5-9) branch *part5-9*.
+Before we start executing the test.
+This means that by the time that we sarch for make not important, we are clicking the importance of the task, ***a test task by playwright***,
+and ensure that the text of that for the button on that task has changed to ***make important***.
 
-### Failed login test
+### Test for failed login
 
-Let's make a test to ensure that a login attempt fails if the password is wrong.
+Now let's do a test that ensures that the login attempt fails if the password is wrong.
 
-Cypress will run all tests each time by default, and as the number of tests increases, it starts to become quite time-consuming.
-When developing a new test or when debugging a broken test,
-*we can define the test with `it.only` instead of `it`*, so that Cypress will only run the required test.
-When the test is working, we can remove `.only`.
-
-First version of our tests is as follows:
+The first version of the test looks like this:
 
 ```js
-describe("Task app", function() {
+describe("Task app", () => {
   // ...
 
-  it.only("login fails with wrong password", function() {
-    cy.contains("login").click();
-    cy.get("#username").type("root");
-    cy.get("#password").type("wrong");
-    cy.get("#login-button").click();
+  test("login fails with wrong password", async ({ page }) => {
+    await page.getByRole("button", { name: "login" }).click();
+    await page.getByLabel("username").fill("test");
+    await page.getByLabel("password").fill("wrong");
+    await page.getByRole("button", { name: "login" }).click();
 
-    cy.contains("Wrong credentials");
+    await expect(page.getByText("wrong credentials")).toBeVisible();
   });
 
   // ...
-)}
+});
 ```
 
-The test uses [`cy.contains`](https://docs.cypress.io/api/commands/contains.html#Syntax) to ensure that the application prints an error message.
+The test verifies with the [method `page.getByText`](https://playwright.dev/docs/api/class-page#page-get-by-text) that the application prints an error message.
 
-The application renders the error message to a component with the CSS class `error`:
+The application renders the error message to an element containing the CSS class `error`:
 
 ```js
 const Notification = ({ message }); => {
   if (message === null) {
-    return null
+    return null;
   }
 
   return (
     <div className="error"> // highlight-line
       {message}
     </div>
-  )
-}
+  );
+};
 ```
 
-The test could also ensure that the error message renders to the correct component, the component with the CSS class *`error`*:
+We could refine the test to ensure that the error message is printed exactly in the right place, i.e. in the element containing the CSS class `error`:
 
 ```js
-it("login fails with wrong password", function() {
+test("login fails with wrong password", async ({ page }) => {
   // ...
 
-  cy.get(".error").contains("Wrong credentials"); // highlight-line
+  const errorDiv = page.locator(".error"); // highlight-line
+  await expect(errorDiv).toContainText("wrong credentials");
 });
 ```
 
-First, we use [`cy.get`](https://docs.cypress.io/api/commands/get.html#Syntax) to search for a component with the CSS class `error`.
-Then we check that the error message can be found from this component.
-Notice that [CSS class selectors](https://developer.mozilla.org/en-US/docs/Web/CSS/Class_selectors)
-start with a period, so the selector for the class `error` is **`.error`**.
+So the test uses the [`page.locator` method](https://playwright.dev/docs/api/class-page#page-locator) to find the component containing the CSS class `error` and stores it in a variable.
+The correctness of the text associated with the component can be verified with the expectation [`toContainText`](https://playwright.dev/docs/api/class-locatorassertions#locator-assertions-to-contain-text).
+Notice that the [CSS class selector](https://developer.mozilla.org/en-US/docs/Web/CSS/Class_selectors) starts with a dot, so the `error` class selector is *`.error`*.
 
-We could do the same using the [`should`](https://docs.cypress.io/api/commands/should.html) syntax:
+It is also possible to test the application's CSS styles with matcher [`toHaveCSS`](https://playwright.dev/docs/api/class-locatorassertions#locator-assertions-to-have-css).
+For example, we can make sure that the color of the error message is red, and that there is a border around it:
 
 ```js
-it("login fails with wrong password", function() {
+test("login fails with wrong password", async ({ page }) => {
   // ...
 
-  cy.get(".error").should("contain", 'Wrong credentials"); // highlight-line
+  const errorDiv = page.locator(".error");
+  await expect(errorDiv).toContainText("wrong credentials");
+  await expect(errorDiv).toHaveCSS("border-style", "solid"); // highlight-line
+  await expect(errorDiv).toHaveCSS("color", "rgb(255, 0, 0)"); // highlight-line
 });
 ```
 
-Using `should` is a bit trickier than using `contains`, but it allows for more diverse tests than `contains` which works based on text content only.
+Colors must be defined to Playwright as [RGB](https://rgbcolorcode.com/color/red) codes.
 
-You *should* (pun intended) check this [list of the most common assertions](https://docs.cypress.io/guides/references/assertions.html#Common-Assertions) that can be used with `should`.
-
-We can, for example, make sure that the error message is red and it has a border:
+Let's finalize this incorrect login test by ensuring that the application **does not render the text describing a successful login**, *`"Pacific Tests logged in"`*:
 
 ```js
-it("login fails with wrong password", function() {
-  // ...
+test("login fails with wrong password", async ({ page }) =>{
+  await page.getByRole("button", { name: "login" }).click();
+  await page.getByLabel("username").fill("root");
+  await page.getByLabel("password").fill("wrong");
+  await page.getByRole("button", { name: "login" }).click();
 
-  cy.get(".error").should("contain", 'wrong credentials"); 
-  cy.get(".error").should("have.css", 'background-color", 'rgb(156, 43, 46)");
-  cy.get(".error").should("have.css", 'border-style", 'solid");
+  const errorDiv = page.locator(".error");
+  await expect(errorDiv).toContainText("wrong credentials");
+  await expect(errorDiv).toHaveCSS("border-style", "solid");
+  await expect(errorDiv).toHaveCSS("color", "rgb(255, 0, 0)");
+
+  await expect(page.getByText("Pacific Tests logged in")).not.toBeVisible(); // highlight-line
 });
 ```
 
-Cypress requires the colors to be given as [rgb](https://rgbcolorcode.com/color/red).
+### Running tests one by one
 
-Because all tests are for the same component we accessed using [cy.get](https://docs.cypress.io/api/commands/get.html#Syntax),
-we can chain them using [and](https://docs.cypress.io/api/commands/and.html).
-
-```js
-it("login fails with wrong password", function() {
-  // ...
-
-  cy.get(".error");
-    .should("contain", 'wrong credentials")
-    .and("have.css", 'background-color", 'rgb(156, 43, 46)")
-    .and("have.css", 'border-style", 'solid")
-});
-```
-
-Let's finish the test so that it also checks that the application does not render the success message `'Pacific Tests logged in'`.
-Let's also remove the `only` from `it.only` if it's still present on this test:
+By default, Playwright always runs all tests, and as the number of tests increases, it becomes time-consuming.
+When developing a new test or debugging a broken one, the test can be defined with the command *`test.only`*,
+which makes Playwright ***run only that test***:
 
 ```js
-it("login fails with wrong password", function() {
-  cy.contains("login").click();
-  cy.get("#username").type("root");
-  cy.get("#password").type("wrong");
-  cy.get("#login-button").click();
-
-  cy.get(".error");
-    .should("contain", 'wrong credentials")
-    .and("have.css", 'background-color", 'rgb(156, 43, 46)")
-    .and("have.css", 'border-style", 'solid")
-
-  cy.get("html").should("not.contain", 'Pacific Tests logged in"); // highlight-line
-});
-```
-
-The command `should` is most often used by chaining it after the command `get` (or another similar chain-friendly command).
-The highlighted line above (`cy.get("html")`) essentially retrieves the visible content from the entire application.
-
-Another way to write that line is by chaining the command `contains` with the command `should` via the `not.exist` parameter.
-Here's the two options side-by-side.
-
-| Option 1 | Option 2 |
-| :--- | :--- |
-|`cy.get("html").should("not.contain", 'Pacific Tests logged in")`|`cy.contains("Pacific Tests logged in").should("not.exist")`|
-
-### Bypassing the UI
-
-Currently, we have the following tests:
-
-```js
-describe("Task app", function() {
-  it("user can login", function() {
-    cy.contains("login").click();
-    cy.get("#username").type("test");
-    cy.get("#password").type("pacific");
-    cy.get("#login-button").click();
-
-    cy.contains("Pacific Tests logged in");
-  });
-
-  it("login fails with wrong password", function() {
+describe(() => {
+  // this is the only test executed!
+  test.only("login fails with wrong password", async ({ page }) => {  // highlight-line
     // ...
   });
 
-  describe("when logged in", function() {
-    beforeEach(function() {
-      cy.contains("login").click();
-      cy.get("#username").type("test");
-      cy.get("#password").type("pacific");
-      cy.get("#login-button").click();
+  // this test is skipped...
+  test("user can login with correct credentials", async ({ page }) => {
+    // ...
+  });
+
+  // ...
+});
+```
+
+When the test no longer needs to be isolated, *`only` can and **should be deleted***.
+Otherwise, we keep only running that one test.
+
+Another option to run a single test is to use a command line parameter:
+
+```bash
+npm test -- -g "login fails with wrong password"
+```
+
+### Helper functions for tests
+
+Our application tests currently look like this:
+
+```js
+const { test, describe, expect, beforeEach } = require("@playwright/test");
+
+describe("Task app", () => {
+  // ...
+
+  test("user can login with correct credentials", async ({ page }) => {
+    await page.getByRole("button", { name: "login" }).click();
+    await page.getByLabel("username").fill("test");
+    await page.getByLabel("password").fill("pacific");
+    await page.getByRole("button", { name: "login" }).click();
+    await expect(page.getByText("Pacific Tests logged in")).toBeVisible();
+  })
+
+  test("login fails with wrong password", async ({ page }) =>{
+    // ...
+  });
+
+  describe("when logged in", () => {
+    beforeEach(async ({ page, request }) => {
+      await page.getByRole("button", { name: "login" }).click();
+      await page.getByLabel("username").fill("test");
+      await page.getByLabel("password").fill("pacific");
+      await page.getByRole("button", { name: "login" }).click();
     });
 
-    it("a new task can be created", function() {
+    test("a new task can be created", async ({ page }) => {
       // ...
-
     });
-   
-  });
+  
+    // ...
+  });  
 });
 ```
 
-First, we test logging in.
-Then, in their own `describe` block, we tests that expect the user to be logged in, which happens in the `beforeEach` block.
+First, the login function is tested.
+After this, another `describe` block contains a set of tests that assume that the user is logged in, and that same login is duplicated inside of the initializing `beforeEach` block.
 
-As we said above, ***each test starts from zero!*** Tests do not start from the state where the previous tests ended.
+Remember, each test is executed starting from the initial state (where the database is cleared and one user is created there),
+so even though the test is defined after another test in the code, it does not start from the same state where the tests in the code executed earlier have left!
 
-The Cypress documentation gives us the following advice:
-[*Fully test the login flow – but only once!*](https://docs.cypress.io/guides/end-to-end-testing/testing-your-app#Fully-test-the-login-flow-but-only-once).
-So instead of logging in a user using the form in the `beforeEach` block, Cypress recommends that we
-[bypass the UI](https://docs.cypress.io/guides/getting-started/testing-your-app.html#Bypassing-your-UI)
-and do an HTTP request to the backend to login.
-The reason for this is that *logging in with an HTTP request is much faster than filling out a form*.
-
-Our situation is a bit more complicated than in the example in the Cypress documentation because when a user logs in, our application saves their details to the localStorage.
-However, Cypress can handle that as well.
-The code is the following
+While it looks like we need to duplicate the code because of how tests are structured,
+(*and we try to keep tests to be simple to understand*),
+we should also consider having non-repetitive code in tests, where it makes sense.
+Let's isolate the code that handles the login as a helper function, which is placed e.g. in the file *tests/helper.js*:
 
 ```js
-describe("when logged in", function() {
-  beforeEach(function() {
-    // highlight-start
-    cy.request("POST", 'http://localhost:3001/api/login", {
-      username: 'test", password: 'pacific'
-    });.then(response => {
-      localStorage.setItem("loggedTaskappUser", JSON.stringify(response.body))
-      cy.visit("http://localhost:5173");
-    });
-    // highlight-end
+const loginWith = async (page, username, password)  => {
+  await page.getByRole("button", { name: "login" }).click();
+  await page.getByLabel("username").fill(username);
+  await page.getByLabel("password").fill(password);
+  await page.getByRole("button", { name: "login" }).click();
+};
+
+export { loginWith };
+```
+
+The tests becomes simpler and clearer:
+
+```js
+const { test, describe, expect, beforeEach } = require("@playwright/test");
+const { loginWith } = require("./helper"); // highlight-line
+
+describe("Task app", () => {
+  // ...
+
+  test("user can log in", async ({ page }) => {
+    await loginWith(page, "test", "pacific"); // highlight-line
+    await expect(page.getByText("Powercat logged in")).toBeVisible();
   });
 
-  it("a new task can be created", function() {
+  test("login fails with wrong password", async ({ page }) => {
+    await loginWith(page, "test", "wrong"); // highlight-line
+
+    const errorDiv = page.locator(".error");
     // ...
   });
 
-  // ...
-});
-```
+  describe("when logged in", () => {
+    beforeEach(async ({ page }) => {
+      await loginWith(page, "test", "pacific") // highlight-line
+    });
 
-We can access the response to a [cy.request](https://docs.cypress.io/api/commands/request.html) with the `then` method.
-Under the hood `cy.request`, like all Cypress commands,
-are [promises](https://docs.cypress.io/guides/core-concepts/introduction-to-cypress.html#Commands-Are-Promises).
-The callback function saves the details of a logged-in user to localStorage, and reloads the page.
-Now there is no difference to a user logging in with the login form.
-
-If and when we write new tests to our application, we have to use the login code in multiple places.
-We should make it a [**custom command**](https://docs.cypress.io/api/cypress-api/custom-commands.html).
-
-Custom commands are declared in *cypress/support/commands.js*.
-The code for logging in is as follows:
-
-```js
-Cypress.Commands.add("login", ({ username, password }); => {
-  cy.request("POST", 'http://localhost:3001/api/login", {
-    username, password
-  });.then(({ body }); => {
-    localStorage.setItem("loggedTaskappUser", JSON.stringify(body))
-    cy.visit("http://localhost:5173");
-  });
-});
-```
-
-Using our custom command is easy, and our test becomes cleaner:
-
-```js
-describe("when logged in", function() {
-  beforeEach(function() {
-    // highlight-start
-    cy.login({ username: 'test", password: 'pacific' });
-    // highlight-end
-  });
-
-  it("a new task can be created", function() {
     // ...
   });
-
-  // ...
 });
 ```
 
-The same applies to creating a new task now that we think about it.
-We have a test, which makes a new task using the form.
-We also make a new task in the `beforeEach` block of the test testing changing the importance of a task:
+Playwright also offers a [solution](https://playwright.dev/docs/auth) where the login is performed once before the tests,
+and each test starts from a state where the application is already logged in.
+In order for us to take advantage of this method, the initialization of the application's test data should be done a bit differently than now.
+In the current solution, the database is reset before each test, and because of this, logging in just once before the tests is impossible.
+In order for us to use the pre-test login provided by Playwright, the user should be initialized only once before the tests.
+We'll stick to our current solution for the sake of simplicity.
+
+The corresponding repeating code actually also applies to creating a new task:
 
 ```js
 describe("Task app", function() {
   // ...
 
-  describe("when logged in", function() {
-    it("a new task can be created", function() {
-      cy.contains("new task").click();
-      cy.get("input").type("a task created by cypress");
-      cy.contains("save").click();
-
-      cy.contains("a task created by cypress");
+  describe("when logged in", () => {
+    test("a new task can be created", async ({ page }) => {
+      await page.getByRole("button", { name: "new task" }).click();
+      await page.getByRole("textbox").fill("a task created by playwright");
+      await page.getByRole("button", { name: "save" }).click();
+      await expect(page.getByText("a task created by playwright")).toBeVisible();
     });
-
-    describe("and a task exists", function () {
-      beforeEach(function () {
-        cy.contains("new task").click();
-        cy.get("input").type("another task cypress");
-        cy.contains("save").click();
+  
+    describe("and a task exists", () => {
+      beforeEach(async ({ page }) => {
+        await page.getByRole("button", { name: "new task" }).click();
+        await page.getByRole("textbox").fill("a test task by playwright");
+        await page.getByRole("button", { name: "save" }).click();
       });
-
-      it("it can be made important", function () {
+  
+      test("it can be made important", async ({ page }) => {
         // ...
       });
     });
@@ -915,299 +985,391 @@ describe("Task app", function() {
 });
 ```
 
-Let's make a new custom command for making a new task.
-The command will make a new task with an HTTP POST request:
+We can isolate task creation to a helper function.
+The file *tests/helper.js* expands as follows:
 
 ```js
-Cypress.Commands.add("createTask", ({ content, important }); => {
-  cy.request({
-    url: 'http://localhost:3001/api/tasks",
-    method: 'POST",
-    body: { content, important },
-    headers: {
-      'Authorization': `Bearer ${JSON.parse(localStorage.getItem("loggedTaskappUser")).token}`
-    }
-  });
+const loginWith = async (page, username, password)  => {
+  await page.getByRole("button", { name: "login" }).click();
+  await page.getByLabel("username").fill(username);
+  await page.getByLabel("password").fill(password);
+  await page.getByRole("button", { name: "login" }).click();
+};
 
-  cy.visit("http://localhost:5173");
-});
+// highlight-start
+const createTask = async (page, content) => {
+  await page.getByRole("button", { name: "new task" }).click();
+  await page.getByRole("textbox").fill(content);
+  await page.getByRole("button", { name: "save" }).click();
+};
+// highlight-end
+
+export { loginWith, createTask }; // highlight-line
 ```
 
-The command expects the user to be logged in and the user's details to be saved to localStorage.
-
-Now the formatting block becomes:
+This function, in turn, simplifies our tests:
 
 ```js
-describe("Task app", function() {
+const { test, describe, expect, beforeEach } = require("@playwright/test");
+const { createTask, loginWith } = require("./helper"); // highlight-line
+
+describe("Task app", () => {
   // ...
 
-  describe("when logged in", function() {
-    it("a new task can be created", function() {
-      // ...
+  describe("when logged in", () => {
+    beforeEach(async ({ page }) => {
+      await loginWith(page, "test", "pacific");
     });
 
-    describe("and a task exists", function () {
-      beforeEach(function () {
-        // highlight-start
-        cy.createTask({
-          content: 'another task cypress",
-          important: false
-        });
-        // highlight-end
-      });
+    test("a new task can be created", async ({ page }) => {
+      await createTask(page, "a task created by playwright"); // highlight-line
+      await expect(page.getByText("a task created by playwright")).toBeVisible();
+    });
 
-      it("it can be made important", function () {
-        // ...
+    describe("and a task exists", () => {
+      beforeEach(async ({ page }) => {
+        await createTask(page, "a test task by playwright"); // highlight-line
+      });
+  
+      test("importance can be changed", async ({ page }) => {
+        await page.getByRole("button", { name: "make not important" }).click();
+        await expect(page.getByText("make important")).toBeVisible();
       });
     });
   });
 });
 ```
-
-#### Defining a baseURL
 
 There is one more annoying feature in our tests.
-The application address `http://localhost:5173` is hardcoded in *commands.js* and *task_app.cy.js*.
-Let's define the `baseUrl` for the application in the Cypress pre-generated [configuration file](https://docs.cypress.io/guides/references/configuration) ***cypress.config.js***:
+The frontend address <http://localhost:5173> and the backend address <http://localhost:3001> are hardcoded for tests.
+Of these, ***the address of the backend is actually useless***, because a proxy has been defined in the Vite configuration of the frontend,
+which forwards all requests made by the frontend to the address <http://localhost:5173/api> to the backend:
 
 ```js
-const { defineConfig } = require("cypress");
-module.exports = defineConfig({
-  e2e: {
-    setupNodeEvents(on, config) {
-    },
-    baseUrl: 'http://localhost:5173' // highlight-line
-  },
-});
-```
-
-All the commands in the tests use the address of the application
-
-```js
-cy.visit("http://localhost:5173");
-```
-
-can be transformed into
-
-```js
-cy.visit("");
-```
-
-The backend's hardcoded address `http://localhost:3001` is still in the tests.
-Cypress [documentation](https://docs.cypress.io/guides/guides/environment-variables) recommends defining other addresses used by the tests as **environment variables**.
-Environment variables are slightly different than a reserved word like `baseURL`.
-
-Let's expand the configuration file `cypress.config.js` as follows:
-
-```js
-const { defineConfig } = require("cypress");
-module.exports = defineConfig({
-  e2e: {
-    setupNodeEvents(on, config) {
-    },
-    baseUrl: 'http://localhost:5173",
-  },
-  env: {
-    BACKEND_API: 'http://localhost:3001/api' // highlight-line
-  }
-});
-```
-
-Let's replace all the backend addresses from the tests in the following way
-
-```js
-describe("Task app", function() {
-  beforeEach(function() {
-    cy.request("POST", `${Cypress.env("BACKEND_API")}/testing/reset`) // highlight-line
-    const user = {
-      name: 'Pacific Tests",
-      username: 'test",
-      password: 'pacific'
+export default defineConfig({
+  server: {
+    proxy: {
+      "/api": {
+        target: "http://localhost:3001",
+        changeOrigin: true,
+      },
     }
-    cy.request("POST", `${Cypress.env("BACKEND_API")}/users`, user) // highlight-line
-    cy.visit("");
-  });
+  },
   // ...
 });
 ```
 
-The tests and the frontend code can be found on the [GitHub](https://github.com/comp227/part2-tasks/tree/part5-10) branch *part5-10*.
+So we can replace all the addresses in the tests from ***`http://localhost:3001/api/...`*** to ***`http://localhost:5173/api/...`***
 
-### Changing the importance of a task
-
-Lastly, let's take a look at the test we did for changing the importance of a task.
-First, we'll change the formatting block so that it creates three tasks instead of one:
+We can now define the `baseUrl` for the application in the tests configuration file *playwright.config.js*:
 
 ```js
-describe("when logged in", function() {
-  describe("and several tasks exist", function () {
-    beforeEach(function () {
+export default defineConfig({
+  // ...
+  use: {
+    baseURL: "http://localhost:5173",
+    // ...
+  },
+  // ...
+});
+```
+
+All the commands in the tests that use the application URL, e.g.
+
+```js
+await page.goto("http://localhost:5173");
+await request.post("http://localhost:5173/api/testing/reset");
+```
+
+can be transformed to:
+
+```js
+await page.goto("/");
+await request.post("/api/testing/reset");
+```
+
+The current code for the tests is on [GitHub](https://github.com/comp227/tasks-e2e/tree/part5-2) branch *part5-2*.
+
+### Task importance change revisited
+
+Let's take a look at the test we did earlier, which verifies that it is possible to change the importance of a task.
+
+Let's change the initialization block of the test so that it creates two tasks instead of one:
+
+```js
+describe("when logged in", () => {
+  // ...
+  describe("and several tasks exists", () => { // highlight-line
+    beforeEach(async ({ page }) => {
       // highlight-start
-      cy.createTask({ content: 'first task", important: false });
-      cy.createTask({ content: 'second task", important: false });
-      cy.createTask({ content: 'third task", important: false });
+      await createTask(page, "first task");
+      await createTask(page, "second task");
       // highlight-end
     });
 
-    it("one of those can be made important", function () {
-      cy.contains("second task")
-        .contains("make important");
-        .click();
+    test("one of those can be made non-important", async ({ page }) => {
+      const otherTaskElement = page.getByText("first task");
 
-      cy.contains("second task")
-        .contains("make not important");
+      await otherTaskElement
+        .getByRole("button", { name: "make not important" }).click();
+      await expect(otherTaskElement.getByText("make important")).toBeVisible();
     });
   });
 });
 ```
 
-How does the [`cy.contains`](https://docs.cypress.io/api/commands/contains.html) command actually work?
+The above test searches for the element `first task`using the method `page.getByText` and stores it in a variable (`otherTaskElement`).
+After this, a button with the text ***make not important*** is searched inside the element and the button is pressed.
+Finally, the test verifies that the button's text has changed to ***make important***.
 
-When we click the `cy.contains("second task")` command in Cypress [Test Runner](https://docs.cypress.io/guides/core-concepts/test-runner.html),
-we see that the command searches for the element containing the text `second task`:
-
-![cypress test runner clicking testbody and second task](../../images/5/34x.png)
-
-By clicking the next line `.contains("make important")` we see that the test uses
-the 'make important' button corresponding to the ***second task***:
-
-![cypress test runner clicking make important](../../images/5/35x.png)
-
-When chained, the second `contains` command ***continues*** the search from within the component found by the first command.
-
-If we had not chained the commands, and instead write:
+The test could also have been written without the auxiliary variable *`otherTaskElement`*:
 
 ```js
-cy.contains("second task");
-cy.contains("make important").click();
+test("one of those can be made non-important", async ({ page }) => {
+  page.getByText("first task")
+    .getByRole("button", { name: "make not important" }).click();
+
+  await expect(page.getByText("first task").getByText("make important"))
+    .toBeVisible();
+});
 ```
 
-the result would have been entirely different.
-The second line of the test would click the button of a wrong task:
-
-![cypress showing error and incorrectly trying to click first button](../../images/5/36x.png)
-
-When coding tests, you should ***check in the test runner that the tests use the right components***!
-
-Let's change the `Task` component so that the text of the task is rendered to a `span`.
+Let's change the `Task` component so that the task text is rendered inside a `span` element
 
 ```js
 const Task = ({ task, toggleImportance }); => {
   const label = task.important
-    ? 'make not important' : 'make important'
+    ? "make not important" : "make important";
 
   return (
-    <li className='task'>
+    <li className="task">
       <span>{task.content}</span> // highlight-line
       <button onClick={toggleImportance}>{label}</button>
     </li>
-  )
-}
+  );
+};
 ```
 
-Our tests break! As the test runner reveals, `cy.contains("second task")` now returns the component containing the text, and the button is not in it.
+If you run the tests now, *the tests break*!
+The reason for the problem is that the command `page.getByText("first task")` now returns a `span` element containing only text, and the button is outside of it.
 
-![cypress showing test is broken trying to click make important](../../images/5/37x.png)
-
-One way to fix this is the following:
+One way to fix the problem is as follows:
 
 ```js
-it("one of those can be made important", function () {
-  cy.contains("second task").parent().find("button").click();
-  cy.contains("second task").parent().find("button")
-    .should("contain", 'make not important");
+test("one of those can be made non-important", async ({ page }) => {
+  const otherTaskText = page.getByText("first task"); // highlight-line
+  const otherTaskElement = otherTaskText.locator(".."); // highlight-line
+
+  await otherTaskElement.getByRole("button", { name: "make not important" }).click();
+  await expect(otherTaskElement.getByText("make important")).toBeVisible();
 });
 ```
 
-In the first line, we use the [`parent`](https://docs.cypress.io/api/commands/parent.html)
-command to access the parent element of the element containing ***second task*** and find the button from within it.
-Then we click the button and check that the text on it changes.
+The first line now looks for the `span` element containing the text associated with the first created task.
+In the second line, the function `locator` is used and `..` is given as an argument, which retrieves the element's parent element.
+The locator function is very flexible, and we take advantage of the fact that accepts [as argument](https://playwright.dev/docs/locators#locate-by-css-or-xpath)
+not only CSS selectors but also [***XPath selector***](https://developer.mozilla.org/en-US/docs/Web/XPath).
+It would be possible to express the same with CSS, but in this case XPath provides the simplest way to find the parent of an element.
 
-Notice that we use the command [`find`](https://docs.cypress.io/api/commands/find.html#Syntax) to search for the button.
-We cannot use [`cy.get`](https://docs.cypress.io/api/commands/get.html) here,
-because `cy.get` always searches from the *entire* page and ***would return all 5 buttons on the page***.
-
-Unfortunately, we have some copy-paste in the tests now, because the code for searching for the right button is always the same.
-
-In these kinds of situations, it is possible to use the [`as`](https://docs.cypress.io/api/commands/as.html) command:
+Of course, the test can also be written using only one auxiliary variable:
 
 ```js
-it("one of those can be made important", function () {
-  cy.contains("second task").parent().find("button").as("theButton");
-  cy.get("@theButton").click();
-  cy.get("@theButton").should("contain", 'make not important");
+test("one of those can be made non-important", async ({ page }) => {
+  const secondTaskElement = page.getByText("second task").locator("..");
+  await secondTaskElement.getByRole("button", { name: "make not important" }).click();
+  await expect(secondTaskElement.getByText("make important")).toBeVisible();
 });
 ```
 
-Now the first line finds the right button and uses `as` to save it as `theButton`.
-The following lines can use the named element with `cy.get("@theButton")`.
-
-### Running and debugging the tests
-
-Finally, let's discuss how Cypress works and how to debug your tests.
-
-Cypress tests give the impression that the tests are normal JavaScript code, and we could for example try this:
+Let's change the test so that three tasks are created, and the importance is changed in the second created task:
 
 ```js
-const button = cy.contains("login");
-button.click();
-debugger;
-cy.contains("logout").click();
+describe("when logged in", () => {
+  beforeEach(async ({ page }) => {
+    await loginWith(page, "root", "tigers");
+  });
+
+  test("a new task can be created", async ({ page }) => {
+    await createTask(page, "a task created by playwright", true);
+    await expect(page.getByText("a task created by playwright")).toBeVisible();
+  });
+
+  describe("and several tasks exists", () => {
+    beforeEach(async ({ page }) => {
+      await createTask(page, "first task");
+      await createTask(page, "second task");
+      await createTask(page, "third task"); // highlight-line
+    });
+
+    test("one of those can be made non-important", async ({ page }) => {
+      const otherTaskText = page.getByText("second task"); // highlight-line
+      const otherTaskElement = otherTaskText.locator("..");
+    
+      await otherTaskElement.getByRole("button", { name: "make not important" }).click();
+      await expect(otherTaskElement.getByText("make important")).toBeVisible();
+    });
+  });
+}); 
 ```
 
-This won't work, however.
-When Cypress runs a test, *it adds each `cy` command to an execution queue*.
-When the code of the test method has been executed, Cypress will execute each command in the queue one by one.
+For some reason if we start running the tests,
+the ***tests starts working unreliably***, sometimes it passes and sometimes it doesn't.
+It's time to roll up your sleeves and learn how to debug tests.
 
-Cypress commands always return `undefined`, so `button.click()` in the above code would cause an error.
-An attempt to start the debugger would not stop the code between executing the commands, but before any commands have been executed.
+### Test development and debugging
 
-Cypress commands are *like promises*, so if we want to access their return values,
-we have to do it using the [`then`](https://docs.cypress.io/api/commands/then.html) command.
-For example, the following test would print the number of buttons in the application, and click the first button:
+If, and when the tests don't pass and you suspect that the fault is in the tests instead of in the code,
+you should run the tests in [**debug mode**](https://playwright.dev/docs/debug#run-in-debug-mode-1).
+
+The following command runs the problematic test in debug mode:
+
+```bash
+npm test -- -g"one of those can be made non-important" --debug
+```
+
+Playwright-inspector shows the progress of the tests step by step.
+The **arrow-dot** button at the top takes the tests one step further.
+The elements found by the locators and the interaction with the browser are visualized in the browser:
+
+![playwright inspector highlighting element found by the selected locator in the application](../../images/5/play6a.png)
+
+By default, debug steps through the test command by command.
+If it is a complex test, it can be quite a burden to step through the test to the point of interest.
+This can be avoided by using the command `await page.pause()`:
 
 ```js
-it("then example", function() {
-  cy.get("button").then( buttons => {
-    console.log("number of buttons", buttons.length)
-    cy.wrap(buttons[0]).click();
+describe("Task app", () => {
+  beforeEach(async ({ page, request }) => {
+    // ...
+  });
+
+  describe("when logged in", () => {
+    beforeEach(async ({ page }) => {
+      // ...
+    });
+
+    describe("and several tasks exists", () => {
+      beforeEach(async ({ page }) => {
+        await createTask(page, "first task");
+        await createTask(page, "second task");
+        await createTask(page, "third task");
+      });
+  
+      test("one of those can be made non-important", async ({ page }) => {
+        await page.pause(); // highlight-line
+        const otherTaskText = page.getByText("second task");
+        const otherTaskElement = otherTaskText.locator("..");
+      
+        await otherTaskElement.getByRole("button", { name: "make not important" }).click();
+        await expect(otherTaskElement.getByText("make important")).toBeVisible();
+      });
+    });
   });
 });
 ```
 
-Stopping the test execution with the debugger is [possible](https://docs.cypress.io/api/commands/debug.html).
-The debugger starts only if Cypress test runner's developer console is open.
+Now in the test you can go to `page.pause()` in one step, by pressing the green arrow symbol in the inspector.
+When we now run the test and jump to the `page.pause()` command, we find an interesting fact:
 
-The developer console is all sorts of useful when debugging your tests.
-You can see the HTTP requests done by the tests on the Network tab, and the console tab will show you information about your tests:
+![playwright inspector showing the state of the application at page.pause](../../images/5/play6b.png)
 
-![developer console while running cypress](../../images/5/38ea.png)
+> ***Pertinent:*** It seems that the browser ***does not render*** all the tasks created in the block `beforeEach`.
+> What is the problem?
+>
+> The reason for the problem is that when the test creates one task, it starts creating the next one even before the server has responded, and the added task is rendered on the screen.
+> This in turn can cause some tasks to be lost (in the picture, this happened to the second task created),
+> since the browser is re-rendered when the server responds, based on the state of the tasks at the start of that insert operation.
+>
+> The problem can be solved by "slowing down" the insert operations
+> by using the [`waitFor` method](https://playwright.dev/docs/api/class-locator#locator-wait-for) after the insert to wait for the inserted task to render:
+>
+> ```js
+> const createTask = async (page, content) => {
+>   await page.getByRole("button", { name: "new task" }).click();
+>   await page.getByRole("textbox").fill(content);
+>   await page.getByRole("button", { name: "save" }).click();
+>   await page.getByText(content).waitFor(); // highlight-line
+> }
+> ```
 
-So far we have run our Cypress tests using the graphical test runner.
-It is also possible to run them [from the command line](https://docs.cypress.io/guides/guides/command-line.html).
-We just have to add an npm script for it:
+Instead of, or alongside debugging mode, running tests in UI mode can be useful.
+As already mentioned, tests are started in UI mode as follows:
 
-```js
-  "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject",
-    "server": "json-server -p3001 --watch db.json",
-    "eslint": "eslint .",
-    "cypress:open": "cypress open",
-    "test:e2e": "cypress run" // highlight-line
-  },
+```bash
+npm run test -- --ui
 ```
 
-Now we can run our tests from the command line with the command `npm run test:e2e`
+Almost the same as UI mode is use of the Playwright's [Trace Viewer](https://playwright.dev/docs/trace-viewer-intro).
+The idea is that a ***visual trace*** of the tests is saved, which can be viewed if necessary after the tests have been completed.
+A trace is saved by running the tests as follows:
 
-![terminal output of running npm e2e tests showing passed](../../images/5/39x.png)
+```bash
+npm run test -- --trace on
+```
 
-Notice that videos of the test execution will be saved to *cypress/videos/*, ***so you should add `cypress/videos` to your .gitignore***.
-It is also possible to [turn off](https://docs.cypress.io/guides/guides/screenshots-and-videos#Videos) video generation.
+If necessary, Trace can be viewed with the command
 
-The frontend and the test code can be found on the [GitHub](https://github.com/comp227/part2-tasks/tree/part5-11) branch *part5-11*.
+```bash
+npx playwright show-report
+```
+
+or with the npm script we defined `npm run test:report`
+
+Trace looks practically the same as running tests in UI mode.
+
+UI mode and Trace Viewer also offer the possibility of assisted search for locators.
+This is done by pressing the double circle on the left side of the lower bar, and then by clicking on the desired user interface element.
+Playwright displays the element locator:
+
+![playwright's trace viewer with red arrows pointing at the locator assisted search location and to the element selected with it showing a suggested locator for the element](../../images/5/play8.png)
+
+Playwright suggests the following as the locator for the third task
+
+```js
+page.locator("li").filter({ hasText: "third task" }).getByRole("button");
+```
+
+The method [`page.locator`](https://playwright.dev/docs/api/class-page#page-locator) is called with the argument `li`,
+i.e. we search for all `li` elements on the page, of which there are three in total.
+After this, using the [`locator.filter` method](https://playwright.dev/docs/api/class-locator#locator-filter),
+we narrow down to the `li` element that contains the text ***`third task`*** and the button element inside it is taken using the
+[`locator.getByRole` method](https://playwright.dev/docs/api/class-locator#locator-get-by-role).
+
+The locator generated by Playwright is somewhat different from the locator used by our tests, which was
+
+```js
+page.getByText("first task").locator("..").getByRole("button", { name: "make not important" });
+```
+
+Which of the locators is better is probably a matter of taste.
+
+Playwright also includes a [test generator](https://playwright.dev/docs/codegen-intro) that makes it possible to "record" a test through the user interface.
+The test generator is started with the command:
+
+```bash
+npx playwright codegen http://localhost:5173/
+```
+
+When the `Record` mode is on, the test generator "records" the user's interaction in the Playwright inspector, from where it is possible to copy the locators and actions to the tests:
+
+![playwright's record mode enabled with its output in the inspector after user interaction](../../images/5/play9.png)
+
+Instead of the command line, Playwright can also be used via [Webstorm's IDE](https://www.jetbrains.com/help/webstorm/playwright.html).
+
+To avoid problem situations and increase understanding, it is definitely worth browsing Playwright's high-quality [documentation](https://playwright.dev/docs/intro).
+The most important sections are listed below:
+
+- the section about [locators](https://playwright.dev/docs/locators) gives good hints for finding elements in test
+- section [actions](https://playwright.dev/docs/input) tells how it is possible to simulate the interaction with the browser in tests
+- the section about [assertions](https://playwright.dev/docs/test-assertions) demonstrates the different expectations Playwright offers for testing
+
+In-depth details can be found in the [API](https://playwright.dev/docs/api/class-playwright) description,
+particularly useful are the class [`Page`](https://playwright.dev/docs/api/class-page) corresponding to the browser window of the application under test,
+and the class [`Locator`](https://playwright.dev/docs/api/class-locator) corresponding to the elements searched for in the tests.
+
+The final version of the tests is in full on [GitHub](https://github.com/comp227/tasks-e2e/tree/part5-3), in branch *part5-3*.
+
+The final version of the frontend code is in its entirety on [GitHub](https://github.com/comp227/part2-tasks-frontend/tree/part5-9), in branch *part5-9*.
 
 </div>
 
@@ -1216,126 +1378,108 @@ The frontend and the test code can be found on the [GitHub](https://github.com/c
 ### Exercises 5.17-5.22
 
 In the last exercises of this part, we will do some E2E tests for our Watchlist application.
-The material of this part should be enough to complete the exercises.
-You **must check out the Cypress [documentation](https://docs.cypress.io/guides/overview/why-cypress.html#In-a-nutshell)**.
-It is probably the best documentation I have ever seen for an open-source project.
+The material above should be enough to complete the exercises.
+However, you **should definitely read Playwright's [documentation](https://playwright.dev/docs/intro) and [API description](https://playwright.dev/docs/api/class-playwright)**,
+at least the sections mentioned at the end of the previous chapter.
 
-I especially recommend reading
-[Introduction to Cypress](https://docs.cypress.io/guides/core-concepts/introduction-to-cypress.html#Cypress-Can-Be-Simple-Sometimes), which states
+#### 5.17: Watchlist End To End Testing, Step 1
 
-> **This is the single most important guide for understanding how to test with Cypress.**
-> **Read it.**
-> **Understand it.**
+Create a new npm project for tests and configure Playwright there.
 
-#### 5.17: Watchlist end to end testing, Step 1
+Make a test to ensure that the application displays the login form by default.
 
-Configure Cypress for your project.
-Make a test for checking that the application displays the login form by default.
-
-The structure of the test must be as follows:
+The body of the test should be as follows:
 
 ```js
-describe("Watchlist app", function() {
-  beforeEach(function() {
-    cy.request("POST", 'http://localhost:3003/api/testing/reset");
-    cy.visit("http://localhost:5173");
+const { test, expect, beforeEach, describe } = require("@playwright/test")
+
+describe("Watchlist app", () => {
+  beforeEach(async ({ page }) => {
+    await page.goto("http://localhost:5173");
   });
 
-  it("Login form is shown", function() {
+  test("Login form is shown", async ({ page }) => {
     // ...
   });
 });
+
 ```
 
-The `beforeEach` function must empty the database.
-Feel free to use the [method we used in the material](#controlling-the-state-of-the-database).
-
-#### 5.18: Watchlist end to end testing, Step 2
+#### 5.18: Watchlist End To End Testing, Step 2
 
 Make tests for logging in.
 Test both successful and unsuccessful login attempts.
 Make a new user in the `beforeEach` block for the tests.
 
-The test structure extends like so:
+The body of the tests expands as follows
 
 ```js
-describe("Watchlist app", function() {
-  beforeEach(function() {
-    cy.request("POST", 'http://localhost:3003/api/testing/reset");
-    // create here a user to backend
-    cy.visit("http://localhost:5173");
-  });
+const { test, expect, beforeEach, describe } = require("@playwright/test")
 
-  it("Login form is shown", function() {
+describe("Watchlist app", () => {
+  beforeEach(async ({ page, request }) => {
+    // empty the db here
+    // create a user for the backend here
     // ...
   });
 
-  describe("Login",function() {
-    it("succeeds with correct credentials", function() {
+  test("Login form is shown", async ({ page }) => {
+    // ...
+  });
+
+  describe("Login", () => {
+    test("succeeds with correct credentials", async ({ page }) => {
       // ...
     });
 
-    it("fails with wrong credentials", function() {
+    test("fails with wrong credentials", async ({ page }) => {
       // ...
     });
   });
 });
 ```
+
+The `beforeEach` block must empty the database using, for example, the `reset` method we used in the [material](#controlling-the-state-of-the-database).
 
 **Optional bonus exercise**: Check that the notification shown with unsuccessful login is displayed red.
 
-#### 5.19: Watchlist end to end testing, Step 3
+#### 5.19: Watchlist End To End Testing, Step 3
 
-Make a test that verifies a logged-in user can recommend a new show.
-The structure of the test could be as follows:
+Create a test that verifies that a logged in user can recommend a new show.
+The structure of the test may look like the following:
 
 ```js
-describe("Watchlist app", function() {
-  // ...
-
-  describe("When logged in", function() {
-    beforeEach(function() {
-      // log in user here
-    });
-
-    it("A show can be added", function() {
-      // ...
-    });
+describe("When logged in", () => {
+  beforeEach(async ({ page }) => {
+    // ...
   });
 
+  test("a new show can be added", async ({ page }) => {
+    // ...
+  });
 });
 ```
 
-The test has to ensure that a new show is added to the list of all shows.
+The test should ensure that the recommended show is visible in the list of shows.
 
-#### 5.20: Watchlist end to end testing, Step 4
+#### 5.20: Watchlist End To End Testing, Step 4
 
-Make a test that confirms users can like a show.
+Do a test that makes sure that a show can be liked.
 
-#### 5.21: Watchlist end to end testing, Step 5
+#### 5.21: Blog List End To End Testing, Step 5
 
 Make a test for ensuring that the user who recommended a show can delete it.
+If you use the `window.confirm` dialog in the delete operation, you may have to Google how to use the dialog in the Playwright tests.
 
-#### 5.22: Watchlist end to end testing, Step 6
+#### 5.22: Watchlist End To End Testing, Step 6
 
 Make an additional test that other users do not see a delete button on shows they did not recommend.
 
-#### 5.23: Watchlist end to end testing, Step 7
+#### 5.23*: Watchlist End To End Testing, Step 7
 
 Make a test that checks that the shows are ordered according to likes - the show with the most likes should be first.
 
-This exercise is quite a bit trickier than the previous ones.
-One solution is to add a certain class for the element which wraps the show's content
-and use the [`eq`](https://docs.cypress.io/api/commands/eq#Syntax) method to get the show at a specific index:
-  
-```js
-cy.get(".show").eq(0).should("contain", 'The title with the most likes");
-cy.get(".show").eq(1).should("contain", 'The title with the second most likes");
-```
-
-Notice that you might end up having problems if you click a like button many times in a row.
-It might be that cypress does the clicking so fast that it does not have time to update the app state in between the clicks.
-One remedy for this is to *wait for the number of likes to update in between all clicks*.
+*This task is significantly more challenging than the previous ones.*
 
 This was the last exercise of this part, and it's time to push your code to GitHub if you haven't already and mark the exercises that were completed on Canvas.
 

@@ -58,7 +58,7 @@ After verifying that everything works, we can start studying the code.
 All of the interesting stuff resides in the *src* folder.
 For your convenience, there is already a *types.ts* file for basic types used in the app, which you will have to extend or refactor in the exercises.
 
-In principle, we could use the same types for both backend and frontend,
+In principle, we could use the same types for both the backend and the frontend,
 but usually, *the frontend has different data structures and use cases for the data*, which causes the types to be different.
 For example, the frontend has a state and may want to keep data in objects or maps whereas the backend uses an array.
 The frontend might also not need all the fields of a data object saved in the backend, and it may need to add some new fields to use for rendering.
@@ -75,7 +75,7 @@ For example, the *src/AddPatientModal* folder currently houses two components:
 - `AddPatientModal` defined in *index.tsx*
 - `AddPatientForm` a subcomponent of `AddPatientModal` defined in *AddPatientForm.tsx*.
 
-There is nothing very surprising in the code.
+There is nothing too surprising in the code.
 The state and communication with the backend are implemented with the `useState` hook and Axios, similar to the tasks app in the previous section.
 [Material UI](/part7/more_about_styles#material-ui) is used to style the app and the navigation structure is implemented with
 [React Router](/part7/react_router),
@@ -207,23 +207,23 @@ Our function does not return anything so the correct return type is just `Promis
 
 <div class="tasks">
 
-### Exercises 8.20-8.21
+### Exercises 8.21-8.22
 
 We will soon add a new type for our app, `Entry`, which represents a lightweight patient journal entry.
 It consists of a journal text, i.e. a `description`, a creation date, information regarding the specialist who created it and possible diagnosis codes.
 Diagnosis codes map to the ICD-10 codes returned from the ***/api/diagnoses*** endpoint.
 Our naive implementation will be that a patient has an array of entries.
 
-Before going into this, let us do some preparatory work.
+Before going into this, we need some preparatory work.
 
-#### 8.20: Patientia, step 1
+#### 8.21: Patientia, step 1
 
 Create an endpoint ***/api/patients/:id*** to the backend that returns all of the patient information for one patient,
 including the array of patient entries that is still empty for all the patients.
 For the time being, expand the backend types as follows:
 
 ```js
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface Entry {
 }
 
@@ -244,7 +244,7 @@ The response should look as follows:
 
 ![browser showing entries blank array when accessing patient](../../images/8/38a.png)
 
-#### 8.21: Patientia, step 2
+#### 8.22: Patientia, step 2
 
 Create a page for showing a patient's full information in the frontend.
 
@@ -375,7 +375,7 @@ Let's start by creating the `HealthCheckEntry` type.
 
 Entries of type `HealthCheck` contain the field `HealthCheckRating`, which is an integer from 0 to 3, zero meaning `Healthy` and 3 meaning `CriticalRisk`.
 This is a perfect case for an enum definition.
-With these specifications we could write a `HealthCheckEntry` type definition like so:
+With these specifications, we could write a `HealthCheckEntry` type definition like so:
 
 ```js
 export enum HealthCheckRating {
@@ -425,11 +425,11 @@ type EntryWithoutId = UnionOmit<Entry, 'id'>;
 
 <div class="tasks">
 
-### Exercises 8.22-8.29
+### Exercises 8.23-8.30
 
 Now we are ready to put the finishing touches to the app!
 
-#### 8.22: Patientia, step 3
+#### 8.23: Patientia, step 3
 
 Define the types `OccupationalHealthcareEntry` and `HospitalEntry` so that those conform with the example data.
 Ensure that your backend returns the entries properly when you go to an individual patient's route:
@@ -440,7 +440,7 @@ Use types properly in the backend!
 For now, there is no need to do a proper validation for all the fields of the entries in the backend,
 it is enough e.g. to check that the field `type` has a correct value.
 
-#### 8.23: Patientia, step 4
+#### 8.24: Patientia, step 4
 
 Extend a patient's page in the frontend to list the `date`, `description` and `diagnoseCodes` of the patient's entries.
 
@@ -451,14 +451,14 @@ Your solution could look like this:
 
 ![browser showing list of diagnosis codes for patient](../../images/8/41.png)
 
-#### 8.24: Patientia, step 5
+#### 8.25: Patientia, step 5
 
 Fetch and add diagnoses to the application state from the ***/api/diagnoses*** endpoint.
 Use the new diagnosis data to show the descriptions for patient's diagnosis codes:
 
 ![browser showing list of codes and their descriptions for patient ](../../images/8/42.png)
 
-#### 8.25: Patientia, step 6
+#### 8.26: Patientia, step 6
 
 Extend the entry listing on the patient's page to include the Entry's details with a new component
 that shows the rest of the information of the patient's entries distinguishing different types from each other.
@@ -475,7 +475,7 @@ The resulting entries in the listing *could* look something like this:
 
 ![browser showing list of entries and their details in a nicer format](../../images/8/36x.png)
 
-#### 8.26: Patientia, step 7
+#### 8.27: Patientia, step 7
 
 We have established that patients can have different kinds of entries.
 We don't yet have any way of adding entries to patients in our app, so, at the moment, it is pretty useless as an electronic medical record.
@@ -486,7 +486,7 @@ Remember that we have different kinds of entries in our app, so our backend shou
 
 In this exercise you quite likely need to remember [this trick](/part8/working_with_an_existing_codebase#omit-with-unions).
 
-You may assume that the diagnostic codes are sent in a correct form and use eg. the following kind of parser to extract those from the request body:
+You may assume that the diagnostic codes are sent in the correct form and *use the following kind of parser to extract those from the request body*:
 
 ```js
 const parseDiagnosisCodes = (object: unknown): Array<Diagnosis['code']> =>  {
@@ -499,32 +499,32 @@ const parseDiagnosisCodes = (object: unknown): Array<Diagnosis['code']> =>  {
 };
 ```
 
-#### 8.27: Patientia, step 8
+#### 8.28: Patientia, step 8
 
 Now that our backend supports adding entries, we want to add the corresponding functionality to the frontend.
 In this exercise, you should add a form for adding an entry to a patient.
 An intuitive place for accessing the form would be on a patient's page.
 
 In this exercise, it is enough to **support *one* entry type**.
-All the fields in the form can be just plain text inputs, so it is up to user to enter valid values.
+All the fields in the form can be just plain text inputs, so it is up to the user to enter valid values.
 
-Upon a successful submit, the new entry should be added to the correct patient and the patient's entries on the patient page should be updated to contain the new entry.
+Upon a successful submission the new entry should be added to the correct patient and the patient's entries on the patient page should be updated to contain the new entry.
 
 Your form might look something like this:
 
 ![Patientia new healthcheck entry form](../../images/8/74new.png)
 
-If user enters invalid values to the form and backend rejects the addition, show a proper error message to user
+If a user enters invalid values to the form and backend rejects the addition, show a proper error message to the user.
 
 ![browser showing healthCheckRating incorrect 15 error](../../images/8/75new.png)
 
-#### 8.28: Patientia, step 9
+#### 8.29: Patientia, step 9
 
-Extend your solution so that it supports **all the entry types**
+Extend your solution so that it supports **all the entry types**.
 
-#### 8.29: Patientia, step 10
+#### 8.30: Patientia, step 10
 
-Improve the entry creation forms so that it makes hard to enter incorrect dates, diagnosis codes and health rating.
+Improve the entry creation forms so that it makes it hard to enter incorrect dates, diagnosis codes and health rating.
 
 Your improved form might look something like this:
 

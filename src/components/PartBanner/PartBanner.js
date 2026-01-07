@@ -34,7 +34,7 @@ export const PartBanner = ({ lang }) => {
       id="course-contents"
     >
       <div className="container spacing flex-fix-aligning col-7--mobile">
-        {parts.map(part => {
+        {parts.map((part) => {
           const partNames =
             partNameTranslations[lang] || partNameTranslations.en;
 

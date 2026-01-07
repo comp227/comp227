@@ -267,7 +267,7 @@ export default class ContentTemplate extends Component {
 }
 
 export const contentPageQuery = graphql`
-  query($part: Int!, $letter: String!, $lang: String!) {
+  query ($part: Int!, $letter: String!, $lang: String!) {
     markdownRemark(
       frontmatter: {
         part: { eq: $part }

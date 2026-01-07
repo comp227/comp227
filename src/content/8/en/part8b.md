@@ -37,7 +37,7 @@ You *could* install both *`ts-node`* and the official *`typescript`* package glo
 npm i -g ts-node typescript
 ```
 
-However, if you can't or don't want to install global packages, you can create an npm project which has the required dependencies and run your scripts in it.
+However, if you can't or don't want to install global packages, you can create an npm project that has the required dependencies and run your scripts in it.
 Let's take this approach.
 
 As we recall from [part 3](/part3),
@@ -159,7 +159,7 @@ This is where we see the first benefits of TypeScript.
 Let's add types to the parameters and see where it takes us.
 
 TypeScript natively supports multiple types including `number`, `string` and `Array`.
-See the comprehensive list [here](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html).
+See the [comprehensive list here](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html).
 More complex custom types can also be created.
 
 The first two parameters of our function are the `number` and the `string`
@@ -341,7 +341,7 @@ to be the type-safe counterpart of `any`.
 We can assign any variable with `unknown`.
 However, we cannot assign an `unknown` variable to just any variable.
 Variables with the `unknown` type are only assignable to other variables of type `unknown` and `any`;
-unless there is a type assertion or a control flow-based narrowing.
+unless there is a type assertion or a control flow-based type narrowing.
 Likewise, no operations are permitted on an `unknown` without first asserting or narrowing it to a more specific type.
 
 Both the possible causes of exception (wrong operator or division by zero)
@@ -397,7 +397,7 @@ So what is the problem with older setups?
 Let's return to the basic idea of TypeScript.
 TypeScript expects all globally-used code to be typed, as it does for your code when your project has a reasonable configuration.
 The TypeScript library itself contains only typings for the code of the TypeScript package.
-It is possible to write custom typings for a library, but that is rarely needed - since the TypeScript community has done it for us!
+It is possible to write a custom typing for a library, but that is rarely needed - since the TypeScript community has done it for us!
 
 As with npm, the TypeScript world also celebrates open-source code.
 The community is active and continuously reacting to updates and changes in commonly used npm packages.
@@ -642,7 +642,7 @@ console.log(calculateBMI(180, 74))
 should print the following message:
 
 ```shell
-Normal (healthy weight)
+Normal range
 ```
 
 Create an npm script for running the program with the command `npm run calculateBMI`.
@@ -651,8 +651,8 @@ Create an npm script for running the program with the command `npm run calculate
 
 Create the code of this exercise in file *exerciseCalculator.ts*.
 
-Write a function `calculateExercises` that calculates the average time of ***daily exercise hours***
-and compares it to the ***target amount*** of daily hours and returns an object that includes the following values:
+Write a function `calculateExercises` that calculates the average time of ***daily exercise hours***,
+compares it to the ***target amount*** of daily hours and returns an object that includes the following values:
 
 - the number of days
 - the number of training days
@@ -677,13 +677,15 @@ For the Result object, you should create an [interface](https://www.typescriptla
 If you call the function with parameters `[3, 0, 2, 4.5, 0, 3, 1]` and `2`, it should return:
 
 ```js
-{ periodLength: 7,
+{ 
+  periodLength: 7,
   trainingDays: 5,
   success: false,
   rating: 2,
   ratingDescription: "not too bad but could be better",
   target: 2,
-  average: 1.9285714285714286 }
+  average: 1.9285714285714286
+}
 ```
 
 Create an npm script, `npm run calculateExercises`, to call the function with hard-coded values.
@@ -705,13 +707,15 @@ and:
 ```shell
 $ npm run calculateExercises 2 1 0 2 4.5 0 3 1 0 4
 
-{ periodLength: 9,
+{
+  periodLength: 9,
   trainingDays: 6,
   success: false,
   rating: 2,
   ratingDescription: "not too bad but could be better",
   target: 2,
-  average: 1.7222222222222223 }
+  average: 1.7222222222222223
+}
 ```
 
 In the example, the *first argument* is the target value.
@@ -761,7 +765,7 @@ It's a good place to start, but now it's time to look into the config file a lit
 As mentioned, the [tsconfig.json](https://www.typescriptlang.org/docs/handbook/tsconfig-json.html) file
 contains all your core configurations on how you want TypeScript to work in your project.
 
-Let's specify the following configurations in our *tsconfig.json* file:
+Let's specify the following configuration in our *tsconfig.json* file:
 
 ```json
 {
@@ -895,7 +899,7 @@ A good rule of thumb is to try importing a module using the `import` statement f
 We will always use this method in the *frontend*.
 If `import` does not work, try a combined method: `import ... = require("...")`.
 
-We strongly suggest you read more about TypeScript modules [here](https://www.typescriptlang.org/docs/handbook/modules.html).
+We strongly suggest you read more about [TypeScript modules here](https://www.typescriptlang.org/docs/handbook/modules.html).
 
 There is one more problem with the code:
 
@@ -1009,7 +1013,7 @@ The response is a JSON of the form:
 {
   weight: 72,
   height: 180,
-  bmi: "Normal (healthy weight)"
+  bmi: "Normal range"
 }
 ```
 
@@ -1025,6 +1029,14 @@ If the query parameters of the request are of the wrong type or missing, a respo
 
 Do not copy the calculator code to file *index.ts*;
 instead, make it a [TypeScript module](https://www.typescriptlang.org/docs/handbook/modules.html) that can be imported into *index.ts*.
+
+For `calculateBmi` to work correctly from both the command line and the endpoint, consider adding a check `require.main === module` to the file *bmiCalculator.ts*.
+It tests whether the module is **`main`**, i.e. it is run directly from the command line (in our case, *`npm run calculateBmi`*),
+or it is used by other modules that import functions from it (e.g. *index.ts*).
+Parsing command-line arguments makes sense only if the module is `main`.
+Without this condition, you might see argument validation errors when starting the application via *`npm start`* or *`npm run dev`*.
+
+See the [Node documentation](https://nodejs.org/api/modules.html#accessing-the-main-module) for more.
 
 </div>
 
@@ -1058,9 +1070,9 @@ To get this working, we must add an `export` to the function `calculator`:
 export const calculator = (a: number, b: number, op: Operation) : number => {
 ```
 
-When you hover over the `calculate` function, you can see the typing of the `calculator` even though the code itself does not contain any typings:
+When you hover over the `calculate` function, you can see the typing of the `calculator` even though the code itself does not contain any typing:
 
-![vscode showing calculator types when mouse over function](../../images/8/12a21.png)
+![vscode showing calculator types when mouse over the function](../../images/8/12a21.png)
 
 But if you hover over the parameters which were parsed from the request, an issue arises:
 
@@ -1102,27 +1114,33 @@ our code.
 Let's install ESlint and its TypeScript extensions:
 
 ```shell
-npm i -D eslint @typescript-eslint/eslint-plugin @typescript-eslint/parser
+npm i -D eslint @eslint/js @types/eslint__js typescript typescript-eslint
 ```
 
 We will configure ESlint to [disallow explicit any]( https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-explicit-any.md).
 Write the following rules to *.eslintrc.cjs*:
 
-```json
-{
-  "parser": "@typescript-eslint/parser",
-  "parserOptions": {
-    "ecmaVersion": 11,
-    "sourceType": "module"
-  },
-  "plugins": ["@typescript-eslint"],
-  "rules": {
-    "@typescript-eslint/no-explicit-any": 2 // highlight-line
-  }
-}
-```
+```js
+import eslint from '@eslint/js';
+import tseslint from 'typescript-eslint';
 
-(Newer versions of ESlint have this rule on by default, so you don't necessarily need to add it separately.)
+export default tseslint.config({
+  files: ['**/*.ts'],
+  extends: [
+    eslint.configs.recommended,
+    ...tseslint.configs.recommendedTypeChecked,
+  ],
+  languageOptions: {
+    parserOptions: {
+      project: true,
+      tsconfigRootDir: import.meta.dirname,
+    },
+  },
+  rules: {
+    '@typescript-eslint/no-explicit-any': 'error',
+  },
+});
+```
 
 Let us also set up a **lint** npm script to inspect the files with *.ts* extension by modifying the *package.json* file:
 
@@ -1132,7 +1150,7 @@ Let us also set up a **lint** npm script to inspect the files with *.ts* extensi
   "scripts": {
       "start": "ts-node index.ts",
       "dev": "ts-node-dev index.ts",
-      "lint": "eslint --ext .ts ." // highlight-line
+      "lint": "eslint ." // highlight-line
       //  ...
   },
   // ...
@@ -1152,38 +1170,48 @@ For now, we should probably go with the recommended settings,
 and we will modify the rules as we go along whenever we find something we want to change the behavior of.
 
 On top of the recommended settings, we should try to get familiar with the coding style required in this part and ***set the semicolon at the end of each line of code to `required`***.
+For that, we should install and configure [@stylistic/eslint-plugin](https://eslint.style/packages/default):
 
-So we will use the following *.eslintrc.cjs*
+```bash
+npm i -D @stylistic/eslint-plugin
+```
 
-```json
-{
-  "extends": [
-    "eslint:recommended",
-    "plugin:@typescript-eslint/recommended",
-    "plugin:@typescript-eslint/recommended-requiring-type-checking"
+Our final *eslint.config.mjs* looks as follows:
+
+```js
+import eslint from '@eslint/js';
+import tseslint from 'typescript-eslint';
+import stylistic from "@stylistic/eslint-plugin";
+
+export default tseslint.config({
+  files: ['**/*.ts'],
+  extends: [
+    eslint.configs.recommended,
+    ...tseslint.configs.recommendedTypeChecked,
   ],
-  "plugins": ["@typescript-eslint"],
-  "env": {
-    "node": true,
-    "es6": true
+  languageOptions: {
+    parserOptions: {
+      project: true,
+      tsconfigRootDir: import.meta.dirname,
+    },
   },
-  "rules": {
-    "@typescript-eslint/semi": ["error"],
-    "@typescript-eslint/explicit-function-return-type": "off",
-    "@typescript-eslint/explicit-module-boundary-types": "off",
-    "@typescript-eslint/restrict-template-expressions": "off",
-    "@typescript-eslint/restrict-plus-operands": "off",
-    "@typescript-eslint/no-unused-vars": [
-      "error",
-      { "argsIgnorePattern": "^_" }
+  plugins: {
+    "@stylistic": stylistic,
+  },
+  rules: {
+    '@stylistic/semi': 'error',
+    '@typescript-eslint/no-unsafe-assignment': 'error',
+    '@typescript-eslint/no-explicit-any': 'error',
+    '@typescript-eslint/explicit-function-return-type': 'off',
+    '@typescript-eslint/explicit-module-boundary-types': 'off',
+    '@typescript-eslint/restrict-template-expressions': 'off',
+    '@typescript-eslint/restrict-plus-operands': 'off',
+    '@typescript-eslint/no-unused-vars': [
+      'error',
+      { 'argsIgnorePattern': '^_' }
     ],
-    "no-case-declarations": "off"
   },
-  "parser": "@typescript-eslint/parser",
-  "parserOptions": {
-    "project": "./tsconfig.json"
-  }
-}
+});
 ```
 
 You may have a few semicolons missing, but those are easy to add, and WebStorm should be able to add them when a file is saved.
@@ -1210,7 +1238,7 @@ app.post("/calculate", (req, res) => {
 
 However this still leaves one problem to deal with, the last parameter in the function call (`op`) is not safe:
 
-![vscode showing unsafe argument of any type assigned to parameter of type Operation](../../images/8/51x.png)
+![vscode showing unsafe argument of any type assigned to the parameter of type Operation](../../images/8/51x.png)
 
 One option is to just disable the ESlint rule to make the error disappear:
 > *again you should be able to move your cursor to `op` and use the keyboard shortcut for context actions to disable the rule*
@@ -1265,7 +1293,7 @@ Let us export the type Operation in *calculator.ts*:
 export type Operation = "multiply" | "add" | "divide";
 ```
 
-Now we can import `Operation` and use a **type assertion** to tell the TypeScript compiler what type `op` has:
+Now we can import `Operation` and use a *type assertion* (***`as`***) to tell the TypeScript compiler what type `op` has:
 
 ```js
 import { calculator, Operation } from "./calculator"; // highlight-line
@@ -1306,7 +1334,7 @@ app.post("/calculate", (req, res) => {
 
 Using a type assertion (or quieting an Eslint rule) is risky.
 It leaves the TypeScript compiler off the hook, the compiler just trusts that we as developers know what we are doing.
-If the asserted type does ***not*** have the right kind of value, the result will be a runtime error,
+If the asserted type ***does not*** have the right kind of value, the result will be a runtime error,
 so one must be pretty careful when validating the data if a type assertion is used.
 
 In the next chapter, we shall have a look at [type narrowing](https://www.typescriptlang.org/docs/handbook/2/narrowing.html),
@@ -1325,7 +1353,7 @@ Configure your project to use the above ESlint settings and fix all the warnings
 #### 8.7 WebExercises
 
 Add an endpoint to your app for the exercise calculator.
-It should be used by doing an HTTP POST request to the endpoint ***<http://localhost:3002/exercises>*** with the input in the request body:
+It should be used by doing an HTTP POST request to the endpoint ***<http://localhost:3003/exercises>*** with the input in the request body:
 
 ```js
 {

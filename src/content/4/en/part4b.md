@@ -38,8 +38,8 @@ To do that, let's change the scripts in our *package.json* to include which mode
   "scripts": {
     // highlight-start
     "start": "NODE_ENV=production node index.js",
-    "dev": "NODE_ENV=development nodemon index.js",
-    "test": "NODE_ENV=test jest --verbose --runInBand",
+    "dev": "NODE_ENV=development node --watch index.js",
+    "test": "NODE_ENV=test node --test",
     // highlight-end
     "build:ui": "rm -rf dist && cd ../reading/ && npm run build && cp -r dist ../backend-reading",
     "deploy": "npm run build:ui && git add . && git commit -m npm_generated_rebuild_of_the_UI && git push",
@@ -50,12 +50,9 @@ To do that, let's change the scripts in our *package.json* to include which mode
 }
 ```
 
-We also added the [`runInBand` option](https://jestjs.io/docs/cli#--runinband) to the npm script that executes the tests.
-This option will prevent Jest from running tests in parallel; we will discuss its significance once our tests start using the database.
+We specified the application mode (`NODE_ENV`) as:
 
-We also specified the application mode (`NODE_ENV`) as:
-
-- ***development*** in the `npm run dev` script that uses nodemon.
+- ***development*** in the `npm run dev` script.
 - ***production*** in the default `npm start` command.
 
 > **Windows Users:** There is a slight issue in how we have set up the application mode in our scripts: it will not work on Windows 😔.
@@ -72,8 +69,8 @@ We also specified the application mode (`NODE_ENV`) as:
 >   // ...
 >   "scripts": {
 >     "start": "cross-env NODE_ENV=production node index.js",
->     "dev": "cross-env NODE_ENV=development nodemon index.js",
->     "test": "cross-env NODE_ENV=test jest --verbose --runInBand",
+>     "dev": "cross-env NODE_ENV=development node --watch index.js",
+>     "test": "cross-env NODE_ENV=test node --test",
 >     // ...
 >   },
 >   // ...
@@ -102,7 +99,7 @@ The optimal solution would be to have every test execution use a separate databa
 This is "relatively simple" to achieve by [running Mongo in-memory](https://docs.mongodb.com/manual/core/inmemory/) or by using [Docker](https://www.docker.com) containers.
 Nonetheless, to reduce complexity at this point we will instead continue to use the MongoDB Atlas database.
 
-Let's make some changes to the module that defines the application's configuration, *utils/config.js*:
+Let's make some changes to the module that defines the application's configuration in *utils/config.js*:
 
 ```js
 require('dotenv').config();
@@ -124,11 +121,11 @@ module.exports = {
 The *.env* file has ***separate variables*** for the database addresses of the development and test databases:
 
 ```bash
-MONGODB_URI=mongodb+srv://comp227:<password>@cluster0.gb6u3el.mongodb.net/taskApp?retryWrites=true&w=majority
+MONGODB_URI=mongodb+srv://comp227:<password>@cluster0.gb6u3el.mongodb.net/taskApp?retryWrites=true&w=majority&appName=Cluster0
 PORT=3001
 
 // highlight-start
-TEST_MONGODB_URI=mongodb+srv://comp227:<password>@cluster0.gb6u3el.mongodb.net/testTaskApp?retryWrites=true&w=majority
+TEST_MONGODB_URI=mongodb+srv://comp227:<password>@cluster0.gb6u3el.mongodb.net/testTaskApp?retryWrites=true&w=majority&appName=Cluster0
 // highlight-end
 ```
 
@@ -153,6 +150,7 @@ npm i -D supertest
 Let's write our first test in the *tests/task_api.test.js* file:
 
 ```js
+const { test, after } = require('node:test')
 const mongoose = require("mongoose");
 const supertest = require("supertest");
 const app = require("../app");
@@ -166,7 +164,7 @@ test("tasks are returned as json", async () => {
     .expect("Content-Type", /application\/json/);
 });
 
-afterAll(async () => {
+after(async () => {
   await mongoose.connection.close();
 });
 ```
@@ -185,7 +183,7 @@ Checking the value of the header uses a bit strange looking syntax:
 ```
 
 The desired value is now defined as a [regular expression](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions) or in short **regex**.
-The regex starts and ends with a slash `/`, because the desired string *`application/json`* also contains the same slash,
+The regex starts and ends with a slash `/`, and because the desired string *`application/json`* also contains the same slash,
 it is preceded by a *`\`* so that it is not interpreted as a regex termination character.
 
 In principle, the test could also have been defined as a string
@@ -199,36 +197,29 @@ For the regex we defined, it is acceptable that the header *contains* the string
 The actual value of the header is *`application/json; charset=utf-8`*, i.e. it also contains information about character encoding.
 However, our test is not interested in this and therefore it is ***better to define the test as a regex instead of an exact string***.
 
-The test contains some details that we will explore [a bit later on](/part4/testing_the_backend#async-await).
-The arrow function that defines the test is preceded by the **`async`** keyword and the method call for the *api* object is preceded by the **`await`** keyword.
-We will write a few tests and then take a closer look at this *`async`*/*`await`* magic.
-Do not concern yourself with them for now, just be assured that the example tests work correctly.
-The *`async`*/*`await`* syntax is related to the fact that making a request to the API is an *asynchronous* operation.
-The [*`async`*/*`await`* syntax](https://jestjs.io/docs/asynchronous) can be used for writing asynchronous code with the appearance of synchronous code.
-
 > **FYI:** If you're not familiar with the RegEx syntax of `/application\/json/`,
 you can learn more [via Mozilla's documentation](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions).
 I would strongly encourage you all to practice working more with regular expressions!
 If you're just plain rusty with regex and need practice, then there many sites that can help you test your regex as well, like [regex101](https://regex101.com/).
 
 The test contains some details that we will explore [a bit later on](/part4/testing_the_backend#async-await).
-The arrow function that defines the test is preceded by the `async` keyword
-and the method call for the `api` object is preceded by the `await` keyword.
+The arrow function that defines the test is preceded by the **`async`** keyword
+and the method call for the *`api`* object is preceded by the **`await`** keyword.
 We will write a few tests and then take a closer look at *`async`*/*`await`*.
 Do not concern yourself with them for now, just be assured that the example tests work correctly.
-The async/await syntax is related to the fact that making a request to the API is an **asynchronous** operation.
-The [Async/await syntax](https://jestjs.io/docs/asynchronous) can be used for writing asynchronous code with the appearance of synchronous code.
+The *`async`*/*`await`* syntax is related to the fact that making a request to the API is an **asynchronous** operation.
+This syntax can be used for writing asynchronous code with the appearance of synchronous code.
 
 Once all the tests (*there is currently only one*) have finished running, we have to close the database connection used by Mongoose.
-This can be achieved with the [`afterAll` method](https://jestjs.io/docs/api#afterallfn-timeout):
+This can be achieved with the [`after` method](https://nodejs.org/api/test.html#afterfn-option):
 
 ```js
-afterAll(async () => {
+after(async () => {
   await mongoose.connection.close();
 });
 ```
 
-#### Dealing with some supertest and jest warnings
+#### Dealing with some supertest warnings
 
 At this point, you may end up noticing that WebStorm will flag some false positive warnings in your code.
 Particularly you may see an error like this:
@@ -236,9 +227,8 @@ Particularly you may see an error like this:
 ![jest supertest is having issues](../../images/4/custom/supertest_get_call.png)
 
 Your code still runs, but we want to prevent as many of these false positives from causing us to lose confidence in WebStorm's excellent warning system.
-So to remove this, we can do something similar to what we did [for removing jest errors](/part4/#handling-complaints-about-jest) and issuing an npm command.
 
-This time, I'll show you how to do this from WebStorm.
+So to remove this, I'll show you how to do this from WebStorm.
 Open *package.json* and locate the `supertest` dependency.
 Then either right-click (or use your keyboard shortcut) to open up the context actions and select ***install @types/supertest*** option and you should be set.
 
@@ -247,65 +237,14 @@ Then either right-click (or use your keyboard shortcut) to open up the context a
 For many of the libraries, we'll be able to download those types to have more information that WebStorm can provide us,
 and I think it's prudent to install as many as they allow as *`devDependencies`*.
 
-#### Mongoose related warnings
-
-While *mongoose* is a very popular library, there are some intricacies that we may end up having to deal with.
-
-For example, when running your tests you may run across the following console warning:
-
-![jest console warning about not exiting](../../images/4/8.png)
-
-The problem is quite likely caused by the Mongoose version 6.x, the problem does not appear when versions 5.x or 7.x are used.
-[Mongoose documentation](https://mongoosejs.com/docs/jest.html) does not recommend testing Mongoose applications with Jest.
-
-[One way](https://stackoverflow.com/questions/50687592/jest-and-mongoose-jest-has-detected-opened-handles)
-to get rid of this is to add the file *tests/teardown.js* with the following content:
-
-```js
-module.exports = () => {
-  process.exit(0);
-};
-```
-
-and by extending the Jest definitions in the *package.json* like this:
-
-```js
-{
- //...
- "jest": {
-   "testEnvironment": "node",
-   "globalTeardown": "./tests/teardown.js" // highlight-line
- }
-}
-```
-
-#### Tests taking a long time
-
-Another error you may come across is your test takes longer than the default Jest test timeout of 5000 ms.
-This can be solved by adding a third parameter to our *task_api.test.js* function:
-  
-```js
-test("tasks are returned as json", async () => {
-  await api
-    .get("/api/tasks")
-    .expect(200)
-    .expect("Content-Type", /application\/json/);
-}, 100000); //highlight-line
-```
-  
-This third parameter sets the timeout to *`100000`* ms.
-A long timeout ensures that our test won't fail due to the time it takes to run.
-(A long timeout may not be what you want for tests based on performance or speed, but this is fine for our example tests).
-
-If you still encounter issues with *mongoose* timeouts, set `bufferTimeoutMS` variable to a value significantly higher than 10000 (10 seconds).
-You could set it like this at the top, right after the `require` statements: `mongoose.set("bufferTimeoutMS", 30000)`
-
 > **Pertinent**: at the [beginning](/part4/structure_of_backend_application_introduction_to_testing#project-structure)
 of this part we extracted the Express application into the *app.js* file,
 and the role of the *index.js* file was changed to launch the application at the specified port via `app.listen`:
 >
 > ```js
 > const app = require("./app"); // the actual Express app
+> const config = require('./utils/config')
+> const logger = require('./utils/logger')
 > // ...
 > 
 > app.listen(config.PORT, () => {
@@ -330,25 +269,45 @@ and the role of the *index.js* file was changed to launch the application at the
 >> *if the server is not already listening for connections then it is bound to an ephemeral port for you so there is no need to keep track of ports.*
 >
 > In other words, ***supertest makes sure that the application being tested is started at the port that it uses internally***.
+> This is one of the reasons why we are going with supertest instead of something like axios,
+> as we do not need to run another instance of the server separately before beginning to test.
+> The other reason is that supertest provides functions like `expect()`, which makes testing easier.
 
 Let's write a few more tests:
 
 ```js
+const assert = require('node:assert')
+// ...
+
 test("there are two tasks", async () => {
   const response = await api.get("/api/tasks");
-  expect(response.body).toHaveLength(2);
+  assert.strictEqual(response.body.length, 2)
 });
 
-test("the first task is about HTTP methods", async () => {
+test("a specific task is within the returned tasks", async () => {
   const response = await api.get("/api/tasks");
-  expect(response.body[0].content).toBe("Wash the dishes");
+  const contents = response.body.map(e => e.content)
+  assert.strictEqual(contents.includes("Wash the dishes"), true)
 });
 ```
 
-Both tests store the response of the request to the `response` variable,
+Both tests store the response of the request in the `response` variable,
 and unlike the previous test that used the methods provided by *supertest* for verifying the status code and headers,
 this time ***we are inspecting the response data stored in `response.body` property***.
-Our tests verify the format and content of the response data with the [`expect` method](https://jestjs.io/docs/expect#expectvalue) of Jest.
+Our tests verify the format and content of the response data with the
+[`strictEqual` method](https://nodejs.org/docs/latest/api/assert.html#assertstrictequalactual-expected-message) of the *assert-library*.
+
+We could simplify the second test a bit,
+and use the [`assert`](https://nodejs.org/docs/latest/api/assert.html#assertokvalue-message) itself to verify that the task is among the returned ones:
+
+```js
+test('a specific task is within the returned tasks', async () => {
+  const response = await api.get('/api/tasks')
+
+  const contents = response.body.map(e => e.content)
+  assert(contents.includes("Wash the dishes"))
+})
+```
 
 The benefit of using the *`async`*/*`await`* syntax is starting to become evident.
 Normally we would have to use callback functions to access the data returned by promises, but with the new syntax things are a lot more comfortable:
@@ -357,7 +316,7 @@ Normally we would have to use callback functions to access the data returned by 
 const response = await api.get("/api/tasks");
 // execution gets here only after the HTTP request is complete
 // the result of HTTP request is saved in variable response
-expect(response.body).toHaveLength(2);
+assert.strictEqual(response.body.length, 2)
 ```
 
 The middleware that outputs information about the HTTP requests is obstructing the test execution output.
@@ -387,26 +346,27 @@ module.exports = {
 
 ### Initializing the database before tests
 
-Testing appears to be easy and our tests are currently passing.
-However, our tests are problematic because they are dependent on the state of the database (which happens to be correct in my test database).
+Currently, our tests have an issue where their success depends on the state of the database.
+The tests pass if the test database happens to contain two tasks, one of which has the content `"Wash the dishes"`.
 To make our tests more robust, we have to ***reset the database and generate the needed test data in a controlled manner before we run the tests***.
 
-Our tests are already using [Jest's `afterAll` function](https://jestjs.io/docs/api#afterallfn-timeout)
+Our tests are already using the [`after` function](https://nodejs.org/api/test.html#afterfn-options)
 to close the connection to the database after the tests are finished executing.
-Jest offers many other [functions](https://jestjs.io/docs/setup-teardown)
+The library *node:test* offers many other functions
 that can be used for executing operations once before any test is run or every time before a test is run.
 
-In *task_api.test.js*, let's initialize the database ***before every test*** with the [`beforeEach` function](https://jestjs.io/docs/en/api.html#beforeeachfn-timeout):
+In *task_api.test.js*, let's initialize the database **before every test** with the [`beforeEach` function](https://nodejs.org/api/test.html#beforeeachfn-options):
 
 ```js
-const mongoose = require("mongoose");
-const supertest = require("supertest");
-const app = require("../app");
 
-const api = supertest(app);
-// highlight-start
-const Task = require("../models/task");
-// highlight-end
+const assert = require('node:assert')
+const { test, after, beforeEach } = require('node:test') // highlight-line
+const mongoose = require('mongoose')
+const supertest = require('supertest')
+const app = require('../app')
+const Task = require('../models/task') // highlight-line
+
+const api = supertest(app)
 
 // highlight-start
 const initialTasks = [
@@ -434,39 +394,55 @@ beforeEach(async () => {
   await taskObject.save();
 });
 // highlight-end
+
 // ...
 ```
 
 The database is cleared out at the beginning, and after that, we save the two tasks stored in the `initialTasks` array to the database.
 By doing this, *we ensure that the database is in the same state before every test is run*.
 
-Let's also make the following changes to our last two tests:
+Let's modify the test that checks the number of tasks as follows:
 
 ```js
 test("all tasks are returned", async () => { // highlight-line
   const response = await api.get("/api/tasks");
-  expect(response.body).toHaveLength(initialTasks.length); // highlight-line
-});
+  assert.strictEqual(response.body.length, initialTasks.length) // highlight-line
+})
 
-test("a specific task is within the returned tasks", async () => { // highlight-line
-  const response = await api.get("/api/tasks");
-  // highlight-start
-  const contents = response.body.map(r => r.content);
-  expect(contents).toContain("Take out the trash");
-  // highlight-end
-});
+// ...
 ```
-
-*Pay special attention to the `expect` in the latter test.*
-The `response.body.map(r => r.content)` command is used to create an array containing the content of every task returned by the API.
-The [`toContain` method](https://jestjs.io/docs/expect#tocontainitem) is used for checking that the task given to it as a parameter is in the list of tasks returned by the API.
 
 ### Running tests one by one
 
 The `npm test` command executes all of the tests for the application.
 When we are writing tests, it is usually wise to only execute one or two tests.
-Jest offers a few different ways of accomplishing this, one of which is the [`only` method](https://jestjs.io/docs/en/api#testonlyname-fn-timeout).
-If tests are written across many files, this method is not great.
+There are a few different ways of accomplishing this, one of which is the [**`only`** method](https://nodejs.org/api/test.html#testonlyname-options-fn).
+With this method, we can define in the code what tests should be executed:
+
+```js
+test.only('tasks are returned as json', async () => {
+  await api
+    .get('/api/tasks')
+    .expect(200)
+    .expect('Content-Type', /application\/json/)
+})
+
+test.only('all tasks are returned', async () => {
+  const response = await api.get('/api/tasks')
+
+  assert.strictEqual(response.body.length, 2)
+})
+```
+
+When tests are run with option *`--test-only`*, that is, with the command:
+
+```bash
+npm test -- --test-only
+```
+
+The functions marked as `test.only` are the ones npm executes.
+
+The danger of `only` is that one forgets to remove those from the code.
 
 A better option is to specify the tests that need to be run as parameters of the `npm test` command.
 
@@ -476,22 +452,19 @@ The following command only runs the tests found in the *tests/task_api.test.js* 
 npm test -- tests/task_api.test.js
 ```
 
-The `-t` option can be used for running tests with a specific name:
+The [--tests-by-name-pattern](https://nodejs.org/api/test.html#filtering-tests-by-name) option can be used for running tests with a specific name:
 
 ```js
-npm test -- -t 'a specific task is within the returned tasks'
+npm test -- --test-name-pattern="a specific task is within the returned tasks"
 ```
 
-The provided parameter can refer to the name of the test or the `describe` block.
+The provided argument can refer to the name of the test or the `describe` block.
 ***The parameter can also contain just a part of the name.***
 *The following command will run all of the tests that contain `tasks` in their name:*
 
 ```js
-npm test -- -t 'tasks'
+npm run test -- --test-name-pattern="tasks"
 ```
-
-> **Notice** When running a single test, the ***mongoose connection might stay open if no tests using the connection are run*** 🐞.
-The problem might be because *supertest* primes the connection, but *Jest* does not run the `afterAll` portion of the code.
 
 ### async/await
 
@@ -563,7 +536,7 @@ Let's see them side-by-side:
 
 | .then | .now |
 | :--- | :--- |
-|<pre>Task.find({})<br/>  .then(tasks => {<br/>  })<br/>  .then(response => {<br/>    console.log("the 1st task is removed");<br/>    // more code here<br/>  });<br/>|<pre>const tasks = await Task.find({});<br/>const response = await tasks[0].remove();<br/><br>console.log("the 1st task is removed");<br/>|
+| <pre>Task.find({})<br/>  .then(tasks => {<br/>  })<br/>  .then(response => {<br/>    console.log("the 1st task is removed");<br/>    // more code here<br/>  });<br/> | <pre>const tasks = await Task.find({});<br/>const response = await tasks[0].remove();<br/><br>console.log("the 1st task is removed");<br/> |
 
 Thanks to the new syntax, the *code is a lot simpler than the previous `then` chain*.
 
@@ -594,11 +567,22 @@ After this, the code calls the function with `main()`.
 
 ### async/await in the backend
 
-Let's start to change the backend to `async` and `await`.
+Let's start to change the backend routes to `async` and `await`.
+
 As all of the asynchronous operations are currently done inside of a function,
 it is enough to change the route handler functions into `async` functions.
 
-The route in *controllers/tasks.js* for fetching all `tasks` gets changed to the following:
+Let's start with the route in *controllers/tasks.js* for fetching all `tasks`:
+
+```js
+tasksRouter.get('/', (request, response) => {
+  Task.find({}).then((tasks) => {
+    response.json(tasks)
+  })
+})
+```
+
+that route gets changed to the following:
 
 ```js
 tasksRouter.get("/", async (request, response) => { 
@@ -643,14 +627,13 @@ test("a valid task can be added", async () => {
 
   const contents = response.body.map(r => r.content);
 
-  expect(response.body).toHaveLength(initialTasks.length + 1);
-  expect(contents).toContain(
-    "async/await simplifies making async calls"
-  );
-});
+  assert.strictEqual(response.body.length, initialTasks.length + 1)
+
+  assert(contents.includes('async/await simplifies making async calls'))
+})
 ```
 
-Our test fails since we are by accident returning the status code ***200 OK*** when a new task is created.
+Our test fails because we accidentally returned the status code ***200 OK*** when a new task is created.
 Let us change that to ***201 CREATED*** in *controllers/tasks.js*:
 
 ```js
@@ -686,8 +669,8 @@ test("task without content is not added", async () => {
 
   const response = await api.get("/api/tasks");
 
-  expect(response.body).toHaveLength(initialTasks.length);
-});
+  assert.strictEqual(response.body.length, initialTasks.length)
+})
 ```
 
 Both tests check the state stored in the database after the saving operation, by fetching all the tasks of the application.
@@ -741,13 +724,15 @@ which can be used for creating a database object ID that does not belong to any 
 Our *task_api.test.js* can now use the helper module and be changed like this:
 
 ```js
-const supertest = require("supertest");
+const assert = require('node:assert')
+const { test, after, beforeEach } = require('node:test')
 const mongoose = require("mongoose");
-const helper = require("./test_helper"); // highlight-line
+const supertest = require("supertest");
 const app = require("../app");
-const api = supertest(app);
-
+const helper = require("./test_helper"); // highlight-line
 const Task = require("../models/task");
+
+const api = supertest(app)
 
 beforeEach(async () => {
   await Task.deleteMany({});
@@ -769,18 +754,15 @@ test("tasks are returned as json", async () => {
 test("all tasks are returned", async () => {
   const response = await api.get("/api/tasks");
 
-  expect(response.body).toHaveLength(helper.initialTasks.length); // highlight-line
-});
+  assert.strictEqual(response.body.length, helper.initialTasks.length) // highlight-line
+})
 
 test("a specific task is within the returned tasks", async () => {
   const response = await api.get("/api/tasks");
 
-  const contents = response.body.map(r => r.content);
-
-  expect(contents).toContain(
-    "Take out the trash"
-  );
-});
+  const contents = response.body.map(r => r.content)
+  assert(contents.includes("Take out the trash"))
+})
 
 test("a valid task can be added ", async () => {
   const newTask = {
@@ -795,12 +777,10 @@ test("a valid task can be added ", async () => {
     .expect("Content-Type", /application\/json/);
 
   const tasksAtEnd = await helper.tasksInDb(); // highlight-line
-  expect(tasksAtEnd).toHaveLength(helper.initialTasks.length + 1); // highlight-line
+  assert.strictEqual(tasksAtEnd.length, helper.initialTasks.length + 1) // highlight-line
 
   const contents = tasksAtEnd.map(t => t.content); // highlight-line
-  expect(contents).toContain(
-    "async/await simplifies making async calls"
-  );
+  assert(contents.includes("async/await simplifies making async calls"))
 });
 
 test("task without content is not added", async () => {
@@ -815,82 +795,93 @@ test("task without content is not added", async () => {
 
   const tasksAtEnd = await helper.tasksInDb(); // highlight-line
 
-  expect(tasksAtEnd).toHaveLength(helper.initialTasks.length); // highlight-line
-});
+  assert.strictEqual(tasksAtEnd.length, helper.initialTasks.length) // highlight-line
+})
 
-afterAll(async () => {
-  await mongoose.connection.close();
-});
+after(async () => {
+  await mongoose.connection.close()
+})
 ```
 
 The code using promises works and the tests pass.
 We are ready to refactor our code to use the *`async`*/*`await`* syntax.
 
-Change the code in *controllers/tasks.js* that adds a new `task` (notice that the route handler definition is preceded by the `async` keyword):
+Change the code in *controllers/tasks.js* that adds a new `task` changes from:
 
 ```js
-tasksRouter.post("/", async (request, response, next) => {
-  const body = request.body;
+tasksRouter.post('/', (request, response, next) => {
+  const body = request.body
 
   const task = new Task({
     content: body.content,
-    important: Boolean(body.important) || false,
+    important: body.important || false,
     date: new Date(),
-  });
+  })
 
+  task
+    .save()
+    .then((savedTask) => {
+      response.status(201).json(savedTask)
+    })
+    .catch((error) => next(error))
+})
+```
+
+changes to:
+
+```js
+tasksRouter.post("/", async (request, response, next) => { // highlight-line
+  const body = request.body
+
+  const task = new Task({
+    content: body.content,
+    important: body.important || false,
+    date: new Date(),
+  })
+  // highlight-start
   const savedTask = await task.save();
   response.status(201).json(savedTask);
-});
-```
-
-There's a slight problem with our code: *we don't handle error situations*.
-***How should we deal with them?***
-
-### Error handling and async/await
-
-Luckily, we've built enough tests at this point that if we try to run our tests, jest will let us know that something is wrong as our test fails.
-
-![test failing saying content is required](../../images/4/6.png)
-
-While this should be enough of an alarm, you could also manually test this, by running the program and merely pressing save without any content.
-Once you do this, you'll get a nice stack trace and the server will even crash afterwards.
-
-![terminal showing unhandled promise rejection warning](../../images/4/custom/exception_from_6.png)
-
-What is happening? Well, we end up with an unhandled promise rejection, and the request never receives a response.
-
-With *`async`*/*`await`* the recommended way of dealing with exceptions is the old and familiar *try/catch* mechanism:
-
-```js
-tasksRouter.post("/", async (request, response, next) => {
-  const body = request.body;
-
-  const task = new Task({
-    content: body.content,
-    important: Boolean(body.important) || false,
-    date: new Date(),
-  });
-  // highlight-start
-  try {
-    const savedTask = await task.save();
-    response.status(201).json(savedTask);
-  } catch(exception) {
-    next(exception);
-  }
   // highlight-end
-});
+})
 ```
 
-The catch block simply calls the `next` function, which passes the request handling to the error handling middleware.
+You need to add the `async` keyword at the beginning of the handler to enable the use of `async`/`await` syntax.
+The code becomes much simpler.
 
-After making the change, all of our tests will pass once again.
-
-Next, let's write tests for fetching and removing an individual task:
+Notably, possible errors no longer need to be forwarded separately for handling.
+In code using promises, a possible error was passed to the error-handling middleware like this:
 
 ```js
-test("a specific task can be viewed", async () => {
-  const tasksAtStart = await helper.tasksInDb();
-  const taskToView = tasksAtStart[0];
+  task
+    .save()
+    .then((savedTask) => {
+      response.json(savedTask)
+    })
+    .catch((error) => next(error)) // highlight-line
+```
+
+When using `async`/`await` syntax, Express will [automatically call](https://expressjs.com/en/guide/error-handling.html)
+the error-handling middleware if an `await` statement throws an error or the awaited promise is rejected.
+This makes the final code even cleaner.
+
+> **FYI:** This feature is available starting from Express version 5.
+> If you installed Express as a dependency before March 31, 2025, you might still be using version 4.
+> You can check your project's Express version in the *package.json* file.
+> If you have an older version, update to version 5 with the following command:
+>
+> ```bash
+> npm install express@5 
+> ```
+
+### Refactoring the route responsible for fetching a single task
+
+Next, let's write a test for viewing the details of a single task.
+The code highlights the actual API operation being performed:
+
+```js
+test('a specific task can be viewed', async () => {
+  const tasksAtStart = await helper.tasksInDb()
+  const taskToView = tasksAtStart[0]
 
 // highlight-start
   const resultTask = await api
@@ -899,166 +890,77 @@ test("a specific task can be viewed", async () => {
     .expect("Content-Type", /application\/json/);
 // highlight-end
 
-  expect(resultTask.body).toEqual(taskToView);
-});
-
-test("a task can be deleted", async () => {
-  const tasksAtStart = await helper.tasksInDb();
-  const taskToDelete = tasksAtStart[0];
-
-// highlight-start
-  await api
-    .delete(`/api/tasks/${taskToDelete.id}`)
-    .expect(204);
-// highlight-end
-
-  const tasksAtEnd = await helper.tasksInDb();
-  expect(tasksAtEnd).toHaveLength(
-    helper.initialTasks.length - 1
-  );
-
-  const contents = tasksAtEnd.map(r => r.content);
-  expect(contents).not.toContain(taskToDelete.content);
-});
+  assert.deepStrictEqual(resultTask.body, taskToView)
+})
 ```
 
-Both tests share a similar structure.
-In the initialization phase, they fetch a task from the database.
-After this, the tests call the actual operation being tested.
-Lastly, the tests verify that the outcome of the operation is as expected.
+First, the test fetches a single task from the database.
+Then, it checks that the specific task can be retrieved through the API.
+Finally, it verifies that the content of the fetched task is as expected.
 
-In the first test, the *task* object we receive as the *response body* goes through JSON serialization and parsing.
-This processing will turn the task object's `date` property value's type from `Date` object into a `string`.
-Because of this we can't directly compare the equality of the `resultTask.body` and `taskToView` that is read from the database.
-Instead, we must first perform similar JSON serialization and parsing for the `taskToView` as the server is performing for the task object.
-
-The tests pass and now that we have some coverage for that code, we can refactor the tested routes to use *`async`*/*`await`*:
+There is one point worth noting in the test.
+Instead of the previously used [`strictEqual` method](https://nodejs.org/api/assert.html#assertstrictequalactual-expected-message),
+the [`deepStrictEqual` method](https://nodejs.org/api/assert.html#assertdeepstrictequalactual-expected-message) is used:
 
 ```js
-tasksRouter.get("/:id", async (request, response, next) => {
-  try {
-    const task = await Task.findById(request.params.id);
-    if (task) {
-      response.json(task);
-    } else {
-      response.status(404).end();
-    }
-  } catch(exception) {
-    next(exception);
-  }
-});
+assert.deepStrictEqual(resultTask.body, taskToView)
 ```
+
+The reason for this is that `strictEqual` uses the [`Object.is` method](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/is)
+to compare similarity, i.e. it compares whether the objects are the same.
+In our case, we want to check that the contents of the objects, i.e. the values of their fields, are the same.
+For this purpose `deepStrictEqual` is suitable.
+
+The tests pass and we can safely refactor the tested route to use `async`/`await`:
 
 ```js
-tasksRouter.delete("/:id", async (request, response, next) => {
-  try {
-    await Task.findByIdAndDelete(request.params.id);
-    response.status(204).end();
-  } catch(exception) {
-    next(exception);
-  }
-});
-```
-
-You can find the code for our current application in its entirety in the *part4-4* branch of
-[this GitHub repository](https://github.com/comp227/part3-tasks-backend/tree/part4-4).
-
-### Eliminating the try-catch
-
-*Async/await* unclutters the code, though at the expense of requiring the `try`/`catch` structure for catching exceptions.
-All of the route handlers follow the same structure
-
-```js
-try {
-  // do the async operations here
-} catch(exception) {
-  next(exception);
-}
-```
-
-One starts to wonder if it would be possible to refactor the code to eliminate the *catch* from the methods?
-
-The [*express-async-errors* library](https://github.com/davidbanham/express-async-errors) has a solution for this.
-
-Let's install the library
-
-```bash
-npm i express-async-errors
-```
-
-Using the library requires minimal changes.
-You introduce the library in *app.js* ***before*** you import your routes:
-
-```js
-const config = require("./utils/config");
-const express = require("express");
-require("express-async-errors"); // highlight-line
-const app = express();
-const cors = require("cors");
-const tasksRouter = require("./controllers/tasks");
-const middleware = require("./utils/middleware");
-const logger = require("./utils/logger");
-const mongoose = require("mongoose");
-
-// ...
-
-module.exports = app;
-```
-
-The *'magic'* of the library allows us to eliminate the *`try`*/*`catch`* blocks completely.
-For example, our code for deleting a task in *controller/tasks.js*:
-
-```js
-tasksRouter.delete("/:id", async (request, response, next) => {
-  try {
-    await Task.findByIdAndDelete(request.params.id);
-    response.status(204).end();
-  } catch (exception) {
-    next(exception);
-  }
-});
-```
-
-changes to:
-
-```js
-tasksRouter.delete("/:id", async (request, response) => {
-  await Task.findByIdAndDelete(request.params.id);
-  response.status(204).end();
-});
-```
-
-Because of the library, we do not need the `next(exception)` call anymore.
-***The library handles everything under the hood.***
-If an exception occurs in an `async` route, the execution is automatically passed to the error-handling middleware.
-
-The other routes become:
-
-```js
-tasksRouter.post("/", async (request, response) => {
-  const body = request.body;
-
-  const task = new Task({
-    content: body.content,
-    important: Boolean(body.important) || false,
-    date: new Date(),
-  });
-
-  const savedTask = await task.save();
-  response.status(201).json(savedTask);
-});
-```
-
-```js
-tasksRouter.get("/:id", async (request, response) => {
-  const task = await Task.findById(request.params.id);
+tasksRouter.get('/:id', async (request, response) => {
+  const task = await Task.findById(request.params.id)
   if (task) {
-    response.json(task);
+    response.json(task)
   } else {
     response.status(404).end();
   }
 });
 ```
+
+### Refactoring the route responsible for deleting a task
+
+Let's also add a test for the route that handles deleting a task:
+
+```js
+test('a task can be deleted', async () => {
+  const tasksAtStart = await helper.tasksInDb()
+  const taskToDelete = tasksAtStart[0]
+
+  await api
+    .delete(`/api/tasks/${taskToDelete.id}`)
+    .expect(204)
+
+  const tasksAtEnd = await helper.tasksInDb()
+
+  const contents = tasksAtEnd.map(n => n.content)
+  assert(!contents.includes(taskToDelete.content))
+
+  assert.strictEqual(tasksAtEnd.length, helper.initialTasks.length - 1)
+})
+```
+
+The test is structured similarly to the one that checks viewing a single task.
+First, a single task is fetched from the database, then its deletion via the API is tested.
+Finally, it is verified that the task no longer exists in the database and that the total number of tasks has decreased by one.
+
+The tests still pass, so we can safely proceed with refactoring the route:
+
+```js
+tasksRouter.delete('/:id', async (request, response) => {
+  await Task.findByIdAndDelete(request.params.id)
+  response.status(204).end()
+})
+```
+
+You can find the code for our current application in its entirety in the *part4-4* branch of
+[this GitHub repository](https://github.com/comp227/part3-tasks-backend/tree/part4-4).
 
 ### Optimizing the beforeEach function
 
@@ -1112,12 +1014,13 @@ saved
 saved
 ```
 
-Aside from sharing with them our clog template, we look closer at the issue.
-Despite our use of the async/await syntax, our solution does not work as we expected it to.
+Despite our use of the `async`/`await` syntax, our solution does not work as we expected it to.
 From the logs, we notice the test execution begins before the database is initialized!
 
-The problem is that ***every iteration of the forEach loop generates an asynchronous operation***, and `beforeEach` won't wait for them to finish executing.
+The problem is that ***every iteration of the `forEach` loop generates an asynchronous operation***, and `beforeEach` won't wait for them to finish executing.
 In other words, the `await` commands defined inside of the `forEach` loop are not in the `beforeEach` function, but in ***separate functions that `beforeEach` will not wait for***.
+Additionally, [the `forEach` method expects a synchronous function as its parameter](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/forEach#description),
+so the `async`/`await` structure does not work correctly within it.
 
 Since the execution of tests begins immediately after `beforeEach` has finished executing,
 the execution of tests begins before the database state is initialized.
@@ -1127,13 +1030,13 @@ One way of fixing this is to wait for all of the asynchronous operations to fini
 
 ```js
 beforeEach(async () => {
-  await Task.deleteMany({});
+  await Task.deleteMany({})
 
   const taskObjects = helper.initialTasks
-    .map(task => new Task(task));
-  const promiseArray = taskObjects.map(task => task.save());
-  await Promise.all(promiseArray);
-});
+    .map(task => new Task(task))
+  const promiseArray = taskObjects.map(task => task.save())
+  await Promise.all(promiseArray)
+})
 ```
 
 The solution is quite advanced despite its compact appearance.
@@ -1142,8 +1045,9 @@ The next line of code creates a new array that **consists of promises**,
 that are created by calling the `save` method of each item in the `taskObjects` array.
 In other words, it is an array of promises for saving each of the items to the database.
 
-`Promise.all` can be used for transforming an array of promises into a single promise,
-that will be ***fulfilled*** once every promise in the array passed to it as a parameter is resolved.
+The [`Promise.all` method](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/all)
+can be used for transforming an array of promises into a single promise,
+which will be ***fulfilled*** once every promise in the array passed to it as an argument is resolved.
 The last line of code `await Promise.all(promiseArray)` waits until every promise for saving a task is finished, meaning that the database has been initialized.
 
 > The returned values of each promise in the array can still be accessed when using the `Promise.all` method.
@@ -1172,9 +1076,15 @@ beforeEach(async () => {
 > It then provides you the option to change it automatically to use the `for`...`of` syntax we've just explained here.
 > ***Make sure to look at the warnings!***
 
-The asynchronous nature of JavaScript can lead to surprising behavior, and for this reason,
-it is important to pay careful attention when using the *`async`*/*`await`* syntax.
-Even though the syntax makes it easier to deal with promises, **it is still necessary to understand how promises work**!
+However, there is an even simpler way to implement the `beforeEach` function.
+The easiest way to handle the situation is by utilizing Mongoose's built-in method `insertMany`:
+
+```js
+beforeEach(async () => {
+  await Task.deleteMany({})
+  await Task.insertMany(helper.initialTasks) // highlight-line
+})
+```
 
 The code for our application can be found on
 [GitHub](https://github.com/comp227/part3-tasks-backend/tree/part4-5), branch *part4-5*.
@@ -1195,18 +1105,12 @@ but will also add another item, since last time we pledged to check the database
 
 ### Exercises 4.8-4.12
 
-> **Pertinent:** the material uses the [`toContain` matcher](https://jestjs.io/docs/expect#tocontainitem) in several places
-to verify that an array contains a specific element.
-It's worth noting that the method uses the `===` operator for comparing and matching elements, which means that it is often not well suited for matching objects.
-In most cases, the appropriate method for verifying objects in arrays is the [`toContainEqual`](https://jestjs.io/docs/expect#tocontainequalitem) matcher.
-However, the model solutions don't check for objects in arrays with matchers, so using the method is not required for solving the exercises.
-
 **Warning:** If you find yourself ***using `async`/`await` and `then` methods*** in the same code, it is almost guaranteed that **you are doing something wrong**.
 Use one or the other and don't mix the two.
 
 #### 4.8: Watchlist tests, Step 1
 
-Use the *supertest* package for writing a test that makes an **HTTP GET** request to the ***/api/show*** URL.
+Use the *supertest* library for writing a test that makes an **HTTP GET** request to the ***/api/show*** URL.
 Verify that the watchlist application returns the correct amount of streaming shows in the JSON format.
 
 Once the test is finished, refactor the route handler to use the *`async`*/*`await`* syntax instead of promises.
@@ -1215,30 +1119,22 @@ Notice that you will have to make similar changes to the code that were made
 [in the material](#specifying-application-modes),
 like defining the test environment so that you can write tests that use separate databases.
 
-> **FYI:** If you run into the following warning:
->
-![Warning to read docs on connecting mongoose to jest](../../images/4/8a.png)
->
-> *Please revisit [the earlier section](#mongoose-related-warnings)*
-> to follow the directions for adding a *tests/teardown.js* file and updating Jest definitions in *package.json*.
->
->> **Pertinent:** when you are writing your tests ***it is better to not execute all of your tests***, only execute the ones you are working on.
-Read more about this [here](#running-tests-one-by-one).
+> **Pertinent:** when you are writing your tests ***it is better to not execute all of your tests***, only execute the ones you are working on.
+> [Read more about this here](#running-tests-one-by-one).
 
 #### 4.9*: Watchlist tests, Step 2
 
 Write a test that verifies that the unique identifier property of the shows is named `id`, by default the database names the property `_id`.
-Verifying the existence of a property is easily done with Jest's [`toBeDefined` matcher](https://jestjs.io/docs/en/expect#tobedefined).
 
 Make the required changes to the code so that it passes the test.
-The [`toJSON` method](/part3/saving_data_to_mongo_db#backend-connected-to-a-database) discussed in part 3
+The [`toJSON` method](/part3/saving_data_to_mongo_db#connecting-the-backend-to-a-database) discussed in part 3
 is an appropriate place for defining the `id` parameter.
 
 #### 4.10: Watchlist tests, Step 3
 
 Write a test that verifies that making an **HTTP POST** request to the ***/api/shows*** URL successfully creates a new show onto the list.
 At the very least, verify that the total number of shows in the system is increased by one.
-You can also verify that the show JSON object is saved correctly to the database.
+You can also verify that the content of the show is saved correctly to the database.
 
 Once the test is finished, refactor the operation to use *`async`*/*`await`* instead of promises.
 
@@ -1271,133 +1167,124 @@ The readability of the test would improve if we group related tests with `descri
 Below is an example of *task_api.test.js* after making some minor improvements:
 
 ```js
-const supertest = require("supertest");
-const mongoose = require("mongoose");
-const helper = require("./test_helper");
-const app = require("../app");
-const api = supertest(app);
+const assert = require('node:assert')
+const { test, after, beforeEach, describe } = require('node:test')
+const mongoose = require('mongoose')
+const supertest = require('supertest')
+const app = require('../app')
+const helper = require('./test_helper')
+const Task = require('../models/task')
 
-const Task = require("../models/task");
+const api = supertest(app)
 
-beforeEach(async () => {
-  await Task.deleteMany({});
-  await Task.insertMany(helper.initialTasks);
-});
+describe('when there is initially some tasks saved', () => {
+  beforeEach(async () => {
+    await Task.deleteMany({})
+    await Task.insertMany(helper.initialTasks)
+  })
 
-describe("when there is initially some tasks saved", () => {
-  test("tasks are returned as json", async () => {
+  test('tasks are returned as json', async () => {
     await api
       .get("/api/tasks")
       .expect(200)
       .expect("Content-Type", /application\/json/);
   });
 
-  test("all tasks are returned", async () => {
-    const response = await api.get("/api/tasks");
-    expect(response.body).toHaveLength(helper.initialTasks.length);
-  });
+  test('all tasks are returned', async () => {
+    const response = await api.get('/api/tasks')
 
-  test("a specific task is within the returned tasks", async () => {
-    const response = await api.get("/api/tasks");
-    const contents = response.body.map(r => r.content);
-    expect(contents).toContain(
-      "Take out the trash"
-    );
-  });
-});
+    assert.strictEqual(response.body.length, helper.initialTasks.length)
+  })
 
-describe("viewing a specific task", () => {
-  test("succeeds with a valid id", async () => {
-    const tasksAtStart = await helper.tasksInDb();
-    const taskToView = tasksAtStart[0];
+  test('a specific task is within the returned tasks', async () => {
+    const response = await api.get('/api/tasks')
 
-    const resultTask = await api
-      .get(`/api/tasks/${taskToView.id}`)
-      .expect(200)
-      .expect("Content-Type", /application\/json/);
-      
-    expect(resultTask.body).toEqual(taskToView);
-  });
+    const contents = response.body.map(e => e.content)
+    assert(contents.includes('HTML is easy'))
+  })
 
-  test("fails with statuscode 404 if task does not exist", async () => {
-    const validNonexistingId = await helper.nonExistingId();
-    await api
-      .get(`/api/tasks/${validNonexistingId}`)
-      .expect(404);
-  });
+  describe('viewing a specific task', () => {
+    test('succeeds with a valid id', async () => {
+      const tasksAtStart = await helper.tasksInDb()
+      const taskToView = tasksAtStart[0]
 
-  test("fails with statuscode 400 if id is invalid", async () => {
-    const invalidId = "5a3d5da59070081a82a3445";
-    await api
-      .get(`/api/tasks/${invalidId}`)
-      .expect(400);
-  });
-});
+      const resultTask = await api
+        .get(`/api/tasks/${taskToView.id}`)
+        .expect(200)
+        .expect('Content-Type', /application\/json/)
 
-describe("addition of a new task", () => {
-  test("succeeds with valid data", async () => {
-    const newTask = {
-      content: "async/await simplifies making async calls",
-      important: true,
-    };
+      assert.deepStrictEqual(resultTask.body, taskToView)
+    })
 
-    await api
-      .post("/api/tasks")
-      .send(newTask)
-      .expect(201)
-      .expect("Content-Type", /application\/json/);
+    test('fails with status code 404 if task does not exist', async () => {
+      const validNonexistingId = await helper.nonExistingId()
 
-    const tasksAtEnd = await helper.tasksInDb();
-    expect(tasksAtEnd).toHaveLength(helper.initialTasks.length + 1);
+      await api.get(`/api/tasks/${validNonexistingId}`).expect(404)
+    })
 
-    const contents = tasksAtEnd.map(t => t.content);
-    expect(contents).toContain(
-      "async/await simplifies making async calls"
-    );
-  });
+    test('fails with status code 400 id is invalid', async () => {
+      const invalidId = '5a3d5da59070081a82a3445'
 
-  test("fails with status code 400 if data invalid", async () => {
-    const newTask = {
-      important: true
-    };
+      await api.get(`/api/tasks/${invalidId}`).expect(400)
+    })
+  })
 
-    await api
-      .post("/api/tasks")
-      .send(newTask)
-      .expect(400);
+  describe('addition of a new task', () => {
+    test('succeeds with valid data', async () => {
+      const newTask = {
+        content: 'async/await simplifies making async calls',
+        important: true,
+      }
 
-    const tasksAtEnd = await helper.tasksInDb();
-    expect(tasksAtEnd).toHaveLength(helper.initialTasks.length);
-  });
-});
+      await api
+        .post('/api/tasks')
+        .send(newTask)
+        .expect(201)
+        .expect('Content-Type', /application\/json/)
 
-describe("deletion of a task", () => {
-  test("succeeds with status code 204 if id is valid", async () => {
-    const tasksAtStart = await helper.tasksInDb();
-    const taskToDelete = tasksAtStart[0];
+      const tasksAtEnd = await helper.tasksInDb()
+      assert.strictEqual(tasksAtEnd.length, helper.initialTasks.length + 1)
 
-    await api
-      .delete(`/api/tasks/${taskToDelete.id}`)
-      .expect(204);
+      const contents = tasksAtEnd.map(n => n.content)
+      assert(contents.includes('async/await simplifies making async calls'))
+    })
 
-    const tasksAtEnd = await helper.tasksInDb();
-    expect(tasksAtEnd).toHaveLength(
-      helper.initialTasks.length - 1
-    );
+    test('fails with status code 400 if data invalid', async () => {
+      const newTask = { important: true }
 
-    const contents = tasksAtEnd.map(r => r.content);
-    expect(contents).not.toContain(taskToDelete.content);
-  });
-});
+      await api.post('/api/tasks').send(newTask).expect(400)
 
-afterAll(async () => {
-  await mongoose.connection.close();
-});
+      const tasksAtEnd = await helper.tasksInDb()
+
+      assert.strictEqual(tasksAtEnd.length, helper.initialTasks.length)
+    })
+  })
+
+  describe('deletion of a task', () => {
+    test('succeeds with status code 204 if id is valid', async () => {
+      const tasksAtStart = await helper.tasksInDb()
+      const taskToDelete = tasksAtStart[0]
+
+      await api.delete(`/api/tasks/${taskToDelete.id}`).expect(204)
+
+      const tasksAtEnd = await helper.tasksInDb()
+
+      const contents = tasksAtEnd.map(n => n.content)
+      assert(!contents.includes(taskToDelete.content))
+
+      assert.strictEqual(tasksAtEnd.length, helper.initialTasks.length - 1)
+    })
+  })
+})
+
+after(async () => {
+  await mongoose.connection.close()
+})
 ```
 
-The test output is grouped according to the `describe` blocks:
+The test output in the console is grouped according to the `describe` blocks:
 
-![jest output showing grouped describe blocks](../../images/4/7.png)
+![node:test output showing grouped describe blocks](../../images/4/7new.png)
 
 There is still room for improvement, but it is time to move forward.
 

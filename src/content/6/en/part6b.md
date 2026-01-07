@@ -19,6 +19,7 @@ To ease development, let's initialize our redux `store`'s `state` in *reducers/t
 Let's change `taskReducer`'s default `state` from an empty array *`[]`* to an array of task objects *`initialState`*:
 
 ```js
+// highlight-start
 const initialState = [
   {
     content: 'remind myself that the reducer defines how the redux store works',
@@ -31,6 +32,7 @@ const initialState = [
     id: 2,
   },
 ]
+//highlight-end
 
 const taskReducer = (state = initialState, action) => { // highlight-line
   // ...
@@ -50,7 +52,7 @@ The user interface for the filters will be implemented with [radio buttons](http
 Let's start with a very simple and straightforward implementation in *App.js*:
 
 ```js
-import NewTask from './components/NewTask'
+import TaskForm from './components/TaskForm'
 import Tasks from './components/Tasks'
 
 const App = () => {
@@ -62,15 +64,27 @@ const App = () => {
 
   return (
     <div>
-      <NewTask />
-        //highlight-start
+      <TaskForm />
+      //highlight-start
       <div>
-        <input type="radio" name="filter"
-                onChange={() => filterSelected('ALL')} />all
-        <input type="radio" name="filter"
-                onChange={() => filterSelected('IMPORTANT')} />important
-        <input type="radio" name="filter"
-                onChange={() => filterSelected('UNIMPORTANT')} />unimportant
+        <input
+          type="radio"
+          name="filter"
+          onChange={() => filterSelected('ALL')}
+        />
+        all
+        <input
+          type="radio"
+          name="filter"
+          onChange={() => filterSelected('IMPORTANT')}
+        />
+        important
+        <input
+          type="radio"
+          name="filter"
+          onChange={() => filterSelected('UNIMPORTANT')}
+        />
+        unimportant
       </div>
       //highlight-end
       <Tasks />
@@ -83,8 +97,8 @@ Since the `name` attribute of all the radio buttons is the same, the three optio
 
 The buttons have a *change handler* that currently only prints the string associated with the clicked button to the console.
 
-We decide to implement the filter functionality by storing *the value of the filter* in the redux store in addition to the tasks themselves.
-The state of the store should look like this after we finish making the changes in the next section:
+In the following section, we will implement filtering by storing *the value of the filter* in the redux store in addition to the tasks themselves.
+Once we are finished, the state of the store hopefully looks something like this:
 
 ```js
 {
@@ -96,7 +110,7 @@ The state of the store should look like this after we finish making the changes 
 }
 ```
 
-Currently, our application only stores the array of tasks.
+Previously, our application only stores the array of tasks.
 In the new implementation, the state object will have two properties:
 
 - `tasks` that contains the array of tasks
@@ -105,7 +119,9 @@ In the new implementation, the state object will have two properties:
 ### Combined reducers
 
 To handle our new filter data, we could modify `taskReducer` to deal with the filter data as well.
-However, a better solution in this situation is to separate the filter into a new file *src/reducers/filterReducer.js*:
+However, a better solution in this situation is to separate the filter.
+Let's also *create a new ***action creator*** function*.
+We will write this code into a new file *src/reducers/filterReducer.js*:
 
 ```js
 const filterReducer = (state = 'ALL', action) => {
@@ -116,6 +132,15 @@ const filterReducer = (state = 'ALL', action) => {
       return state
   }
 }
+
+export const filterChange = filter => {
+  return {
+    type: 'SET_FILTER',
+    payload: filter
+  }
+}
+
+export default filterReducer
 ```
 
 The actions for changing the filter's state look like this:
@@ -127,46 +152,25 @@ The actions for changing the filter's state look like this:
 }
 ```
 
-Let's also *create a new **action creator** function*.
-We will write the code for the action creator after our `filterReducer`:
-
-```js
-const filterReducer = (state = 'ALL', action) => {
-  // ...
-}
-
-export const filterChange = filter => {
-  return {
-    type: 'SET_FILTER',
-    payload: filter,
-  }
-}
-
-export default filterReducer
-```
-
 We can *create the actual reducer for our application by combining the two existing reducers with the [`combineReducers`](https://redux.js.org/api/combinereducers) function*.
 
 Let's define the combined reducer in *main.jsx*:
 
 ```js
-import React from 'react'
 import ReactDOM from 'react-dom/client'
-import { createStore, combineReducers } from 'redux' // highlight-line
-import { Provider } from 'react-redux' 
+import { Provider } from 'react-redux'
+import { createStore, combineReducers } from 'redux'
+
 import App from './App'
-
-import taskReducer from './reducers/taskReducer'
 import filterReducer from './reducers/filterReducer' // highlight-line
+import taskReducer from './reducers/taskReducer'
 
- // highlight-start
 const reducer = combineReducers({
   tasks: taskReducer,
   filter: filterReducer
 })
- // highlight-end
 
-const store = createStore(reducer) // highlight-line
+const store = createStore(reducer)
 
 console.log(store.getState())
 
@@ -181,7 +185,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 > *Since our application breaks at this point, we render a `<div />` element, commenting out our `<App />`.* Remember that you can toggle multiline comments with ***Ctrl-Shift-/***.
 >> You could also use ***Ctrl-/***, which will comment out lines individually.
 
-The state of the store gets printed to the console:
+Thanks to `console.log`, the state of the store is printed to the console:
 
 ![devtools console showing tasks array data](../../images/6/4e.png)
 
@@ -203,15 +207,29 @@ Likewise, the `filter` property is managed by the `filterReducer`.
 #### Combined reducers in action
 
 In this section we're going to take a step back from our project to investigate how the combined reducer works.
-Let's simulate changing the filter and creating a task by adding the following to the *main.jsx* file:
+Let's simulate changing the filter and creating a task by temporarily adding the following to the *main.jsx* file:
 
 ```js
+// ...
+
+const store = createStore(reducer)
+
+console.log(store.getState())
+
+// highlight-start
 import { createTask } from './reducers/taskReducer'
 import { filterChange } from './reducers/filterReducer'
-//...
+
 store.subscribe(() => console.log(store.getState()))
 store.dispatch(filterChange('IMPORTANT'))
 store.dispatch(createTask('remember that combineReducers forms one reducer from many simple reducers'))
+// highlight-end
+
+ReactDOM.createRoot(document.getElementById('root')).render(
+  <Provider store={store}>
+    <div />
+  </Provider>
+)
 ```
 
 Notice that with our `subscribe` call above, the store's state gets logged to the console after every change:
@@ -223,7 +241,7 @@ If we add a `console.log` statement *to the beginning of both reducers*:
 
 ```js
 const filterReducer = (state = 'ALL', action) => {
-  console.log('ACTION: ', action)
+  console.log('ACTION: ', action) // highlight-line
   // ...
 }
 ```
@@ -234,15 +252,33 @@ Based on the console output one might think that every action gets duplicated:
 
 Is there a bug in our code? No.
 The combined reducer works in such a way that ***every `action` gets handled in every part of the combined reducer***.
-Typically only one reducer is interested in any given action,
+In other words, ***every reducer listens to all of the dispatched actions*** and does something with them if it has been instructed to do so.
+Typically, only one reducer is interested in any given action,
 but there are situations where *multiple reducers change their respective parts of the state based on the same action*.
 
 ### Finishing the filters
 
 Let's finish the application so that it uses the combined reducer.
-We start by changing the rendering of the application and hooking up the store to the application in the *main.jsx* file:
+We start by removing the extra code from *main.jsx* and restore `App` as the rendered component:
 
 ```js
+import ReactDOM from 'react-dom/client'
+import { Provider } from 'react-redux'
+import { createStore, combineReducers } from 'redux'
+
+import App from './App'
+import filterReducer from './reducers/filterReducer'
+import taskReducer from './reducers/taskReducer'
+
+const reducer = combineReducers({
+  tasks: taskReducer,
+  filter: filterReducer
+})
+
+const store = createStore(reducer)
+
+console.log(store.getState())
+
 ReactDOM.createRoot(document.getElementById('root')).render(
   <Provider store={store}>
     <App />
@@ -294,10 +330,10 @@ const tasks = useSelector(state => state.tasks)
 Let's extract the visibility/importance filter into its own *src/components/VisibilityFilter.js* component:
 
 ```js
-import { filterChange } from '../reducers/filterReducer'
 import { useDispatch } from 'react-redux'
+import { filterChange } from '../reducers/filterReducer'
 
-const VisibilityFilter = (props) => {
+const VisibilityFilter = () => {
   const dispatch = useDispatch()
 
   return (
@@ -330,14 +366,14 @@ export default VisibilityFilter
 With the new component `App` can be simplified as follows:
 
 ```js
+import TaskForm from './components/TaskForm'
 import Tasks from './components/Tasks'
-import NewTask from './components/NewTask'
 import VisibilityFilter from './components/VisibilityFilter'
 
 const App = () => {
   return (
     <div>
-      <NewTask />
+      <TaskForm />
       <VisibilityFilter />
       <Tasks />
     </div>
@@ -362,18 +398,18 @@ const Tasks = () => {
   const dispatch = useDispatch()
   // highlight-start
   const tasks = useSelector(state => {
-    if ( state.filter === 'ALL' ) {
+    if (state.filter === 'ALL') {
       return state.tasks
     }
-    return state.filter  === 'IMPORTANT' 
+    return state.filter  === 'IMPORTANT'
       ? state.tasks.filter(task => task.important)
       : state.tasks.filter(task => !task.important)
   })
   // highlight-end
 
-  return(
+  return (
     <ul>
-      {tasks.map(task =>
+      {tasks.map(task => (
         <Task
           key={task.id}
           task={task}
@@ -381,9 +417,10 @@ const Tasks = () => {
             dispatch(toggleImportanceOf(task.id))
           }
         />
-      )}
+      ))}
     </ul>
   )
+}
 ```
 
 We can simplify `useSelector` even further by ***destructuring `state`'s parameters***:
@@ -411,7 +448,7 @@ The current version of the application can be found on [GitHub](https://github.c
 
 ### Exercise 6.9
 
-#### 6.9 Better jokes, Step 7
+#### 6.9 Jokes, Step 7
 
 Implement filtering for the jokes that are displayed to the user.
 
@@ -452,7 +489,7 @@ export default Filter
 
 <div class="content">
 
-### Redux Toolkit
+### Redux Toolkit and Refactoring the Store Configuration
 
 As we have seen so far, Redux's configuration and state management implementation requires some effort.
 For example, the reducer and action creator-related code has somewhat repetitive boilerplate code.
@@ -470,14 +507,13 @@ Next, open the *main.jsx* file which currently creates the Redux store.
 Instead of Redux's `createStore` function, let's create the store using Redux Toolkit's [`configureStore`](https://redux-toolkit.js.org/api/configureStore) function in *main.jsx*:
 
 ```js
-import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { Provider } from 'react-redux'
 import { configureStore } from '@reduxjs/toolkit' // highlight-line
-import App from './App'
 
-import taskReducer from './reducers/taskReducer'
+import App from './App'
 import filterReducer from './reducers/filterReducer'
+import taskReducer from './reducers/taskReducer'
 
  // highlight-start
 const store = configureStore({
@@ -500,6 +536,41 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 We already got rid of a few lines of code now that we don't need the `combineReducers` function to create the reducer for the store.
 We will soon see that the `configureStore` function has many additional benefits such as the effortless integration of development tools
 and many commonly used libraries *without the need for additional configuration*.
+
+Let's further clean up the *main.jsx* by moving the code related to the creation of the Redux store into a separate file.
+Let's create a new file *src/store.js*:
+
+```js
+import { configureStore } from '@reduxjs/toolkit'
+
+import taskReducer from './reducers/taskReducer'
+import filterReducer from './reducers/filterReducer'
+
+const store = configureStore({
+  reducer: {
+    tasks: taskReducer,
+    filter: filterReducer
+  }
+})
+
+export default store
+```
+
+After the changes, the content of the *main.jsx* is the following:
+
+```js
+import ReactDOM from 'react-dom/client'
+import { Provider } from 'react-redux'
+
+import App from './App'
+import store from './store'
+
+ReactDOM.createRoot(document.getElementById('root')).render(
+  <Provider store={store}>
+    <App />
+  </Provider>
+)
+```
 
 #### Refactoring our Reducers with Redux Toolkit
 
@@ -556,6 +627,11 @@ const taskSlice = createSlice({
   },
 })
 // highlight-end
+
+// highlight-start
+export const { createTask, toggleImportanceOf } = taskSlice.actions
+export default taskSlice.reducer
+// highlight-end
 ```
 
 The `createSlice` function's `name` parameter defines the prefix which is used in the action's type values.
@@ -570,7 +646,7 @@ Notice that the `action.payload` in the function contains the argument provided 
 dispatch(createTask('Preach about how awesome Redux Toolkit is!'))
 ```
 
-This dispatch call responds to dispatching the following object:
+This dispatch call is equivalent to dispatching the following object:
 
 ```js
 dispatch({ type: 'tasks/createTask', payload: 'Preach about how awesome Redux Toolkit is!' })
@@ -600,7 +676,7 @@ Redux Toolkit utilizes the [**Immer**](https://immerjs.github.io/immer/) library
 Using this library makes it possible to mutate the `state` argument inside of `createSlice`.
 Immer uses the mutated state to produce a new, immutable state and ***thus the state changes remain immutable***.
 Notice that `state` can be changed without *mutating* it, as we have done with the `toggleImportanceOf` action.
-In this case, the function ***returns*** the new state.
+In this case, the function ***directly returns*** the new state.
 Nevertheless, mutating the state will often come in handy especially when a complex state needs to be updated.
 
 The `createSlice` function *returns an object containing the reducer as well as the action creators defined by the `reducers` parameter*.
@@ -608,7 +684,9 @@ We can access the reducer via `taskSlice.reducer` and the action creators via `t
 We can produce the file's exports in the following way:
 
 ```js
-const taskSlice = createSlice(/* ... */)
+const taskSlice = createSlice({
+  // ...
+})
 
 // highlight-start
 export const { createTask, toggleImportanceOf } = taskSlice.actions
@@ -626,8 +704,9 @@ import taskReducer, { createTask, toggleImportanceOf } from './reducers/taskRedu
 Nonetheless, we need to alter the action type names in the tests due to the conventions of ReduxToolkit:
 
 ```js
-import taskReducer from './taskReducer'
 import deepFreeze from 'deep-freeze'
+import { describe, expect, test } from 'vitest'
+import taskReducer from './taskReducer'
 
 describe('taskReducer', () => {
   test('returns new state with action tasks/createTask', () => {
@@ -641,12 +720,12 @@ describe('taskReducer', () => {
     const newState = taskReducer(state, action)
 
     expect(newState).toHaveLength(1)
-    expect(newState.map(s => s.content)).toContainEqual(action.payload)
+    expect(newState.map(task => task.content)).toContainEqual(action.payload) // highlight-line
   })
 
-  test('returns new state with action tasks/toggleImportanceOf', () => {
+  test('returns new state with action tasks/toggleImportanceOf', () => { // highlight-line
     const state = [
-      {
+        {
         content: 'learn more about how the app state is in redux store',
         important: true,
         id: 1
@@ -655,20 +734,19 @@ describe('taskReducer', () => {
         content: 'understand more fully how state changes are made with actions',
         important: false,
         id: 2
-      }]
-  
+      }
+    ]
+
     const action = {
       type: 'tasks/toggleImportanceOf', // highlight-line
-      payload: 2 
+      payload: 2 // highlight-line
     }
-  
+
     deepFreeze(state)
     const newState = taskReducer(state, action)
-  
+
     expect(newState).toHaveLength(2)
-  
     expect(newState).toContainEqual(state[0])
-  
     expect(newState).toContainEqual({
       content: 'understand more fully how state changes are made with actions',
       important: true,
@@ -693,7 +771,7 @@ const taskSlice = createSlice({
     toggleImportanceOf(state, action) {
       const id = action.payload
 
-      const taskToChange = state.find(n => n.id === id)
+      const taskToChange = state.find(t => t.id === id)
 
       const changedTask = { 
         ...taskToChange, 
@@ -710,17 +788,24 @@ const taskSlice = createSlice({
 })
 ```
 
-The following is printed to the console
+When we now change the importance of a task by clicking its name, the following is printed to the console
 
 ![browser showing tasks array and proxy on console](../../images/6/40new.png)
 
 The output is interesting but not very useful.
 The reason we don't see any nice information is because of the Immer library used by the Redux Toolkit, which is now used internally to save the state of the Store.
 
-The status can be converted to a human-readable format by converting `state` to a `string` and then back to a JavaScript object as follows:
+The state can be converted to a human-readable format by using the [`current` function](https://redux-toolkit.js.org/api/other-exports#current) from the immer library.
+The function can be imported with the following command:
 
 ```js
-console.log(JSON.parse(JSON.stringify(state))) // highlight-line
+import { current } from '@reduxjs/toolkit'
+```
+
+and after this, the state can be printed to the console with the following command:
+
+```js
+console.log(current(state))
 ```
 
 Console output is now human-readable
@@ -733,7 +818,7 @@ Console output is now human-readable
 It can be used to inspect the Redux store's state and dispatch actions through the browser's console.
 When the store is created using Redux Toolkit's `configureStore` function, no additional configuration is needed for Redux DevTools to work.
 
-Once the addon is installed, clicking the ***Redux*** tab in the browser's console should open the development tools:
+Once the addon is installed, clicking the ***Redux*** tab in the browser's developer tools, the Redux DevTools should open:
 
 ![browser with redux addon in devtools](../../images/6/42new.png)
 
@@ -755,7 +840,7 @@ You can find the code for our current application in its entirety in the *part6-
 
 Let's continue working on the joke application using Redux that we started in exercise 6.3.
 
-#### 6.10 Better jokes, Step 8
+#### 6.10 Jokes, Step 8
 
 Install Redux Toolkit for the project.
 Move the Redux store creation into the file *store.js* and use Redux Toolkit's `configureStore` to create the store.
@@ -764,11 +849,11 @@ Change the definition of the ***filter reducer and action creators*** to use the
 
 Also, start using Redux DevTools to debug the application's state more easily.
 
-#### 6.11 Better jokes, Step 9
+#### 6.11 Jokes, Step 9
 
 Change the definition of the ***joke reducer and action creators*** to use Redux Toolkit's `createSlice` function.
 
-#### 6.12 Better jokes, Step 10
+#### 6.12 Jokes, Step 10
 
 The application has a ready-made body for the `Notification` component:
 
@@ -779,6 +864,7 @@ const Notification = () => {
     backgroundColor: "lavender",
     marginBottom: 10
   }
+
   return (
     <div style={style}>
       render here notification...
@@ -815,7 +901,7 @@ Create a separate reducer for the new functionality by using the Redux Toolkit's
 The application does not have to use the `Notification` component intelligently at this point in the exercises.
 It is enough for the application to display the initial value set for the message in the `notificationReducer`.
 
-#### 6.13 Better jokes, Step 11
+#### 6.13 Jokes, Step 11
 
 Extend the application so that it uses the `Notification` component to display a message for five seconds when the user votes for a joke or creates a new joke:
 

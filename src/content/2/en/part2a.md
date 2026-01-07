@@ -17,7 +17,7 @@ for quickly generating commonly re-used portions of code, much like how `sout` w
 
 **Try erasing everything in *App.jsx*, then type `rsc` and then hit the *Tab* key and see the magic that appears!**
 
-Instructions for working with live templates can be found [here](https://blog.jetbrains.com/webstorm/2018/01/using-and-creating-code-snippets/#work_with_live_templates).
+Instructions for working with live templates can be [found here](https://blog.jetbrains.com/webstorm/2018/01/using-and-creating-code-snippets/#work_with_live_templates).
 The main idea is that in certain contexts, you would be able to type a shortcut, and WebStorm will provide you with some code that you would normally write.
 
 There are already lots of live templates that are available for you to review in ***Settings->Editor->Live Templates***.
@@ -57,7 +57,7 @@ Then type the name of the variable `props` (or whatever other variable you have)
 You should notice that it will display the word you typed in two places on that line.
 First, as the name in the string for the `log` statement and then as the variable to print.
 Finally, if you have some expected value of what you think it should be at that point, you can type that in as well, and then ***Enter*** one last time.
-You'll notice that you have this template that will provide you with a varialbe, its type, the filename and line number to make it easier to debug!
+You'll notice that you have this template that will provide you with a variable, its type, the filename and line number to make it easier to debug!
 
 ### JavaScript Arrays
 
@@ -85,7 +85,7 @@ Passing event handlers to the child components of the `App` component can also b
 
 ### Rendering Collections
 
-We will now do the 'frontend', or the browser-side application logic, in React for an application that's similar to the example application from [part 0](/part0)
+Now, we will build the **frontend**, or the user interface (the part users see in their browser), using React, similar to the example application from [part 0](/part0).
 
 Let's start with the following in *App.jsx*:
 
@@ -112,7 +112,6 @@ We'll also need this in *main.jsx*:
 
 ```js
 import ReactDOM from 'react-dom/client'
-
 import App from './App'
 
 const tasks = [
@@ -322,7 +321,7 @@ Changing our `map` line to have the parameter:
 const result = tasks.map(task => task.content)
 ```
 
-results in the console containing the array *`['Wash the dishes', 'Take out the trash', 'Buy salty snacks']`*.
+will give `result` an array containing: *`['Wash the dishes', 'Take out the trash', 'Buy salty snacks']`*.
 
 This is already pretty close to the React code we used:
 
@@ -374,7 +373,7 @@ As such, one way to define the row generation without getting errors is:
 
 This is, however, 🐞 **not recommended** 🐞 and can create undesired problems even if it seems to be working just fine.
 
-Read more about this in [this article](https://robinpokorny.medium.com/index-as-a-key-is-an-anti-pattern-e0349aece318).
+Read more about this in [this article](https://robinpokorny.com/blog/index-as-a-key-is-an-anti-pattern/).
 
 ### Refactoring Modules
 
@@ -459,9 +458,7 @@ So *reading/src/components/Task.jsx* should have the following:
 
 ```js
 const Task = ({ task }) => {
-  return (
-    <li>{task.content}</li>
-  )
+  return <li>{task.content}</li>
 }
 
 export default Task
@@ -657,7 +654,7 @@ Your folders for this repo should be:
 |-countries
 ```
 
-#### 2.1: handheld arcade info Step 6
+#### 2.1: Handheld arcade info, Step 6
 
 Let's finish the code for rendering companies' handheld arcade games and systems from exercises 1.1 - 1.5.
 If you need help getting your solution to a good state, please let me know.
@@ -740,13 +737,13 @@ so make sure the application works if you add or remove handheld systems that a 
 
 Ensure that the console shows no errors!
 
-#### 2.2: handheld arcade info Step 7
+#### 2.2: Handheld arcade info, Step 7
 
 Show also the sum of the games published for all handhelds of a company.
 
 ![sum of exercises added feature](../../images/teht/9e.png)
 
-#### 2.3*: handheld arcade info Step 8
+#### 2.3*: Handheld arcade info, Step 8
 
 If you haven't done so already, calculate the sum of games with the array method
 [reduce](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/Reduce).
@@ -776,7 +773,7 @@ const total = handhelds.reduce((s, p) => {
 >
 > ![WebStorm sample suggestion for arrow function](../../images/2/5b.png)
 
-#### 2.4: handheld arcade info Step 9
+#### 2.4: Handheld arcade info, Step 9
 
 Let's extend our application to allow for an ***arbitrary number*** of companies:
 
@@ -839,7 +836,7 @@ The application can, for example, look like this:
 
 ![An arbitrary number of courses feature add-on](../../images/teht/10e.png)
 
-#### 2.5: separate module
+#### 2.5: Separate module Step 10
 
 Declare the `Company` component as a separate module that represents a single Company, which is imported by the `App` component.
 You can include all subcomponents of the company in the same module.

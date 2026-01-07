@@ -268,7 +268,7 @@ const addTask = (event) => {
     content: newTask,
     date: new Date().toISOString(),
     important: Math.random() > 0.5,
-    id: tasks.length + 1,
+    id: String(tasks.length + 1),
   }
 
   setTasks(tasks.concat(taskObject))
@@ -412,7 +412,7 @@ const App = (props) => {
 // highlight-start      
       <div>
         <button onClick={() => setShowAll(!showAll)}>
-          show {showAll ? 'important' : 'all' }
+          show {showAll ? 'important' : 'all'}
         </button>
       </div>
 // highlight-end            
@@ -459,7 +459,7 @@ Getting into that habit will also improve your reflections and workflow as a dev
 
 **WARNING** make sure you are in the correct location before calling `create-react-app`
 
-#### 2.6: The Communities Step 1
+#### 2.6: The Communities, Step 1
 
 Let's create a simple community directory, which will be a list of communities that we may want to join.
 
@@ -520,17 +520,17 @@ Notice the use of the React developer tools extension in the picture above!
 > - you can use the group's name as a value of the `key` property
 > - remember to prevent the default action of submitting HTML forms!
 
-#### 2.7: The Communities Step 2
+#### 2.7: The Communities, Step 2
 
 Prevent the user from being able to add names that already exist in the list.
 JavaScript arrays have numerous suitable
 [methods](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)
 for accomplishing this job.
-Keep in mind [how object equality works](https://www.joshbritz.co/posts/why-its-so-hard-to-check-object-equality/) in Javascript.
+Keep in mind [how object equality works](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Equality_comparisons_and_sameness) in Javascript.
 
 Issue a warning with the [alert](https://developer.mozilla.org/en-US/docs/Web/API/Window/alert) command when such an action is attempted:
 
-![2.7 sample screenshot](../../images/2/11e.png)
+![browser alert: "user already exists in the list"](../../images/2/11e.png)
 
 > **Hint:** when you are forming strings that contain values from variables, it is recommended to use a
 > [template string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals):
@@ -553,7 +553,7 @@ Issue a warning with the [alert](https://developer.mozilla.org/en-US/docs/Web/AP
 >
 > Nonetheless, using template strings is the more idiomatic option and the sign of a true JavaScript professional.
 
-#### 2.8: The Communities Step 3
+#### 2.8: The Communities, Step 3
 
 Expand your application by allowing users to add URLs to the community directory.
 The URL will be an invitation link to that communities' discord or slack group.
@@ -572,11 +572,11 @@ The image also displays the application's state with the help of [React develope
 
 ![2.8 sample screenshot](../../images/2/12e.png)
 
-#### 2.9*: The Communities Step 4
+#### 2.9*: The Communities, Step 4
 
 Implement a search field that can be used to filter the list of communities by name:
 
-![2.9 sample screenshot](../../images/2/13e.png)
+![2.9 search field](../../images/2/13e.png)
 
 You can implement the search field as an ***input*** element that is placed outside the HTML form.
 The filtering logic shown in the image is **case insensitive**, meaning that the search term `comp` also returns results that contain Comp with an uppercase C.
@@ -598,7 +598,7 @@ The filtering logic shown in the image is **case insensitive**, meaning that the
 >
 > This saves you from having to manually input data into your application for testing out your new functionality.
 
-#### 2.10: The Communities Step 5
+#### 2.10: The Communities, Step 5
 
 If you have implemented your application in a single component, refactor it by extracting suitable parts into new components.
 Maintain the application's state and all event handlers in the `App` root component.

@@ -29,7 +29,7 @@ const App = () => {
 
   const tasks = []
 
-  return(
+  return (
     <div>
       <h2>Tasks app</h2>
       <form onSubmit={addTask}>
@@ -65,48 +65,67 @@ npm i @tanstack/react-query
 A few additions to the file *main.jsx* are needed to pass the library functions to the entire application:
 
 ```js
-import React from 'react'
-import ReactDOM from 'react-dom/client'
+import { createRoot } from 'react-dom/client'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query' // highlight-line
 
-import App from './App'
+import App from './App.jsx'
 
 const queryClient = new QueryClient() // highlight-line
 
-ReactDOM.createRoot(document.getElementById('root')).render(
+createRoot(document.getElementById('root')).render(
   <QueryClientProvider client={queryClient}> // highlight-line
     <App />
   </QueryClientProvider> // highlight-line
 )
 ```
 
+Let's use [JSON Server](https://github.com/typicode/json-server) as in the previous parts to simulate the backend.
+You can start the server with:
+
+```js
+npm run server
+```
+
+> **Remember:** You should also copy over *db.json* from one of the other projects.
+
 We can now retrieve the tasks in the `App` component.
-You should also copy over *db.json* from one of the other projects.
 The code expands as follows:
 
 ```js
-import { useQuery } from '@tanstack/react-query'  // highlight-line
-import axios from 'axios'  // highlight-line
+import { useQuery } from '@tanstack/react-query' // highlight-line
 
 const App = () => {
-  // ...
+  const addTask = async (event) => {
+    event.preventDefault()
+    const content = event.target.task.value
+    event.target.task.value = ''
+    console.log(content)
+  }
 
-   // highlight-start
-  const result = useQuery({
-    queryKey: ['tasks'],
-    queryFn: () => axios.get('http://localhost:3001/tasks').then(res => res.data)
-  })
-
-  console.log(JSON.parse(JSON.stringify(result)))
-  // highlight-end
+  const toggleImportance = (task) => {
+    console.log('toggle importance of', task.id)
+  }
 
   // highlight-start
-  if ( result.isLoading ) {
+  const result = useQuery({
+    queryKey: ['tasks'],
+    queryFn: async () => {
+      const response = await fetch('http://localhost:3001/tasks')
+      if (!response.ok) {
+        throw new Error('Failed to fetch tasks')
+      }
+      return await response.json()
+    }
+  })
+ 
+  console.log(JSON.parse(JSON.stringify(result)))
+ 
+  if (result.isLoading) {
     return <div>loading data...</div>
   }
+ 
+  const tasks = result.data
   // highlight-end
-
-  const tasks = result.data  // highlight-line
 
   return (
     // ...
@@ -116,7 +135,7 @@ const App = () => {
 
 Retrieving data from the server still looks familiar as it uses Axios' `get` method.
 However, the Axios method call is now wrapped in a [query](https://tanstack.com/query/latest/docs/react/guides/queries)
-formed with the [`useQuery`](https://tanstack.com/query/latest/docs/react/reference/useQuery) function.
+formed by the [`useQuery`](https://tanstack.com/query/latest/docs/react/reference/useQuery) function.
 `useQuery`'s first parameter is a string `tasks`, which acts as a [***key***](https://tanstack.com/query/latest/docs/react/guides/query-keys) to the query defined,
 i.e. the list of tasks.
 
@@ -144,13 +163,18 @@ and the application does not need the state defined with React's `useState` hook
 Let's move the function making the actual HTTP request to its own file *requests.js*
 
 ```js
-import axios from 'axios'
+const baseUrl = 'http://localhost:3001/tasks'
 
-export const getTasks = () =>
-  axios.get('http://localhost:3001/tasks').then(res => res.data)
+export const getTasks = async () => {
+  const response = await fetch(baseUrl)
+  if (!response.ok) {
+    throw new Error('Failed to fetch tasks')
+  }
+  return await response.json()
+}
 ```
 
-The `App` component is now slightly simplified
+The `App` component is now slightly simplified:
 
 ```js
 import { useQuery } from '@tanstack/react-query' 
@@ -179,15 +203,33 @@ Let's start by adding new tasks.
 In *requests.js*, make a function `createTask` for saving new tasks:
 
 ```js
-import axios from 'axios'
-
 const baseUrl = 'http://localhost:3001/tasks'
 
-export const getTasks = () =>
-  axios.get(baseUrl).then(res => res.data)
+export const getTasks = async () => {
+  const response = await fetch(baseUrl)
+  if (!response.ok) {
+    throw new Error('Failed to fetch tasks')
+  }
+  return await response.json()
+}
 
-export const createTask = newTask => // highlight-line
-  axios.post(baseUrl, newTask).then(res => res.data) // highlight-line
+// highlight-start
+export const createTask = async (newTask) => {
+  const options = {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(newTask)
+  }
+ 
+  const response = await fetch(baseUrl, options)
+ 
+  if (!response.ok) {
+    throw new Error('Failed to create task')
+  }
+ 
+  return await response.json()
+}
+// highlight-end
 ```
 
 The `App` component will change as follows
@@ -197,7 +239,11 @@ import { useQuery, useMutation } from '@tanstack/react-query' // highlight-line
 import { getTasks, createTask } from './requests' // highlight-line
 
 const App = () => {
-  const newTaskMutation = useMutation({mutationFn: createTask}) // highlight-line
+  //highlight-start
+  const newTaskMutation = useMutation({
+    mutationFn: createTask,
+  })
+  // highlight-end
 
   const addTask = async (event) => {
     event.preventDefault()
@@ -217,12 +263,14 @@ We define the mutation via
 [`useMutation`](https://tanstack.com/query/latest/docs/react/reference/useMutation):
 
 ```js
-const newTaskMutation = useMutation({ mutationFn: createTask})
+const newTaskMutation = useMutation({
+  mutationFn: createTask,
+})
 ```
 
-`useMutation`'s parameter is `createTask`: the function we added to *requests.js*, which merely uses Axios to send a new task to the server.
+The parameter is the function we added to the file *requests.js*, which uses Fetch API to send a new task to the server.
 
-The **event handler `addTask`** performs the mutation by calling the mutation object's `mutate` method and passing in the new task (*`content, important: true`*):
+The event handler `addTask` performs the mutation by calling the mutation object's `mutate` method and passing in the new task (*`content, important: true`*) as an argument:
 
 ```js
 newTaskMutation.mutate({ content, important: true })
@@ -243,10 +291,13 @@ import { getTasks, createTask } from './requests'
 const App = () => {
   const queryClient = useQueryClient() // highlight-line
 
-  const newTaskMutation = useMutation(createTask, {
-    onSuccess: () => {  // highlight-line
-      queryClient.invalidateQueries({queryKey: ['tasks']})  // highlight-line
+  const newTaskMutation = useMutation({
+    mutationFn: createTask,
+    // highlight-start
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tasks'] })
     },
+    // highlight-end
   })
 
   // ...
@@ -256,7 +307,7 @@ const App = () => {
 So once the mutation has been successfully executed, the function call
 
 ```js
-queryClient.invalidateQueries('tasks')
+queryClient.invalidateQueries({ queryKey: ['tasks'] })
 ```
 
 will cause React Query to automatically fetch the `tasks` from the server.
@@ -266,28 +317,59 @@ Let's also implement changing the importance of tasks.
 Start by adding a function for updating tasks to *requests.js*:
 
 ```js
-export const updateTask = updatedTask =>
-  axios.put(`${baseUrl}/${updatedTask.id}`, updatedTask).then(res => res.data)
+export const updateTask = async (updatedTask) => {
+  const options = {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(updatedTask)
+  }
+
+  const response = await fetch(`${baseUrl}/${updatedTask.id}`, options)
+
+  if (!response.ok) {
+    throw new Error('Failed to update task')
+  }
+
+  return await response.json()
+}
 ```
 
 Updating the task is also done by mutation.
 The `App` component expands as follows:
 
 ```js
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query' 
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { getTasks, createTask, updateTask } from './requests' // highlight-line
 
 const App = () => {
-  // ...
+  const queryClient = useQueryClient()
+
+  const newTaskMutation = useMutation({
+    mutationFn: createTask,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tasks'] })
+    }
+  })
 
   // highlight-start
   const updateTaskMutation = useMutation({
     mutationFn: updateTask,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['tasks']})
-    },
+      queryClient.invalidateQueries({ queryKey: ['tasks'] })
+    }
   })
   // highlight-end
+
+  const addTask = async (event) => {
+    event.preventDefault()
+    const content = event.target.task.value
+    event.target.task.value = ''
+    newTaskMutation.mutate({ content, important: true })
+  }
+
+  const toggleImportance = (task) => {
+    updateTaskMutation.mutate({...task, important: !task.important }) // highlight-line
+  }
 
   // ...
 
@@ -299,8 +381,8 @@ const App = () => {
 }
 ```
 
-So again, a mutation was created that invalidated the query `tasks` so that the updated task is rendered correctly.
-Using mutation is easy, the method `mutate` receives a `task` as a parameter, with the `important` property toggled.
+So again, a mutation was created that invalidated the query *`tasks`* so that the updated task is rendered correctly.
+Using mutations is easy, the method `mutate` receives a `task` as a parameter, with the `important` property toggled.
 
 The current code for the application is in [GitHub](https://github.com/comp227/query-tasks/tree/part6-2) in the branch *part6-2*.
 
@@ -311,12 +393,12 @@ It's effortless to make changes to the list of tasks too!
 For example, when we change the importance of a task, invalidating the query `tasks` is enough for the application data to be updated:
 
 ```js
-  const updateTaskMutation = useMutation({
-    mutationFn: updateTask, 
-    onSuccess: () => {
-      queryClient.invalidateQueries('tasks') // highlight-line
-    },
-  })
+const updateTaskMutation = useMutation({
+  mutationFn: updateTask,
+  onSuccess: () => {
+    queryClient.invalidateQueries({ queryKey: ['tasks'] }) // highlight-line
+  }
+})
 ```
 
 The consequence of this, of course, is that after the PUT request that causes the task to change,
@@ -335,17 +417,18 @@ Here's the code that manually updates the new task mutation:
 
 ```js
 const App = () => {
-  const queryClient =  useQueryClient() 
+  const queryClient = useQueryClient()
 
   const newTaskMutation = useMutation({
     mutationFn: createTask,
     // highlight-start
     onSuccess: (newTask) => {
-      const tasks = queryClient.getQueryData(['tasks']) 
+      const tasks = queryClient.getQueryData(['tasks'])
       queryClient.setQueryData(['tasks'], tasks.concat(newTask))
     // highlight-end
     }
   })
+
   // ...
 }
 ```
@@ -355,24 +438,39 @@ the `queryClient` object reads the existing `tasks` state and updates it by addi
 The value of the `newTask` parameter is the *value returned by the function `createTask`*, defined in the file *requests.js* as follows:
 
 ```js
-export const createTask = newTask =>
-  axios.post(baseUrl, newTask).then(res => res.data)
+export const createTask = async (newTask) => {
+  const options = {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(newTask)
+  }
+
+  const response = await fetch(baseUrl, options)
+
+  if (!response.ok) {
+    throw new Error('Failed to create task')
+  }
+
+  return await response.json()
+}
 ```
 
 It would be reasonable to make a similar change to the mutation that changes a task's importance, but we leave it as an optional exercise.
 
 #### Noticing extra network calls
 
-If we closely follow the browser's network tab, we notice that React Query retrieves all tasks as soon as we move the cursor to the input field:
+Finally, notice an interesting detail.
+React Query re-fetches all tasks when we switch to another browser tab and then return to the application's tab.
+This can be observed in the Network tab of the Developer Console:
 
-![dev tools tasks app with input text field highlighted and arrow on network over notes request as 200](../../images/6/62new.png)
+![dev tools tasks app with an arrow in a new tab and another arrow on console's network tab over tasks request as 200](../../images/6/62new.png)
 
 What is going on?
 The [React Query documentation](https://tanstack.com/query/latest/docs/react/reference/useQuery),
 explains that queries (*whose status is **stale***)
 are updated when the **window focus** changes.
 So since the input field becomes active when clicked, that changes the window focus, and thus the queries update.
-If we want, we can turn off the functionality by adding an *options* parameter to our `getTasks` query.
+If we want, we can turn off the functionality by creating a query as follows:
 
 ```js
 const App = () => {
@@ -421,6 +519,8 @@ The project has a ready-installed JSON Server, the operation of which has been s
 *Read **server.js** for more details.*
 *Also, make sure you're connecting to the correct `PORT`.*
 Start the server with `npm run server`.
+
+Use the Fetch API to make requests.
 
 #### Exercise 6.20
 
@@ -485,23 +585,23 @@ The application displays the counter value, and offers three buttons to update t
 
 ![browser showing simple counter application with + - 0 buttons and 7 above](../../images/6/63new.png)
 
-Let's implement the state management of the counter *using a Redux-like state management mechanism* provided by React's built-in
-[***useReducer***](https://react.dev/reference/react/useReducer) hook.
-Here's what the code looks like:
+We shall now implement the counter state management *using a Redux-like state management mechanism* provided by React's built-in [***useReducer*** hook](https://react.dev/reference/react/useReducer).
+
+The file *App.jsx* looks as follows:
 
 ```js
 import { useReducer } from 'react'
 
 const counterReducer = (state, action) => {
   switch (action.type) {
-    case "INC":
-        return state + 1
-    case "DEC":
-        return state - 1
-    case "ZERO":
-        return 0
+    case 'INC':
+      return state + 1
+    case 'DEC':
+      return state - 1
+    case 'ZERO':
+      return 0
     default:
-        return state
+      return state
   }
 }
 
@@ -512,9 +612,9 @@ const App = () => {
     <div>
       <div>{counter}</div>
       <div>
-        <button onClick={() => counterDispatch({ type: "INC"})}>+</button>
-        <button onClick={() => counterDispatch({ type: "DEC"})}>-</button>
-        <button onClick={() => counterDispatch({ type: "ZERO"})}>0</button>
+        <button onClick={() => counterDispatch({ type: 'INC' })}>+</button>
+        <button onClick={() => counterDispatch({ type: 'DEC' })}>-</button>
+        <button onClick={() => counterDispatch({ type: 'ZERO' })}>0</button>
       </div>
     </div>
   )
@@ -537,14 +637,14 @@ The function returns the new state updated based on the type and possible conten
 ```js
 const counterReducer = (state, action) => {
   switch (action.type) {
-    case "INC":
-        return state + 1
-    case "DEC":
-        return state - 1
-    case "ZERO":
-        return 0
+    case 'INC':
+      return state + 1
+    case 'DEC':
+      return state - 1
+    case 'ZERO':
+      return 0
     default:
-        return state
+      return state
   }
 }
 ```
@@ -566,9 +666,9 @@ const App = () => {
     <div>
       <div>{counter}</div> // highlight-line
       <div>
-        <button onClick={() => counterDispatch({ type: "INC" })}>+</button> // highlight-line
-        <button onClick={() => counterDispatch({ type: "DEC" })}>-</button>
-        <button onClick={() => counterDispatch({ type: "ZERO" })}>0</button>
+        <button onClick={() => counterDispatch({ type: 'INC' })}>+</button> // highlight-line
+        <button onClick={() => counterDispatch({ type: 'DEC' })}>-</button>
+        <button onClick={() => counterDispatch({ type: 'ZERO' })}>0</button>
       </div>
     </div>
   )
@@ -584,17 +684,25 @@ counterDispatch({ type: "INC" })
 The current code for the application is in the repository
 [https://github.com/comp227/hook-counter](https://github.com/comp227/hook-counter/tree/part6-1) in the branch *part6-1*.
 
-### Using context for passing the state to components
+### Passing state via props
 
-If we want to split the application into several components,
-*the value of the counter and the dispatch function used to manage it must also be passed to the other components*.
-One solution would be to ***pass these as props*** in the usual way:
+When the application is split into multiple components, *the counter value and the dispatch function used to manage it must also be passed to the other components*.
+One solution is to ***pass these as props*** in the usual way.
+
+Let's define a separate `Display` component for the application, whose responsibility is to show the counter value.
+The contents of the file *src/components/Display.jsx* should be:
 
 ```js
 const Display = ({ counter }) => {
   return <div>{counter}</div>
 }
 
+export default Display
+```
+
+Additionally, let's define a `Button` component that is responsible for the application's buttons:
+
+```js
 const Button = ({ dispatch, type, label }) => {
   return (
     <button onClick={() => dispatch({ type })}>
@@ -603,12 +711,36 @@ const Button = ({ dispatch, type, label }) => {
   )
 }
 
+export default Button
+```
+
+The file *App.jsx* changes as follows:
+
+```js
+import { useReducer } from 'react'
+
+import Button from './components/Button' // highlight-line
+import Display from './components/Display' // highlight-line
+
+const counterReducer = (state, action) => {
+  switch (action.type) {
+    case 'INC':
+      return state + 1
+    case 'DEC':
+      return state - 1
+    case 'ZERO':
+      return 0
+    default:
+      return state
+  }
+}
+
 const App = () => {
   const [counter, counterDispatch] = useReducer(counterReducer, 0)
 
   return (
     <div>
-      <Display counter={counter}/> // highlight-line
+      <Display counter={counter} /> // highlight-line
       <div>
         // highlight-start
         <Button dispatch={counterDispatch} type='INC' label='+' />
@@ -621,16 +753,18 @@ const App = () => {
 }
 ```
 
+The application has now been split into multiple components.
+The state management is defined in the file *App.jsx*, from which the values and functions needed for state management are passed to child components as props.
+
 The solution works, but is not optimal.
 If the component structure becomes very nested, the dispatcher would need to be forwarded using props through all of those intermediary sub-components,
 even though those components in between may not need the dispatcher.
 This phenomenon is called [**prop drilling**](https://kentcdodds.com/blog/prop-drilling).
 
+### Using context for passing the state to components
+
 React's built-in [Context API](https://react.dev/learn/passing-data-deeply-with-context) provides a solution for us.
 React's **context** is like a global state for the application, so that any component could get access to the state.
-However, as Javascript expert Kent Dodds says in the [prop drilling article linked above](https://kentcdodds.com/blog/prop-drilling), when comparing the context api to global variables:
-
->*The difference is that because of the way the [Context] API was designed, you can still statically find the source of the context as well as any consumers with relative ease.*
 
 Let us now create a context in the application that stores the state management of the counter.
 
@@ -648,18 +782,26 @@ export default CounterContext
 The `App` component can now ***provide a context to its child components*** as follows:
 
 ```js
+import { useReducer } from 'react'
+
+import Button from './components/Button'
+import Display from './components/Display'
 import CounterContext from './CounterContext' // highlight-line
+
+// ...
 
 const App = () => {
   const [counter, counterDispatch] = useReducer(counterReducer, 0)
 
   return (
-    <CounterContext.Provider value={[counter, counterDispatch]}>  // highlight-line
-      <Display />
+    <CounterContext.Provider value={{ counter, counterDispatch }}>  // highlight-line
+      <Display /> // highlight-line
       <div>
+        // highlight-start
         <Button type='INC' label='+' />
         <Button type='DEC' label='-' />
         <Button type='ZERO' label='0' />
+        // highlight-end
       </div>
     </CounterContext.Provider> // highlight-line
   )
@@ -668,33 +810,52 @@ const App = () => {
 
 The code above wraps child components inside the `CounterContext.Provider` component and sets a `value` in its attributes.
 
-The context providers's `value` is set to be an array containing the value of the `counter`, and the `dispatch` function (*`counterDispatch`*).
+The context providers's `value` is set to be an object containing the value of the `counter`, and the `dispatch` function (*`counterDispatch`*).
 
 Other components (including *`Display`* and *`Button`*)
 can now access the context using the [`useContext`](https://react.dev/reference/react/useContext) hook:
+The `Display` component changes as follows:
 
 ```js
 import { useContext } from 'react' // highlight-line
-import CounterContext from '../CounterContext'
+import CounterContext from './CounterContext' // highlight-line
 
-const Display = () => {
-  const [counter, dispatch] = useContext(CounterContext) // highlight-line
-  return (
-    <div>
-      {counter}
-    </div>
-  )
+const Display = () => {  // highlight-line
+  const { counter } = useContext(CounterContext) // highlight-line
+
+  return <div>{counter}</div>
 }
+```
 
-// meanwhile in another component, Button.jsx
-const Button = ({ type, label }) => {
-  const [counter, dispatch] = useContext(CounterContext) // highlight-line
+`Display` component therefore no longer needs props; it obtains the counter value by calling the `useContext` hook with the `CounterContext` object as its argument.
+
+Similarly, the `Button` component becomes:
+
+```js
+import { useContext } from 'react' // highlight-line
+import CounterContext from './CounterContext' // highlight-line
+
+const Button = ({ type, label }) => {  // highlight-line
+  const { counterDispatch } = useContext(CounterContext) // highlight-line
+
   return (
-    <button onClick={() => dispatch({ type })}>
+    <button onClick={() => counterDispatch({ type })}> // highlight-line
       {label}
     </button>
   )
 }
+```
+
+Components therefore receive the value provided by the context provider.
+In this case, the context is an object with:
+
+- a `counter` field that represents the counter's value
+- a `counterDispatch` field that is the dispatch function used to change the counter's state.
+
+Components access the attributes they need using JavaScript's destructuring syntax:
+
+```js
+const { counter } = useContext(CounterContext)
 ```
 
 The current code for the application is in [GitHub](https://github.com/comp227/hook-counter/tree/part6-2) in the branch *part6-2*.
@@ -710,14 +871,14 @@ import { createContext, useReducer } from 'react'
 
 const counterReducer = (state, action) => {
   switch (action.type) {
-    case "INC":
-        return state + 1
-    case "DEC":
-        return state - 1
-    case "ZERO":
-        return 0
+    case 'INC':
+      return state + 1
+    case 'DEC':
+      return state - 1
+    case 'ZERO':
+      return 0
     default:
-        return state
+      return state
   }
 }
 
@@ -727,7 +888,7 @@ export const CounterContextProvider = (props) => {
   const [counter, counterDispatch] = useReducer(counterReducer, 0)
 
   return (
-    <CounterContext.Provider value={[counter, counterDispatch] }>
+    <CounterContext.Provider value={{ counter, counterDispatch }}>
       {props.children}
     </CounterContext.Provider>
   )
@@ -742,15 +903,20 @@ whose value is a counter and a dispatcher used for its state management.
 Let's enable the context provider by making a change in *main.jsx*:
 
 ```js
-import ReactDOM from 'react-dom/client'
+import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+
 import App from './App'
 import { CounterContextProvider } from './CounterContext' // highlight-line
 
-ReactDOM.createRoot(document.getElementById('root')).render(
-  <CounterContextProvider>  // highlight-line
-    <App />
-  </CounterContextProvider>  // highlight-line
+createRoot(document.getElementById('root')).render(
+  <StrictMode>
+    <CounterContextProvider> // highlight-line
+      <App />
+    </CounterContextProvider> // highlight-line
+  </StrictMode>
 )
+
 ```
 
 Now the context defining the value and functionality of the counter **is available to *all* components of the application**.
@@ -758,8 +924,8 @@ Now the context defining the value and functionality of the counter **is availab
 The `App` component is simplified to the following form:
 
 ```js
-import Display from './components/Display'
 import Button from './components/Button'
+import Display from './components/Display'
 
 const App = () => {
   return (
@@ -777,78 +943,18 @@ const App = () => {
 export default App
 ```
 
-The context is still used in the same way, e.g. the component `Button` is defined as follows:
+The context is still used in the same way, and no changes are needed in the other components.
+For example, the `Button` component is defined as follows:
 
 ```js
 import { useContext } from 'react'
 import CounterContext from '../CounterContext'
 
 const Button = ({ type, label }) => {
-  const [counter, dispatch] = useContext(CounterContext)
+  const { counterDispatch } = useContext(CounterContext)
+
   return (
-    <button onClick={() => dispatch({ type })}>
-      {label}
-    </button>
-  )
-}
-
-export default Button
-```
-
-The `Button` component *only needs the `dispatch` function of the counter*, but it also gets the value of the counter from the context using the function `useContext`:
-
-```js
-  const [counter, dispatch] = useContext(CounterContext)
-```
-
-This is not a big problem, but it is possible to make the code a bit nicer by defining a couple of helper functions in the `CounterContext` file:
-
-```js
-import { createContext, useReducer, useContext } from 'react' // highlight-line
-
-const CounterContext = createContext()
-
-// ...
-
-export const useCounterValue = () => {
-  const counterAndDispatch = useContext(CounterContext)
-  return counterAndDispatch[0]
-}
-
-export const useCounterDispatch = () => {
-  const counterAndDispatch = useContext(CounterContext)
-  return counterAndDispatch[1]
-}
-
-// ...
-```
-
-With these helper functions, the components can now selectively retrieve the parts of the context they need.
-The `Display` component changes as follows:
-
-```js
-import { useCounterValue } from '../CounterContext' // highlight-line
-
-const Display = () => {
-  const counter = useCounterValue() // highlight-line
-  return <div>
-    {counter}
-  </div>
-}
-
-
-export default Display
-```
-
-Component `Button` becomes:
-
-```js
-import { useCounterDispatch } from '../CounterContext' // highlight-line
-
-const Button = ({ type, label }) => {
-  const dispatch = useCounterDispatch() // highlight-line
-  return (
-    <button onClick={() => dispatch({ type })}>
+    <button onClick={() => counterDispatch({ type })}>
       {label}
     </button>
   )
@@ -859,15 +965,9 @@ export default Button
 
 This code is much cleaner.
 The *entire state of the application*, i.e. the value of the counter and the code for managing it, ***is now isolated in the file `CounterContext`***.
-*CounterContext.jsx* also has well-named and easy-to-use auxiliary functions for managing the state.
+Components access the part of the context they need by using the `useContext` hook and JavaScript's destructuring syntax.
 
 The final code for the application is in [GitHub](https://github.com/comp227/hook-counter/tree/part6-3) in the branch *part6-3*.
-
-As a technical detail, notice that the helper functions `useCounterValue` and `useCounterDispatch` are defined as
-[custom hooks](https://react.dev/learn/reusing-logic-with-custom-hooks),
-because calling the hook function `useContext` is [possible](https://legacy.reactjs.org/docs/hooks-rules.html) only from React components or custom hooks.
-**Custom Hooks** are JavaScript functions whose name must start with the string *`use`*.
-We will return to custom hooks in a little more detail in [part 7](/part7/custom_hooks) of the course.
 
 </div>
 
@@ -922,7 +1022,8 @@ If the application is communicating with the server, the communication can be ha
 Recently, however, it has become more common to move the communication and associated state management at least partially under the control of React Query (or some other similar library).
 There are also situations where it may make sense to handle some of the state with `useState` and some with contexts.
 
-The most comprehensive and robust state management solution is *Redux*, which is a way to implement the so-called [Flux](https://facebookarchive.github.io/flux/) architecture.
+The most comprehensive and robust state management solution is *Redux*,
+which is a way to implement the so-called [Flux](https://facebookarchive.github.io/flux/docs/in-depth-overview/) architecture.
 Redux is slightly older than the solutions presented in this section.
 The rigidity of Redux has been the motivation for many new state management solutions, such as React's `useReducer`.
 Some of the criticisms of Redux's rigidity have already become obsolete thanks to the [Redux Toolkit](https://redux-toolkit.js.org/).

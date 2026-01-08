@@ -198,13 +198,13 @@ A clear indicator that a project uses npm is the *package.json* file located at 
     "preview": "vite preview"
   },
   "dependencies": {
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react": "^22.21.1",
+    "react-dom": "^22.21.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.17.0",
-    "@types/react": "^18.3.18",
-    "@types/react-dom": "^18.3.5",
+    "@types/react": "^22.21.18",
+    "@types/react-dom": "^22.21.5",
     "@vitejs/plugin-react": "^4.3.4",
     "eslint": "^9.17.0",
     "eslint-plugin-react": "^7.37.2",
@@ -248,8 +248,8 @@ Axios is now included among the other dependencies:
   },
   "dependencies": {
     "axios": "^1.7.9", // highlight-line
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react": "^22.21.1",
+    "react-dom": "^22.21.1"
   },
   // ...
 }

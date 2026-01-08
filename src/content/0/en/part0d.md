@@ -177,13 +177,13 @@ You can press ***Space*** to continue reviewing the changes, and ***q*** to exit
 
 Now with our handy package manager, we need to install **[node.js](https://nodejs.org/en/)** AKA **node**.
 If you already have Node installed,
-make sure it is at least version 18.13.0.
+make sure it is at least version 22.21.0.
 We will discuss node.js further in [part 1](/part1).
 
 For this class, I'm going to install nvm first so that we can use a specific version of node.
-Specifically, we'll use Node version 18.13.0.
-However, the bulk of this course was written and fully tested with Node 16.13.2.
-So essentially we want to have two node versions 18.13 (a newer version) and 16.13.2 (as a fallback).
+Specifically, we'll use Node version 22.21.0.
+However, the bulk of this course was written and fully tested with Node 18.3.2.
+So essentially we want to have two node versions 22.21 (a newer version) and 18.3.2 (as a fallback).
 Since that is the case, we will also install **[NVM](https://github.com/nvm-sh/nvm)**,
 which allows us to have these two different versions of node.js on our computer and switch between them.
 
@@ -194,16 +194,16 @@ This can be done via one of these commands.
 |:---|:--|
 |`winget install -e CoreyButler.NVMforWindows`|`brew install nvm`|
 
-After installing *`nvm`*, you could use the `nvm help` to figure out the commands to install a version (like 18.13.0 and 16.13.2), and then use the later version.
+After installing *`nvm`*, you could use the `nvm help` to figure out the commands to install a version (like 22.21.0 and 18.3.2), and then use the later version.
 I'll provide the commands here, which you'll need to execute separately.
 
 ```bash
-nvm install 16.13
-nvm install 18.13
-nvm use 18
+nvm install 18.3
+nvm install 22.23
+nvm use 22
 ```
 
-After this, you should be able to type `node -v` and you'll notice that it should print out *`v18.13.0`*.
+After this, you should be able to type `node -v` and you'll notice that it should print out *`v22.21.0`*.
 
 To link node to our future IDE WebStorm we'll follow the next couple of instructions.
 Here's the first:
@@ -216,11 +216,11 @@ The above command creates a ***symbolic link*** where WebStorm can find the vers
 Then, type:
 
 ```bash
-nvm use 18
+nvm use 22
 ```
 
 > If, after typing this line, you get an error like *`panic: runtime error: slice bounds out of range`*, this is mostly likely due to you already having node installed.
-> If you type `nvm list` and you just type the number of one of the versions installed, like say `nvm use 18`, that will also work.
+> If you type `nvm list` and you just type the number of one of the versions installed, like say `nvm use 22`, that will also work.
 
 #### 4 Alternate: Installing node directly
 

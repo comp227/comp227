@@ -13,8 +13,8 @@ Let's continue our work on the backend of the tasks application we started in [p
 ### Project structure
 
 > **FYI**: This course material was originally written with version *18* of Node.js,
-> but most of it has been adapted recently to use *22.3.0*.
-> If you are using NVM, you can always switch, but you can also just stick with 22.3 for now.
+> but most of it has been adapted recently to use *22.21.0*.
+> If you are using NVM, you can always switch, but you can also just stick with 22.21 for now.
 
 Before we move into the topic of testing, we will modify the structure of our project to adhere to Node.js best practices.
 

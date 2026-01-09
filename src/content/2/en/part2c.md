@@ -674,7 +674,7 @@ Store the initial state of the application in the file *db.json*, which should b
   "groups":[
     { 
       "name": "COMP 227 Students", 
-      "url": "https://discord.gg/VRUKRxCJ95",
+      "url": "https://discord.gg/85rgmTtxHm",
       "id": "1"
     },
     { 

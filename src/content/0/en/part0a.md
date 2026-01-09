@@ -26,7 +26,7 @@ Students are expected to read online resources and apply techniques to develop a
 | | |
 | --- | --- |
 | Email | ojimenez AT pacific.edu |
-| Discord | <https://discord.gg/VRUKRxCJ95> |
+| Discord | <https://discord.gg/85rgmTtxHm> |
 | Office Hours | TTh 1pm-2:45pm |
 | Other meetings | by email/discord appointment |
 
@@ -77,7 +77,7 @@ This course helps students meet the following Computer Science Program Learning 
 ### Learning Resources
 
 - [canvas.pacific.edu](https://pacific.instructure.com)
-- [Discord](https://discord.gg/VRUKRxCJ95)
+- [Discord](https://discord.gg/85rgmTtxHm)
 - [Class website](http://comp227.djosv.com)
 
 ### Other Responsibilities
@@ -99,7 +99,7 @@ The next [reading](/part0/general_info) in the course will discuss more informat
 It's crucial to seek help when you can't access Canvas or class materials.
 It's up to you to ask questions!
 
-1. We will be using [Discord](https://discord.gg/VRUKRxCJ95).
+1. We will be using [Discord](https://discord.gg/85rgmTtxHm).
    - if you have not used Discord before it is fairly intuitive, but [here's a guide should you need it](https://support.discord.com/hc/en-us/articles/360045138571-Beginner-s-Guide-to-Discord)
 2. Canvas has live help that will assist you with any technical issues.
     To access help, click the question mark at the far left side of the screen.
@@ -120,7 +120,7 @@ We also need the course time to be able to check in and for me to be able to pro
 While there will be some asynchronous portions, coming to class will allow me to observe you and provide tips.
 It will also serve as an opportunity for you to work on exercises and to help each other out in a community fashion.
 
-You can discuss the course and related topics in our [Discord](https://discord.gg/VRUKRxCJ95) outside of class hours.
+You can discuss the course and related topics in our [Discord](https://discord.gg/85rgmTtxHm) outside of class hours.
 Discord will have different channels for both your learning partners as well as course-related conversations to help augment class exercises.
 
 ### Pronouns

@@ -1055,7 +1055,7 @@ Data:
     { 
       "id": "1",
       "name": "COMP 227 Students", 
-      "url": "https://discord.gg/VRUKRxCJ95"
+      "url": "https://discord.gg/85rgmTtxHm"
     },
     { 
       "id": "2",

@@ -586,7 +586,7 @@ The filtering logic shown in the image is **case insensitive**, meaning that the
 > ```js
 > const App = () => {
 >   const [groups, setGroups] = useState([
->     { name: 'COMP 227 Students', url: 'https://discord.gg/VRUKRxCJ95', id: 1 },
+>     { name: 'COMP 227 Students', url: 'https://discord.gg/85rgmTtxHm', id: 1 },
 >     { name: 'PySlackers', url: 'https://pythondev.slack.com', id: 2 },
 >     { name: 'Code Support', url: 'https://discord.gg/XQ9C3sY', id: 3 },
 >     { name: 'Front End Developers', url: 'https://discord.gg/XHsumw2C39', id: 4 }

@@ -59,10 +59,5 @@ module.exports = {
       d: 'React with types',
       e: 'Working with an existing codebase',
     },
-    // '9': {
-    //   a: 'Introduction to React Native',
-    //   b: 'React Native basics',
-    //   c: 'Markdown Test Page',
-    // },
   },
 };

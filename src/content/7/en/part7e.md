@@ -362,7 +362,7 @@ The most famous type of injection is probably [SQL injection](https://bobby-tabl
 ![xkcd bobby tables comic](https://imgs.xkcd.com/comics/exploits_of_a_mom.png)
 *From [xkcd](https://xkcd.com/327/)*
 
-In case you haven't seen many of the (great explanations out there) [https://www.explainxkcd.com/wiki/index.php/Little_Bobby_Tables],
+In case you haven't seen many of the [great explanations out there](https://www.explainxkcd.com/wiki/index.php/Little_Bobby_Tables),
 let's review.
 Imagine you have some form and you have this query for searching users.
 

@@ -77,7 +77,7 @@ So, in addition to the Axios library, the command would install over 20 other np
 
 The *Fetch API* provides a similar way to make HTTP requests as Axios, but ***using the Fetch API does not require installing any external libraries***.
 Maintaining the application becomes easier when there are fewer libraries to update, and security is also improved because the potential attack surface of the application is reduced.
-The security and maintainability of applications is discussed further in [part 7](part7/class_components_miscellaneous#react-node-application-security) of the course.
+The security and maintainability of applications is discussed further in [part 7](/part7/class_components_miscellaneous#react-node-application-security) of the course.
 
 In practice, requests are made using the `fetch()` function.
 The syntax used differs somewhat from Axios.

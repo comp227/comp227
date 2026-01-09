@@ -841,7 +841,9 @@ npm test -- --coverage
 The first time you run the command, Vitest will ask you if you want to install the required library `@vitest/coverage-v8`.
 Install it, and run the command again:
 
-![terminal output of test coverage](../../images/5/18new.png)
+```bash
+![terminal output of test coverage](../../images/5/18new.png)  //TODO: Create image
+```
 
 A HTML report will be generated to the *coverage* directory.
 The report will tell us the lines of untested code in each component:

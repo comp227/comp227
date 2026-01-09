@@ -46,7 +46,7 @@ The operating principles of both libraries are very similar, so your choice is n
 However, Playwright is now the preferred E2E library for the course.
 
 If your choice is Playwright, please proceed.
-If you end up using Cypress, [visit our older documentation](/en/part5/end_to_end_testing_cypress).
+If you end up using Cypress, [visit our older documentation](/part5/end_to_end_testing_cypress).
 
 ### Playwright
 

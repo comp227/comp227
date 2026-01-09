@@ -89,7 +89,7 @@ A better question would be:
 >
 > *The network tab looks like the following*
 >
-> [screen shot from the network or console]
+> `[screen shot from the network or console]`
 
 If you are asking the teaching staff directly for help, then please also include a link to your GitHub repo, however, this should not be shared with your classmates.
 Notice the details in the second response and a plan of action for what you've tried.

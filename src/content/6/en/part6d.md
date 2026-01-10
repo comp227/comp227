@@ -463,7 +463,7 @@ Finally, notice an interesting detail.
 React Query re-fetches all tasks when we switch to another browser tab and then return to the application's tab.
 This can be observed in the Network tab of the Developer Console:
 
-![dev tools tasks app with an arrow in a new tab and another arrow on console's network tab over tasks request as 200](../../images/6/62new.png)
+![dev tools tasks app with an arrow in a new tab and another arrow on console's network tab over tasks request as 200](../../images/6/62new.png) //TODO: Replace this image w/ new tab
 
 What is going on?
 The [React Query documentation](https://tanstack.com/query/latest/docs/react/reference/useQuery),

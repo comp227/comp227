@@ -840,7 +840,7 @@ The application prints the data that we sent in the request to the console:
 The development server will restart if changes are made to the code,
 so by monitoring the console, you will immediately notice if there is an error in the application's code:
 >
-> ![console error about SyntaxError](../../images/3/16_25.png)
+> ```![console error about SyntaxError](../../images/3/16_25.png)   //TODO: redo this image```
 >
 > Similarly, it is useful to check the console to make sure that the backend behaves as we expect it to in different situations, like when we send data with an HTTP POST request.
 Any `console.log` commands that you have put in temporarily for development will also appear here.
@@ -856,7 +856,7 @@ This can happen with Postman if the type of body is not defined correctly:
 >
 > The server appears to only receive an empty object:
 >
-> ![console output showing empty curly braces](../../images/3/19_25.png)
+> ![console output showing empty curly braces](../../images/3/19.png)
 >
 > The server will not be able to parse the data correctly without the correct value in the header.
 It won't even try to guess the format of the data since

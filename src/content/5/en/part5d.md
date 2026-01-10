@@ -247,11 +247,15 @@ The test fails because an old year ended up in the test.
 Playwright opens the test report in the browser and it becomes clear that Playwright has actually performed the tests with three different browsers:
 Chrome, Firefox and Webkit, i.e. the browser engine used by Safari:
 
-![test report showing the test failing in three different browsers](../../images/5/play2.png)
+```bash
+![test report showing the test failing in three different browsers](../../images/5/play2.png) //TODO: Replace this image
+```
 
 By clicking on the report of one of the browsers, we can see a more detailed error message:
 
-![test error message](../../images/5/play3a.png)
+```bash
+![test error message](../../images/5/play3a.png) //TODO: Replace this image
+```
 
 In the big picture, it is of course a very good thing that the testing takes place with all three commonly used browser engines,
 but this is slow, and when developing the tests it is probably best to carry them out mainly with only one browser.
@@ -331,11 +335,15 @@ npm test -- --ui
 
 We now see that the test finds the button
 
-![playwright UI rendering the tasks app while testing it](../../images/5/play4.png)
+```bash
+![playwright UI rendering the tasks app while testing it](../../images/5/play4.png) //TODO: Replace this image
+```
 
 After clicking, the form will appear
 
-![playwright UI rendering the login form of the tasks app](../../images/5/play5.png)
+```bash
+![playwright UI rendering the login form of the tasks app](../../images/5/play5.png) //TODO: Replace this image
+```
 
 When the form is opened, the test should look for the text fields and enter the username and password in them.
 Let's make the first attempt using the [method `page.getByRole`](https://playwright.dev/docs/api/class-page#page-get-by-role):
@@ -1231,7 +1239,9 @@ Playwright-inspector shows the progress of the tests step by step.
 The **arrow-dot** button at the top takes the tests one step further.
 The elements found by the locators and the interaction with the browser are visualized in the browser:
 
-![playwright inspector highlighting element found by the selected locator in the application](../../images/5/play6a.png)
+```bash
+![playwright inspector highlighting element found by the selected locator in the application](../../images/5/play6a.png) //TODO: Replace this image
+```
 
 By default, debug steps through the test command by command.
 If it is a complex test, it can be quite a burden to step through the test to the point of interest.
@@ -1271,7 +1281,9 @@ describe("Task app", () => {
 Now in the test you can go to `page.pause()` in one step, by pressing the green arrow symbol in the inspector.
 When we now run the test and jump to the `page.pause()` command, we find an interesting fact:
 
-![playwright inspector showing the state of the application at page.pause](../../images/5/play6b.png)
+```bash
+![playwright inspector showing the state of the application at page.pause](../../images/5/play6b.png) //TODO: Replace this image
+```
 
 > ***Pertinent:*** It seems that the browser ***does not render*** all the tasks created in the block `beforeEach`.
 > What is the problem?
@@ -1321,7 +1333,9 @@ UI mode and Trace Viewer also offer the possibility of assisted search for locat
 This is done by pressing the double circle on the left side of the lower bar, and then by clicking on the desired user interface element.
 Playwright displays the element locator:
 
-![playwright's trace viewer with red arrows pointing at the locator assisted search location and to the element selected with it showing a suggested locator for the element](../../images/5/play8.png)
+```bash
+![playwright's trace viewer with red arrows pointing at the locator assisted search location and to the element selected with it showing a suggested locator for the element](../../images/5/play8.png) //TODO: Replace this image
+```
 
 Playwright suggests the following as the locator for the third task
 
@@ -1352,7 +1366,9 @@ npx playwright codegen http://localhost:5173/
 
 When the `Record` mode is on, the test generator "records" the user's interaction in the Playwright inspector, from where it is possible to copy the locators and actions to the tests:
 
-![playwright's record mode enabled with its output in the inspector after user interaction](../../images/5/play9.png)
+```bash
+![playwright's record mode enabled with its output in the inspector after user interaction](../../images/5/play9.png) //TODO: Replace this image
+```
 
 Instead of the command line, Playwright can also be used via [Webstorm's IDE](https://www.jetbrains.com/help/webstorm/playwright.html).
 

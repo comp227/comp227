@@ -6,7 +6,7 @@ module.exports = {
       c: 'Fundamentals of Web apps',
       d: 'Configuring your machine for this course'
     },
-    1: {
+    /* 1: {
       a: 'Introduction to React',
       b: 'JavaScript',
       c: 'Component state, event handlers',
@@ -58,6 +58,6 @@ module.exports = {
       c: 'Typing an Express app',
       d: 'React with types',
       e: 'Working with an existing codebase',
-    },
+    }, */
   },
 };

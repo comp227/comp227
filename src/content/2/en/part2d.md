@@ -18,7 +18,7 @@ The json-server does not exactly match the description provided by the
 
 We will take a closer look at REST in the [next part](/part3) of the course.
 But it's important to familiarize ourselves at this point with some of the
-[REST conventions](https://en.wikipedia.org/wiki/Representational_state_transfer#Applied_to_web_services)
+[REST conventions](https://en.wikipedia.org/wiki/REST#Applied_to_web_services)
 used by json-server and other APIs in general.
 In particular, we will be taking a look at the conventional use of [**routes**](https://github.com/typicode/json-server#routes),
 aka URLs and HTTP request types, in REST.
@@ -45,7 +45,7 @@ and that the request must contain the `Content-Type` request header with the val
 Let's make the following changes to the event handler responsible for creating a new task:
 
 ```js
-addTask = (event) => {
+const addTask = (event) => {
   event.preventDefault()
   const taskObject = {
     content: newTask,
@@ -91,11 +91,11 @@ Since the data we sent in the POST request was a JavaScript object,
 *axios* automatically knew to set the appropriate `application/json` value for the `Content-Type` header.
 
 The new task is not rendered to the screen yet.
-This is because *we did not update the state of the `App` component when we created the new task*.
+This is because *we did not update the state of the `App` component when we created it*.
 Let's fix this:
 
 ```js
-addTask = event => {
+const addTask = event => {
   event.preventDefault()
   const taskObject = {
     content: newTask,
@@ -245,7 +245,7 @@ const toggleImportanceOf = (id) => {
   const changedTask = { ...task, important: !task.important }
 
   axios.put(url, changedTask).then(response => {
-    setTasks(tasks.map(t => t.id !== id ? t : response.data))
+    setTasks(tasks.map(task => task.id === id ? response.data : task))
   })
 }
 ```
@@ -297,21 +297,21 @@ except for the old task which is *replaced by the updated version* returned by t
 
 ```js
 axios.put(url, changedTask).then(response => {
-  setTasks(tasks.map(task => task.id !== id ? task : response.data))
+  setTasks(tasks.map(task => task.id === id ? response.data : task))
 })
 ```
 
 This update is accomplished with the `map` method:
 
 ```js
-tasks.map(task => task.id !== id ? task : response.data)
+tasks.map(task => task.id === id ? response.data : task)
 ```
 
 The `map` method creates a new array by ***mapping every item from the old array into an item in the new array***.
 In our example, the new array is created conditionally:
 
-- if `task.id !== id` is *`true`*; we copy the original item
-- if the condition is *`false`*, then the task object returned by the server is added to the array instead.
+- if `task.id === id` is *`true`*; then the task object returned by the server is added to the array
+- if the condition is *`false`*, we copy the original item to the new array instead.
 
 This `map` trick may seem a bit strange at first, but it's *worth spending some time wrapping your head around it*.
 We will be using this method many times throughout the course.
@@ -382,7 +382,7 @@ const App = () => {
     taskService
       .update(id, changedTask)
       .then(response => {
-        setTasks(tasks.map(task => task.id !== id ? task : response.data))
+        setTasks(tasks.map(task => task.id === id ? response.data : task))
       })
     // highlight-end
   }
@@ -519,7 +519,7 @@ const App = () => {
       .update(id, changedTask)
       // highlight-start      
       .then(returnedTask => {
-        setTasks(tasks.map(task => task.id !== id ? task : returnedTask))
+        setTasks(tasks.map(task => task.id === id ? returnedTask : task))
       // highlight-end
       })
   }
@@ -682,7 +682,7 @@ Users won't be able to tell that an error has occurred unless they happen to hav
 The only way the error can be seen in the application is that clicking the button does not affect the task's importance.
 
 We had [previously mentioned](/part2/getting_data_from_server#axios-and-promises) that a promise can be in one of three different states.
-When an HTTP request fails, the associated promise is ***rejected***.
+When an axios HTTP request fails, the associated promise is ***rejected***.
 Our current code does not handle this rejection in any way.
 
 The rejection of a promise is [handled](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Using_promises)
@@ -708,13 +708,13 @@ If the request fails, the event handler registered with the `catch` method gets 
 
 The `catch` method is often utilized by placing it deeper within the promise chain.
 
-When our application makes an HTTP request, we are **creating a [promise chain](https://javascript.info/promise-chaining)**:
+When multiple `.then` methods are chained together, we are **creating a [promise chain](https://javascript.info/promise-chaining)**:
 
 ```js
 axios
-  .put(`${baseUrl}/${id}`, newObject)
+  .get('http://...')
   .then(response => response.data)
-  .then(changedTask => {
+  .then(data => {
     // ...
   })
 ```
@@ -724,9 +724,9 @@ which is **called once any promise in the chain throws an error and the promise 
 
 ```js
 axios
-  .put(`${baseUrl}/${id}`, newObject)
+  .get('http://...')
   .then(response => response.data)
-  .then(changedTask => {
+  .then(data => {
     // ...
   })
   .catch(error => {
@@ -734,7 +734,8 @@ axios
   })
 ```
 
-Let's use this feature and register an error handler in the `App` component:
+Let's take advantage of this feature.
+We will place our application's error handler in the `App` component:
 
 ```js
 const toggleImportanceOf = id => {
@@ -744,7 +745,7 @@ const toggleImportanceOf = id => {
   taskService
     .update(id, changedTask)
     .then(returnedTask => {
-      setTasks(tasks.map(task => task.id !== id ? task : returnedTask))
+      setTasks(tasks.map(task => task.id === id ? returnedTask : task))
     })
     // highlight-start
     .catch(error => {
@@ -758,7 +759,7 @@ const toggleImportanceOf = id => {
 ```
 
 The error message is displayed to the user with the trusty old
-[`alert` dialog popu](https://developer.mozilla.org/en-US/docs/Web/API/Window/alert),
+[`alert` dialog popup](https://developer.mozilla.org/en-US/docs/Web/API/Window/alert),
 and the deleted task gets filtered out from the state.
 
 Removing an already deleted task from the application's state is done with the array
@@ -793,7 +794,7 @@ but will also add two more items:
 
 ### Exercises 2.12-2.15
 
-#### 2.12: Communities Step 7
+#### 2.12: Communities, Step 7
 
 Let's return to our communities application.
 
@@ -801,11 +802,11 @@ Currently, any community that is added is not saved to a backend server.
 Fix this situation.
 Use ***<http://localhost:3001/groups>*** as your backend URL.
 
-#### 2.13: Communities Step 8
+#### 2.13: Communities, Step 8
 
 Extract the code that handles the communication with the backend into its own module by following the example shown earlier in this part of the course material.
 
-#### 2.14: Communities Step 9
+#### 2.14: Communities, Step 9
 
 Make it possible for users to delete entries from the communities application.
 The deletion can be done through a dedicated button for each community listed.
@@ -829,9 +830,9 @@ You can make an HTTP DELETE request with the [*axios*](https://github.com/axios/
 > }
 > ```
 
-#### 2.15*: Communities Step 10
+#### 2.15*: Communities, Step 10
 
-*Why is there a star on the exercise? See [here](/part0/general_info#taking-the-course) for the explanation.*
+*Why is there an asterisk on the exercise? [See here](/part0/general_info#taking-the-course) for the explanation.*
 
 Change the functionality so that if a URL is added to an already existing community, the **new URL will replace the old URL**.
 It's recommended to use the **HTTP PUT** method for updating the URL.

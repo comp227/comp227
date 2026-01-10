@@ -89,12 +89,6 @@ Debugging backend applications is also possible with the Chrome developer consol
 node --inspect index.js
 ```
 
-You can also pass the `--inspect` flag to `nodemon`:
-
-```bash
-nodemon --inspect index.js
-```
-
 You can access the debugger by clicking the green icon - the node logo - that appears in the Chrome developer console:
 
 ![dev tools with green node logo icon](../../images/3/37.png)
@@ -125,7 +119,7 @@ Logging to the console, REST Client/Postman, debuggers, and experience will help
 
 When bugs occur, ***the worst of all possible strategies*** is to continue writing code.
 It will guarantee that your code will soon have even more bugs, and debugging them will be even more difficult.
-The [*stop and fix* principle](https://leanscape.io/principles-of-lean-13-jidoka/)
+The [Jidoka *stop and fix* principle](https://leanscape.io/principles-of-lean-13-jidoka/)
 from Toyota Production Systems is very effective in this situation as well.
 
 ### MongoDB
@@ -196,7 +190,7 @@ The view displays the *MongoDB URI*, which is the address of the database that w
 The address looks like this:
 
 ```bash
-mongodb+srv://comp227:$<password>@cluster0.gb6u3el.mongodb.net/myFirstDatabase?retryWrites=true&w=majority
+mongodb+srv://comp227:$<password>@cluster0.gb6u3el.mongodb.net/myFirstDatabase?retryWrites=true&w=majority&appName=Cluster0
 ```
 
 We are now ready to use the database.
@@ -228,7 +222,7 @@ if (process.argv.length < 3) {
 
 const password = process.argv[2]
 
-const url = `mongodb+srv://comp227:${password}@cluster0.gb6u3el.mongodb.net/taskApp?retryWrites=true&w=majority`
+const url = `mongodb+srv://comp227:${password}@cluster0.gb6u3el.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`
 
 const taskSchema = new mongoose.Schema({
   content: String,
@@ -239,7 +233,7 @@ const taskSchema = new mongoose.Schema({
 const Task = mongoose.model('Task', taskSchema)
 
 mongoose
-  .connect(url)
+  .connect(url, { family: 4 })
   .then((result) => {
     console.log('connected')
 
@@ -260,6 +254,15 @@ mongoose
 
 > **Pertinent:** Depending on which region you selected when building your cluster, the *MongoDB URI* may be different from the example provided above.
 You should verify and use the correct URI that was generated from MongoDB Atlas.
+
+The connection to the database is established with the command:
+
+```js
+mongoose.connect(url, { family: 4 })
+```
+
+The method takes the database URL as the first argument and an object that defines the required settings as the second argument.
+MongoDB Atlas supports only IPv4 addresses, so with the object `{ family: 4 }` we specify that the connection should always use IPv4.
 
 The code also assumes that it will be passed the password from the credentials we created in MongoDB Atlas, as a command line parameter.
 In the code above, we access the command line parameter like this:
@@ -285,7 +288,7 @@ As the view states, the *document* matching the task has been added to the ***ta
 Let's destroy the default database ***myFirstDatabase*** and change the name of the database referenced in our connection string to `taskApp` instead, by modifying the URI:
 
 ```bash
-mongodb+srv://comp227:$<password>@cluster0.gb6u3el.mongodb.net/taskApp?retryWrites=true&w=majority
+const url = `mongodb+srv://comp227:${password}@cluster0.gb6u3el.mongodb.net/taskApp?retryWrites=true&w=majority&appName=Cluster0`
 ```
 
 Let's run our code again:
@@ -298,8 +301,8 @@ Creating a database like this is not necessary, since MongoDB Atlas automaticall
 
 ### Schema
 
-After establishing the connection to the database, we define the [**schema**](http://mongoosejs.com/docs/guide.html)
-for a task and the matching [**model**](http://mongoosejs.com/docs/models.html):
+After establishing the connection to the database, we define the [**schema**](https://mongoosejs.com/docs/guide.html#schemas)
+for a task and the matching [**model**](https://mongoosejs.com/docs/models.html):
 
 ```js
 const taskSchema = new mongoose.Schema({
@@ -311,11 +314,11 @@ const taskSchema = new mongoose.Schema({
 const Task = mongoose.model('Task', taskSchema)
 ```
 
-First, we define the [schema](http://mongoosejs.com/docs/guide.html) of a task that is stored in the `taskSchema` variable.
+First, we define the [schema](https://mongoosejs.com/docs/guide.html#schemas) of a task that is stored in the `taskSchema` variable.
 The schema tells Mongoose how the task objects are to be stored in the database.
 
 In the `Task` model definition, the first `'Task'` parameter is the *singular name of the model*.
-The name of the collection will be the lowercase plural `tasks`, because the [Mongoose convention](http://mongoosejs.com/docs/models.html)
+The name of the collection will be the lowercase plural `tasks`, because the [Mongoose convention](https://mongoosejs.com/docs/models.html#compiling)
 is to automatically name collections as the plural (e.g. `tasks`) when the schema refers to them in the singular (e.g. `Task`).
 
 Document databases like Mongo are **schemaless**, meaning that the database itself does not care about the structure of the data that is stored in the database.
@@ -325,7 +328,7 @@ The idea behind Mongoose is that the data stored in the database is given a *sch
 
 ### Creating and saving objects
 
-Next, the application creates a new task object with the help of the `Task` [model](http://mongoosejs.com/docs/models.html):
+Next, the application creates a new task object with the help of the `Task` [model](https://mongoosejs.com/docs/models.html):
 
 ```js
 const task = new Task({
@@ -335,7 +338,7 @@ const task = new Task({
 })
 ```
 
-Models are so-called **constructor functions** that create new JavaScript objects based on the provided parameters.
+Models are **constructor functions** that create new JavaScript objects based on the provided parameters.
 
 > **Pertinent:** Since the objects are created with the model's constructor function,
 they have all the properties of the model, which include methods for saving the object to the database.
@@ -351,7 +354,7 @@ task.save().then(result => {
 
 When the object is saved to the database, the event handler provided to `then` gets called.
 The event handler closes the database connection with the command `mongoose.connection.close()`.
-If the connection is not closed, the program will never finish its execution.
+If the connection is not closed, the connection remains open until the program terminates.
 
 The event handler's **`result`** parameter stores the *result of the save* operation.
 The result is not that interesting when we're storing one object in the database.
@@ -383,7 +386,7 @@ When the code is executed, the program prints all the tasks stored in the databa
 
 The objects are retrieved from the database with the [`find` method](https://mongoosejs.com/docs/api/model.html#model_Model-find) of the `Task` model.
 The parameter for `find` is an object expressing search conditions.
-Since the parameter is an empty object`{}`, we get all of the tasks stored in the ***tasks*** collection.
+Since the parameter is an empty object (`{}`), we get all of the tasks stored in the ***tasks*** collection.
 
 The search conditions adhere to the [Mongo search query syntax](https://docs.mongodb.com/manual/reference/operator/).
 
@@ -447,7 +450,7 @@ MeditationMind https://discord.com/invite/XT9xqwv9
 PySlackers https://pythondev.slack.com
 ```
 
-You can get the command-line parameters from the [`process.argv`](https://nodejs.org/docs/latest-v8.x/api/process.html#process_process_argv) variable.
+You can get the command-line parameters from the [`process.argv`](https://nodejs.org/docs/latest-v22.x/api/process.html#process_process_argv) variable.
 
 > **Pertinent: do not close the connection in the wrong place**.
 > E.g. the following code will not work:
@@ -492,10 +495,10 @@ const mongoose = require('mongoose').set('strictQuery', true)
 const password = process.argv[2]
 
 // DO NOT SAVE OR EVEN PASTE YOUR PASSWORD ANYWHERE IN THE REPO
-const url = `mongodb+srv://comp227:${password}@cluster0.gb6u3el.mongodb.net/taskApp?retryWrites=true&w=majority`
+const url = `mongodb+srv://comp227:${password}@cluster0.gb6u3el.mongodb.net/taskApp?retryWrites=true&w=majority&appName=Cluster0`
 // LET ME REPEAT - DO NOT SAVE YOUR PASSWORD IN YOUR REPO!
 
-mongoose.connect(url)
+mongoose.connect(url, { family: 4 })
 
 const taskSchema = new mongoose.Schema({
   content: String,
@@ -516,7 +519,7 @@ app.get('/api/tasks', (request, response) => {
 })
 ```
 
-We can verify in the browser that the backend works for displaying all of the documents:
+Let's start the backend with the command `node --watch index.js yourpassword` so we can verify in the browser that the backend correctly displays all tasks saved to the database:
 
 ![api/tasks in browser shows tasks in JSON](../../images/3/44ea.png)
 
@@ -567,7 +570,7 @@ app.get('/api/tasks', (request, response) => {
 
 The code automatically uses the defined `toJSON` when formatting *`tasks`* to the response.
 
-### Database configuration into its own module
+### Moving db configuration to its own module
 
 Before we refactor the rest of the backend to use the database, let's extract the Mongoose-specific code into its own module.
 
@@ -578,14 +581,13 @@ const mongoose = require('mongoose').set('strictQuery', true)
 
 const url = process.env.MONGODB_URI // highlight-line
 
-console.log('connecting to', url) // highlight-line
-
-mongoose.connect(url)
+console.log('connecting to', url)
+mongoose.connect(url, { family: 4 })
 // highlight-start
   .then(result => {
     console.log('connected to MongoDB')
   })
-  .catch((error) => {
+  .catch(error => {
     console.log('error connecting to MongoDB:', error.message)
   })
 // highlight-end
@@ -607,7 +609,7 @@ taskSchema.set('toJSON', {
 module.exports = mongoose.model('Task', taskSchema) // highlight-line
 ```
 
-Defining Node [modules](https://nodejs.org/docs/latest-v8.x/api/modules.html)
+Defining Node [modules](https://nodejs.org/docs/latest-v22.x/api/modules.html)
 differs slightly from the way of defining [ES6 modules](/part2/rendering_a_collection_modules#refactoring-modules) in part 2.
 
 The public interface of the module is defined by setting a value to the `module.exports` variable.
@@ -622,14 +624,14 @@ const Task = require('./models/task')
 
 This way the `Task` variable will be assigned to the same object that the module defines.
 
-The way that the connection is made has changed slightly:
+### Defining environment variables using the dotenv library
 
 ```js
 const url = process.env.MONGODB_URI
 
 console.log('connecting to', url)
 
-mongoose.connect(url)
+mongoose.connect(url, { family: 4 })
   .then(result => {
     console.log('connected to MongoDB')
   })
@@ -654,7 +656,7 @@ One way would be to define it when the application is started:
 MONGODB_URI=address_here npm run dev
 ```
 
-A more sophisticated way is to use the [dotenv](https://github.com/motdotla/dotenv#readme) library.
+A more sophisticated way to define environment variables is to use the [dotenv](https://github.com/motdotla/dotenv#readme) library.
 You can install the library with the command:
 
 ```bash
@@ -669,7 +671,7 @@ If it was or if it says it was updated, please send me a message to help you get
 The environment variables are defined inside of the file, and it can look like this:
 
 ```bash
-MONGODB_URI=mongodb+srv://comp227:your_DB_password@cluster0.o1opl.mongodb.net/taskApp?retryWrites=true&w=majority
+MONGODB_URI=mongodb+srv://comp227:your_DB_password@cluster0.o1opl.mongodb.net/taskApp?retryWrites=true&w=majority&appName=Cluster0
 PORT=3001
 ```
 
@@ -681,18 +683,17 @@ If you ever make a new repo, **make sure that you immediately add `.env` so you 
 Once you verify that *.env* is correctly being ignored by git, ***open up WebStorm again***.
 
 The environment variables defined in the *.env* file can be taken into use with the expression `require('dotenv').config()`
-and you can reference them in your code just like you would reference normal environment variables, with the familiar `process.env.MONGODB_URI` syntax.
+and you can reference them in your code just like you would reference normal environment variables, with the `process.env.MONGODB_URI` syntax.
 
-Let's change the *index.js* file in the following way:
+Let's load the environment variables at the beginning of the *index.js* file so that they are available throughout the entire application.
+Let's change *index.js* in the following way:
 
 ```js
 require('dotenv').config() // highlight-line
 const express = require('express')
-const app = express()
-const cors = requires('cors')
-
 const Task = require('./models/task') // highlight-line
 
+const app = express()
 // ..
 
 const PORT = process.env.PORT // highlight-line
@@ -715,7 +716,7 @@ This ensures that the environment variables from the *.env* file are available g
 > There you will paste all of the contents of your .env file, making sure you put your DB password from mongo in there.
 > Next click ***Done*** and then Finally ***Save Changes***.
 >
-> ![Heroku dashboard showing config vars](../../images/3/cloudConfig.png)
+> ![browser showing render environment variables](../../images/3/cloudConfig.png)
 
 ### Using database in route handlers
 
@@ -727,7 +728,7 @@ Creating a new task is accomplished like this:
 app.post('/api/tasks', (request, response) => {
   const body = request.body
 
-  if (body.content === undefined) {
+  if (!body.content) {
     return response.status(400).json({ error: 'content missing' })
   }
 
@@ -851,7 +852,7 @@ If a promise returned by the `findById` method is rejected, the response will ha
 The console displays more detailed information about the error.
 
 On top of the non-existing task, there's one more error situation that needs to be handled.
-In this situation, we are trying to fetch a task with the wrong kind of `id`, meaning an `id` that doesn't match the mongo identifier format.
+In this situation, we are trying to fetch a task with the wrong kind of `id`, meaning an `id` that doesn't match the Mongo identifier format.
 
 If we make a request like `GET http://localhost:3001/api/tasks/someInvalidId`, we will get an error message like the one shown below:
 
@@ -890,11 +891,11 @@ app.get('/api/tasks/:id', (request, response) => {
 
 If the format of the id is incorrect, then we will end up in the error handler defined in the `catch` block.
 The appropriate status code for the situation is
-[400 Bad Request](https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.4.1)
+[400 Bad Request](https://www.rfc-editor.org/rfc/rfc9110.html#name-400-bad-request)
 because the situation fits the description perfectly:
 
-> *The request could not be understood by the server due to malformed syntax.
-  The client SHOULD NOT repeat the request without modifications.*
+> *The 400 (Bad Request) status code indicates that the server cannot or will not process the request due to something that is perceived to be a client error
+> (e.g., malformed request syntax, invalid request message framing, or deceptive request routing).*
 
 We have also added some information to the response to shed some light on the cause of the error.
 
@@ -948,9 +949,9 @@ app.get('/api/tasks/:id', (request, response, next) => { // highlight-line
 })
 ```
 
-The error that is passed forward is given to the `next` function as a parameter.
-If `next` was called without a parameter, then the *execution would simply move onto the next route or middleware*.
-If the `next` function is called with a parameter, then the execution will continue to the **error handler middleware**.
+The error that is passed forward is given to the `next` function as an argument.
+If `next` was called without an argument, then the *execution would simply move onto the next route or middleware*.
+If the `next` function is called with an argument, then the execution will continue to the **error handler middleware**.
 
 Express [error handlers](https://expressjs.com/en/guide/error-handling.html)
 are middleware that are defined with a function that accepts ***four parameters***.
@@ -967,7 +968,7 @@ const errorHandler = (error, request, response, next) => {
   next(error)
 }
 
-// this has to be the last loaded middleware.
+// this has to be the last loaded middleware, also all the routes should be registered before this!
 app.use(errorHandler)
 ```
 
@@ -975,11 +976,12 @@ After printing the error message, the error handler checks if the error is a `Ca
 In this situation, the error handler will send a response to the browser with the response object passed as a parameter.
 In all other error situations, the middleware passes the error forward to the default Express error handler.
 
-> **Remember:** *the error-handling middleware has to be the last loaded middleware!*
+> **Remember:** the error-handling middleware *has to be the last loaded middleware*.
+> Also, *all the routes should be registered before the error-handler*!
 
 ### The order of middleware loading
 
-The execution order of middleware is the same as the order that they are loaded into express with the `app.use` function.
+The execution order of middleware is the same as the order that they are loaded into Express with the `app.use` function.
 For this reason, it is important to be careful when defining middleware.
 
 The correct order is the following:
@@ -1073,39 +1075,70 @@ app.delete('/api/tasks/:id', (request, response, next) => {
 In both of the "successful" cases of deleting a resource, the backend responds with the status code **204 no content**.
 The two different cases are deleting a task that exists, and deleting a task that does not exist in the database.
 The `result` callback parameter could be used for checking if a resource was deleted,
-and we could use that information for returning different status codes for the two cases if we deemed it necessary.
+and we could use that information for returning different status codes for the two cases if we deem it necessary.
 Any exception that occurs is passed onto the error handler.
 
-The toggling of the importance of a task can be easily accomplished with the [`findByIdAndUpdate` method](https://mongoosejs.com/docs/api/model.html#model_Model-findByIdAndUpdate).
+Let's implement the functionality to update a single task, allowing the importance of the task to be changed.
+The task updating is done as follows:
 
 ```js
 app.put('/api/tasks/:id', (request, response, next) => {
-  const body = request.body
+  const { content, important } = request.body
 
-  const task = {
-    content: body.content,
-    important: body.important,
-  }
+  Task.findById(request.params.id)
+    .then(task => {
+      if (!task) {
+        return response.status(404).end()
+      }
 
-  Task.findByIdAndUpdate(request.params.id, task, { new: true })
-    .then(updatedTask => {
-      response.json(updatedTask)
+      task.content = content
+      task.important = important
+
+      return task.save().then((updatedTask) => {
+        response.json(updatedTask)
+      })
     })
     .catch(error => next(error))
 })
 ```
 
-In the code above, we also allow the content of the `task` to be edited.
+The task to be updated is first fetched from the database using the `findById` method.
+If no object is found in the database with the given *`id`*, the value of the variable `task` is `null`, and the query responds with the status code **`404`** (*Not Found*).
 
-> *However, we will not support changing the creation date for obvious reasons.*
+If an object with the given id is found, its `content` and `important` fields are updated with the data provided in the request,
+and the modified task is saved to the database using the `save()` method.
+The HTTP request responds by sending the updated task in the response.
 
-Notice that the `findByIdAndUpdate` method receives a regular JavaScript object as its parameter,
-and not a new `task` object created with the `Task` constructor function.
+One notable point is that the code now has nested promises, meaning that within the outer `.then` method,
+another [**promise chain**](https://javascript.info/promise-chaining) is defined:
 
-There is one important detail regarding the use of the `findByIdAndUpdate` method.
-By default, the `updatedTask` parameter of the event handler receives the original document
-[without the modifications](https://mongoosejs.com/docs/api/model.html#model_Model-findByIdAndUpdate).
-We added the optional `{ new: true }` parameter, which will cause our event handler to be called ***with the new modified document instead of the original***.
+```js
+    .then(task => {
+      if (!task) {
+        return response.status(404).end()
+      }
+
+      task.content = content
+      task.important = important
+
+      // highlight-start
+      return task.save().then((updatedTask) => {
+        response.json(updatedTask)
+      })
+      // highlight-end
+```
+
+Usually, this is not recommended because it can make the code difficult to read.
+In this case, however, the solution works because it ensures that the `.then` block following the `save()` method is only executed
+if a task with the given id is found in the database and the `save()` method is called.
+In the fourth part of the course, we will explore the `async`/`await` syntax, which offers an easier and clearer way to handle such situations.
+
+Mongoose also provides the method [`findByIdAndUpdate`](https://mongoosejs.com/docs/api/model.html#Model.findByIdAndUpdate()),
+which can be used to find a document by its `id` and update it with a single method call.
+However, this approach does not fully suit our needs, because later in this part we define certain requirements for the data stored in the database,
+and `findByIdAndUpdate` does not fully support Mongoose's validations.
+Mongoose's [documentation](https://mongoosejs.com/docs/documents.html#updating-using-queries)
+also mentions that the `save()` method is generally the correct choice for updating a document, as it provides full validation.
 
 After testing the backend directly with Postman and the WebStorm REST client, we can verify that it seems to work.
 The frontend also appears to work with the backend using the database.

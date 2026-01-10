@@ -105,13 +105,17 @@ const cors = require('cors')
 app.use(cors())
 ```
 
+> **FYI:** When you are enabling *cors*, you should think about how you want to configure it.
+> In the case of our application, since the backend is not expected to be visible to the public in the production environment,
+> it may make more sense to only enable cors from a specific origin (e.g. the front end).
+
 And the frontend works*!
 
 > **\*** While we can now see the tasks on the frontend, changing the task's importance does not work, as we have yet to implement that on the backend.
 
 You can read more about CORS from [Mozilla's page](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS).
 
-The setup of our app looks now as follows:
+The setup of our app now looks as follows:
 
 ![diagram of react app and browser](../../images/3/100.png)
 
@@ -210,8 +214,6 @@ They do have [a student program](https://www.heroku.com/students) that provides 
 While there are replacements for Heroku that could work with this course like:
 
 - [Fly.io](https://fly.io)
-- [Railway](https://railway.app/)
-- [Cyclic](https://www.cyclic.sh/)
 - [Replit](https://replit.com)
 - [CodeSandBox](https://codesandbox.io)
 
@@ -311,9 +313,9 @@ So far we have been running React code in **development mode**.
 In development mode the application is configured to give clear error messages, immediately render code changes to the browser, and so on.
 
 When the application is deployed, we must create a [**production build**](https://vitejs.dev/guide/build.html)
-or a version of the application which is optimized for production.
+or a version of the application that is optimized for production.
 
-A production build of applications created with *Vite* can be created with the command
+A production build for applications created with *Vite* can be created with the command
 [`npm run build`](https://vitejs.dev/guide/build.html).
 
 Let's run this command from the ***base folder of the frontend project*** (*`reading`*) that we developed in [Part 2](/part2).
@@ -355,9 +357,9 @@ Otherwise, simply copy and paste.
 
 The backend directory should now look as follows:
 
-![bash screenshot of ls showing build directory](../../images/3/27ea.png)
+![bash screenshot of ls showing dist directory](../../images/3/27ea.png)
 
-To make express show **static content**, the page *index.html* and the JavaScript, etc., it fetches,
+To make Express show **static content**, the page *index.html* and the JavaScript, etc., it fetches,
 we need a built-in middleware from express called [***static***](http://expressjs.com/en/starter/static-files.html).
 
 Then we add the following amidst the declarations of middleware in *index.js*:
@@ -366,7 +368,7 @@ Then we add the following amidst the declarations of middleware in *index.js*:
 app.use(express.static('dist'))
 ```
 
-Whenever *express* gets an HTTP *`GET`* request it will first check if the *dist* directory contains a file corresponding to the request's address.
+Whenever *Express* gets an HTTP *`GET`* request it will first check if the *dist* directory contains a file corresponding to the request's address.
 If a correct file is found, express will return it.
 
 Now HTTP *`GET`* requests to the address ***`www.serversaddress.com/index.html`*** or ***`www.serversaddress.com`*** will show the React frontend.
@@ -397,7 +399,7 @@ After the change, we have to:
 
 The application can now be used from the *backend* address <http://localhost:3001>:
 
-![Tasks application screenshot](../../images/3/28e.png)
+![Tasks application in localhost:3001](../../images/3/28e.png)
 
 Our application now works exactly like the [single-page app](/part0/fundamentals_of_web_apps#single-page-app) example application we studied in part 0.
 
@@ -487,7 +489,7 @@ let's add some npm scripts to the ***backend's package.json***.
 }
 ```
   
-> *Note for Windows users*
+> *Notice for Windows users*
 >
 > Back in part 0, I mentioned that you should work exclusively using git bash as your terminal of choice.
 > This is because Windows most popular terminal options *Command Prompt* and *Powershell*, do not natively support Linux-like commands.
@@ -530,7 +532,7 @@ The backend is at [localhost:3001](http://localhost:3001).
 If the project was created with Vite, this problem is easy to solve.
 It is enough to add the following declaration to the ***frontend's*** *vite.config.js* file.
 
-```bash
+```js
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
@@ -551,22 +553,26 @@ export default defineConfig({
 
 ```
 
-After a restart, the React development environment will work as a [proxy](https://vitejs.dev/config/server-options.html#server-proxy).
-If the React code does an HTTP request to a server address at *<http://localhost:5173>* not managed by the React application itself
-(i.e. when requests are not about fetching the CSS or JavaScript of the application),
-the request will be redirected to the server at *<http://localhost:3001>*.
+After restarting, the React development environment will act as [proxy](https://vitejs.dev/config/server-options.html#server-proxy).
+If the React code makes an HTTP request to a path starting with *<http://localhost:5173/api>*, the request will be forwarded to the server at *<http://localhost:3001>*.
+Requests to other paths will be handled normally by the development server.
 
-Note that with the vite configuration shown above, only requests that are made to paths starting with ***/api*** are redirected to the server.
+Now the frontend is also working correctly.
+It functions both in development mode and in production mode together with the server.
+Since from the frontend's perspective all requests are made to <http://localhost:5173>, which is the single origin,
+there is no longer a need for the backend's cors middleware.
+Therefore, we can remove references to the `cors` library from the backend's *index.js* file and remove *`cors`* from the project's dependencies:
 
-A negative aspect of our approach is how complicated it is to deploy the frontend.
-Deploying a new version requires generating a new production build of the frontend and copying it to the backend repository.
-This makes creating an automated [**deployment pipeline**](https://martinfowler.com/bliki/DeploymentPipeline.html) more difficult.
-A deployment pipeline is an automated and controlled way to move the code from the computer of the developer through different tests and quality checks to the production environment.
+```bash
+npm remove cors
+```
 
-There are multiple ways to achieve this - for example placing both backend and frontend code
-[in the same repository](https://github.com/mars/heroku-cra-node) - but we will not go into those now.
-
-In some situations, it may be sensible to deploy the frontend code as its own application.
+We have now successfully deployed the entire application to the internet.
+There are many other ways to implement deployments.
+For example, deploying the frontend code as its own application may be sensible in some situations,
+as it can facilitate the implementation of an automated [**deployment pipeline**](https://martinfowler.com/bliki/DeploymentPipeline.html).
+A deployment pipeline is an automated and controlled way to move the code from the computer of the developer
+through different tests and quality checks before being deployed to the production environment.
 
 You can find the code for our current backend in the [*part3-3* branch of our backend repo](https://github.com/comp227/part3-tasks-backend/tree/part3-3).
 The changes in frontend code are in *part3-3* branch of the [frontend repository](https://github.com/comp227/part2-tasks/tree/part3-3).
@@ -580,7 +586,7 @@ The changes in frontend code are in *part3-3* branch of the [frontend repository
 The following exercises don't require many lines of code.
 They can however be challenging, because you must understand exactly what is happening and where, and the configurations must be just right.
 
-#### 3.9 communities backend Step 9
+#### 3.9: Communities backend, Step 9
 
 Make the backend work with the communities frontend from the exercises of the previous part.
 Do not implement the functionality for making changes to the URLs yet, that will be implemented in exercise 3.17.
@@ -591,7 +597,7 @@ If some HTTP requests fail, you should check from the ***Network*** tab what is 
 Keep an eye on the backend's console as well.
 If you did not do the previous exercise, it is worth it to print the request data or `request.body` to the console in the event handler responsible for POST requests.
 
-#### 3.10 communities backend Step 10
+#### 3.10: Communities backend, Step 10
 
 Deploy the backend to the internet.
 You shall NOT be deploying the frontend directly at any stage of this part.
@@ -628,6 +634,11 @@ Generate a production build of your frontend, and add it to the internet applica
 > ***You may need to remove the comment from line 83 of your `.gitignore` file so that the `dist` folder will be added to your project.***
 
 Also, make sure that the frontend still works locally (in development mode when started with command `npm start`).
+
+> **CAUTION:** You shall NOT be deploying the frontend directly at any stage of this part.
+> Only the backend repository is deployed throughout the whole part.
+> The frontend production build is added to the backend repository,
+> and the backend serves it as described in the section [Serving static files from the backend](/part3/deploying_app_to_internet#serving-static-files-from-the-backend).
 
 If you have problems getting the app working make sure that your directory structure matches
 [the example app](https://github.com/comp227/part3-tasks-backend/tree/part3-3).

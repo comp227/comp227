@@ -9,8 +9,8 @@ import navigation from '../../content/partnavigation/partnavigation';
 import snakeCase from 'lodash/fp/snakeCase';
 import { useTranslation } from 'react-i18next';
 
-const prevChar = c => String.fromCharCode(c.charCodeAt(0) - 1);
-const nextChar = c => String.fromCharCode(c.charCodeAt(0) + 1);
+const prevChar = (c) => String.fromCharCode(c.charCodeAt(0) - 1);
+const nextChar = (c) => String.fromCharCode(c.charCodeAt(0) + 1);
 // TODO change on release
 const hasPart = (part, lang) =>
   Object.keys(navigation[lang]).includes(part.toString());

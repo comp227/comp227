@@ -29,7 +29,7 @@
         "text": [
             "Many completely asynchronous classes are very hard because you don't always get the support when you need it.",
             "Here, the aim should be that you get just enough help to allow you to keep going. You can get that by messaging me or messaging the general forums in Discord.",
-            "If for some reason I'm not responding, think pragamitically about the steps you can take.  How are you reproducing the issue? What do your console logs say? Have you used the debugger to look at what happens just before? Practicing all of these techniques will make you a better software developer in the end.",
+            "If for some reason I'm not responding, think pragmatically about the steps you can take.  How are you reproducing the issue? What do your console logs say? Have you used the debugger to look at what happens just before? Practicing all of these techniques will make you a better software developer in the end.",
             "The best thing you can do is to get <em>just enough</em> help to allow you to continue.  It's easy to become frustrated and to just want to finish, but that will not get you the learning and problem solving skills that most companies are looking for.",
             "Do yourself a favor and think about your learning as you are going through the course to maximize your potential"
         ]

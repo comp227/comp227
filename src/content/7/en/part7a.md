@@ -8,10 +8,10 @@ lang: en
 <div class="content">
 
 The exercises in this seventh part of the course differ a bit from the ones before.
-In this and the next chapter, as usual, there are [exercises related to the theory in the chapter](#exercises-71-73).
+In this and the next chapter, as usual, there are [exercises related to the theory of the chapter](#exercises-71-73).
 
-In addition to the exercises in this and the next chapter,
-there are a series of exercises in which we'll be revising what we've learned during the whole course by expanding the Watchlist application,
+In addition to these theoretical exercises,
+there are another series of exercises in which we'll be revising what we've learned during the whole course by expanding the Watchlist application,
 which we worked on during parts 4 and 5.
 
 ### Application navigation structure
@@ -117,7 +117,7 @@ Luckily, React has the [**React Router**](https://reactrouter.com/) library
 which provides an excellent solution for managing navigation in a React application.
 
 Let's change the above application to use React Router.
-First, we install React Router with the command
+First, we install React Router with the command:
 
 ```bash
 npm i react-router-dom
@@ -152,7 +152,7 @@ const App = () => {
       </Routes>
 
       <div>
-        <em>Task app, Department of Computer Science 2023</em>
+        <em>Task app, Department of Computer Science 2025</em>
       </div>
     </Router>
   )
@@ -184,8 +184,8 @@ However, with the help of the [HTML5 history API](https://css-tricks.com/using-t
 So, ***even if the URL in the address bar changes, the content of the page is only manipulated using Javascript, and the browser will not load new content from the server***.
 Using the back and forward actions, as well as making bookmarks, is still logical like on a traditional web page.
 
-Inside the router, we define *links* that modify the address bar with the help of the [`Link`](https://reactrouter.com/en/main/components/link) component.
-For example,
+Inside the router, we define *links* that modify the address bar with the help of the [`Link` component](https://reactrouter.com/en/main/components/link).
+For example:
 
 ```js
 <Link to="/tasks">tasks</Link>
@@ -217,7 +217,7 @@ The Routes works by rendering the first component whose *path* matches the URL i
 ### Parameterized route
 
 Let's examine a slightly modified version from the previous example.
-The complete code for this example can be found [here](https://github.com/comp227/misc/blob/main/router-app-v1.js).
+The complete code for this example can be [found here](https://github.com/comp227/misc/blob/main/router-app-v1.js).
 
 The application now contains five different views whose display is controlled by the router.
 In addition to the components from the previous example (*`Home`*, *`Tasks`* and *`Users`*),
@@ -247,7 +247,7 @@ const Tasks = ({tasks}) => (
 )
 ```
 
-We define parameterized URLs in the routing in `App` component as follows:
+We define parameterized URLs in the routing of the `App` component as follows:
 
 ```js
 <Router>
@@ -318,7 +318,7 @@ The option to navigate to the `Login` view is rendered conditionally in the menu
 </Router>
 ```
 
-So if the user is already logged in, instead of displaying the link `Login`, we show the username of the user:
+So if the user is already logged in, instead of displaying the link `Login`, we show their username:
 
 ![browser tasks app showing username logged in](../../images/7/4a.png)
 
@@ -366,7 +366,7 @@ just like `useState` and `useEffect` which we have used many times now.
 As you remember from [part 1, there are some rules](/part1/a_more_complex_state_debugging_react_apps/#rules-of-hooks) to using hook functions.
 Vite has been configured to warn you if you break these rules, for example, *by calling a hook function from a conditional statement*.
 
-### redirect
+### Redirect
 
 There is one more interesting detail about the `Users` route:
 
@@ -424,7 +424,7 @@ const App = () => {
       </Router>      
       <footer>
         <br />
-        <em>Task app, Department of Computer Science 2023</em>
+        <em>Task app, Department of Computer Science 2025</em>
       </footer>
     </div>
   )
@@ -437,7 +437,7 @@ so that it is shown regardless of the component shown in the routed part of the 
 ### Parameterized route revisited
 
 Our application has a flaw.
-The `Task` component receives all of the tasks, even though it only displays the one whose `id` matches the url (*/tasks/id*):
+The `Task` component receives all of the tasks, even though it only displays the one whose `id` matches the URL (*/tasks/id*):
 
 ```js
 const Task = ({ tasks }) => { 
@@ -510,7 +510,7 @@ const App = () => {
       </Routes>   
 
       <div>
-        <em>Task app, Department of Computer Science 2023</em>
+        <em>Task app, Department of Computer Science 2025</em>
       </div>
     </div>
   )
@@ -532,9 +532,10 @@ const task = match
   : null
 ```
 
-The completed code can be found [here](https://github.com/comp227/misc/blob/main/router-app-v2.js).
+The completed code can be [found here](https://github.com/comp227/misc/blob/main/router-app-v2.js).
 
 </div>
+
 <div class="tasks">
 
 ### Exercises 7.1-7.3
@@ -549,14 +550,14 @@ However, we will **from now on refer to both *memes* and *jokes* as `jokes`**.
 To start, please visit <http://go.djosv.com/227lab7-1>
 We will use the repo there as the starting point for the exercises.
 
-The application starts the usual way, but first, you need to install the dependencies of the application:
+The application starts the usual way, but first, you need to install its dependencies:
 
 ```bash
 npm i
 npm run dev
 ```
 
-#### 7.1: routed jokes, Step 1
+#### 7.1: Routed Jokes, Step 1
 
 Add React Router to the application so that by clicking links in the `Menu` component the view can be changed.
 
@@ -570,7 +571,7 @@ The creation of a new joke should happen e.g. in the path *create*:
 
 ![browser jokes /create shows create form](../../assets/teht/41.png)
 
-#### 7.2: routed jokes, Step 2
+#### 7.2: Routed Jokes, Step 2
 
 Implement a view for showing a single joke:
 
@@ -580,7 +581,7 @@ Navigating to the page showing the single joke is done by clicking the name of t
 
 ![browser showing previous link that was clicked](../../assets/teht/43.png)
 
-#### 7.3: routed jokes, Step 3
+#### 7.3: Routed Jokes, Step 3
 
 The default functionality of the creation form is quite confusing because nothing seems to be happening after creating a new joke using the form.
 

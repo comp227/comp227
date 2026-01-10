@@ -16,7 +16,7 @@ const createSearchConfig = (indexName, language) => {
                 letter
                 part
               }
-              id      
+              id
               rawMarkdownBody
             }
           }
@@ -28,7 +28,7 @@ const createSearchConfig = (indexName, language) => {
       normalizer: ({ data }) => {
         return IS_DEV
           ? []
-          : data.allMarkdownRemark.nodes.map(node => ({
+          : data.allMarkdownRemark.nodes.map((node) => ({
               id: node.id,
               part: node.frontmatter.part,
               letter: node.frontmatter.letter,

@@ -18,7 +18,7 @@ We'll now implement a part of the required user management functionality in the 
 Let's begin with the user login.
 Throughout this part, we will assume that new users will not be added from the frontend.
 
-### Handling login
+### Adding a Login Form
 
 Let's add a login form to the top of the page.
 That code will be shown below.
@@ -61,26 +61,29 @@ const App = () => {
       <h1>Tasks</h1>
 
       <Notification message={errorMessage} />
-
+      
       // highlight-start
+      <h2>Login</h2>
       <form onSubmit={handleLogin}>
         <div>
-          username
+          <label>
+            username
             <input
-            type="text"
-            value={username}
-            name="Username"
-            onChange={({ target }) => setUsername(target.value)}
-          />
+              type="text"
+              value={username}
+              onChange={({ target }) => setUsername(target.value)}
+            />
+          </label>
         </div>
         <div>
-          password
+          <label>
+            password
             <input
-            type="password"
-            value={password}
-            name="Password"
-            onChange={({ target }) => setPassword(target.value)}
-          />
+              type="password"
+              value={password}
+              onChange={({ target }) => setPassword(target.value)}
+            />
+          </label>
         </div>
         <button type="submit">login</button>
       </form>
@@ -96,7 +99,7 @@ export default App
 ```
 
 The current application code can be found on
-[Github](https://github.com/comp227/part2-tasks/tree/part5-1), branch *part5-1*.
+[GitHub](https://github.com/comp227/part2-tasks/tree/part5-1), in the branch *part5-1*.
 
 > **Notice** If you clone the repo, don't forget to run `npm i` before attempting to run the frontend.
 >
@@ -125,6 +128,8 @@ and they destructure the field `target` from the object and save its value to th
 ```
 
 The method `handleLogin`, which is responsible for handling the data in the form, is yet to be implemented.
+
+### Adding Logic to the Login Form
 
 Logging in is done by sending an HTTP POST request to the server address ***api/login***.
 Let's separate the code responsible for this request on the frontend into its own module, to the file *services/login.js*.
@@ -155,21 +160,20 @@ const App = () => {
 // highlight-start
   const [user, setUser] = useState(null)
 // highlight-end
-  
-  const handleLogin = async (event) => { // highlight-line
+
+  // ...
+
+  const handleLogin = async event => { // highlight-line
     event.preventDefault()
     
     // highlight-start
     try {
-      const user = await loginService.login({
-        username, password,
-      })
-
+      const user = await loginService.login({ username, password })
       setUser(user)
       setUsername('')
       setPassword('')
-    } catch (exception) {
-      setErrorMessage('Wrong credentials')
+    } catch {
+      setErrorMessage('wrong credentials')
       setTimeout(() => {
         setErrorMessage(null)
       }, 5000)
@@ -186,6 +190,8 @@ If the login is successful, the form fields are emptied ***and*** the server res
 
 If the login fails or the function `loginService.login` throws an error, the user is notified.
 
+### Conditional Rendering of the Login Form
+
 The user is not notified about a successful login in any way.
 Let's modify the application to show the login form only *if the user is not logged in* so when `user === null`.
 The form for adding new tasks is shown only if the *user is logged in*, so `user` contains the user details.
@@ -199,35 +205,34 @@ const App = () => {
   const loginForm = () => (
     <form onSubmit={handleLogin}>
       <div>
-        username
+        <label>
+          username
           <input
-          type="text"
-          value={username}
-          name="Username"
-          onChange={({ target }) => setUsername(target.value)}
-        />
+            type="text"
+            value={username}
+            onChange={({ target }) => setUsername(target.value)}
+          />
+        </label>
       </div>
       <div>
-        password
+        <label>
+          password
           <input
-          type="password"
-          value={password}
-          name="Password"
-          onChange={({ target }) => setPassword(target.value)}
-        />
+            type="password"
+            value={password}
+            onChange={({ target }) => setPassword(target.value)}
+          />
+        </label>
       </div>
       <button type="submit">login</button>
-    </form>      
+    </form>
   )
 
   const taskForm = () => (
     <form onSubmit={addTask}>
-      <input
-        value={newTask}
-        onChange={handleTaskChange}
-      />
+      <input value={newTask} onChange={handleTaskChange} />
       <button type="submit">save</button>
-    </form>  
+    </form>
   )
 
   return (
@@ -253,11 +258,10 @@ const App = () => {
   return (
     <div>
       <h1>Tasks</h1>
-
       <Notification message={errorMessage} />
 
-      {user === null && loginForm()} // highlight-line
-      {user !== null && taskForm()} // highlight-line
+      {!user && loginForm()} // highlight-line
+      {user && taskForm()} // highlight-line
 
       <div>
         <button onClick={() => setShowAll(!showAll)}>
@@ -265,13 +269,13 @@ const App = () => {
         </button>
       </div>
       <ul>
-        {tasksToShow.map((task, i) => 
+        {tasksToShow.map(task => 
           <Task
-            key={i}
+            key={task.id}
             task={task} 
             toggleImportance={() => toggleImportanceOf(task.id)}
           />
-        )}
+        ))}
       </ul>
 
       <Footer />
@@ -285,9 +289,7 @@ A slightly odd looking, but commonly used
 is used to render the forms conditionally:
 
 ```js
-{
-  user === null && loginForm()
-}
+{!user && loginForm()}
 ```
 
 If the first statement evaluates to `false` or is [**falsy**](https://developer.mozilla.org/en-US/docs/Glossary/Falsy),
@@ -302,10 +304,7 @@ return (
 
     <Notification message={errorMessage}/>
     // highlight-start
-    {user === null ?
-      loginForm() :
-      taskForm()
-    }
+    {user ? taskForm() : loginForm()}
     // highlight-end
     // ...
 
@@ -313,8 +312,8 @@ return (
 )
 ```
 
-If `user === null` evaluates to true, the code calls `loginForm()`.
-Otherwise, it calls `taskForm()`.
+If `user` evaluates to true, the code calls `taskForm()`.
+Otherwise, it calls `loginForm()`.
 
 Let's do one more modification.
 If the user is logged in, their name is shown on the screen:
@@ -323,7 +322,6 @@ If the user is logged in, their name is shown on the screen:
 return (
   <div>
     <h1>Tasks</h1>
-
     <Notification message={errorMessage} />
 
     // highlight-start
@@ -336,13 +334,12 @@ return (
     }
     // highlight-end
 
+    <div>
+      <button onClick={() => setShowAll(!showAll)}>
     // ...
-
-  </div>
-)
 ```
 
-The solution isn't perfect, but we'll leave it for now.
+The solution isn't perfect, but we'll leave it like this for now.
 
 Our main component `App` is at the moment ***way too large***.
 The changes we just made can make us realize that the forms should be refactored into separate components.
@@ -350,6 +347,52 @@ However, we will leave that for an optional exercise.
 
 The current application code can be found on
 [GitHub](https://github.com/comp227/part2-tasks/tree/part5-2), branch *part5-2*.
+
+### An Aside on Using the Label Element
+
+We used the [`label` element](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/label) for the *`input`* fields in the login form.
+The `input` field for the username is placed inside the corresponding `label` element:
+
+```js
+<div>
+  <label>
+    username
+    <input
+      type="text"
+      value={username}
+      onChange={({ target }) => setUsername(target.value)}
+    />
+  </label>
+</div>
+// ...
+```
+
+*Why did we implement the form this way?*
+Visually, the same result could be achieved with simpler code, without a separate `label` element:
+
+```js
+<div>
+  username
+  <input
+    type="text"
+    value={username}
+    onChange={({ target }) => setUsername(target.value)}
+  />
+</div>
+// ...
+```
+
+The `label` element is used in forms to *describe and name `input` fields*.
+It provides a description for the input field, helping the user understand what information should be entered into each field.
+This description is programmatically linked to the corresponding input field, *improving the form's accessibility*.
+
+This way, *screen readers can read the field's name* to the user when the input field is selected,
+and clicking on the label's text automatically focuses on the correct input field.
+Using the `label` element with `input` fields is always recommended, even if the same visual result could be achieved without it.
+
+There are [several ways](https://react.dev/reference/react-dom/components/input#providing-a-label-for-an-input) to link a specific *`label`* to an *`input`* element.
+The easiest method is to **place the `input` element inside the corresponding `label` element**, as demonstrated in this material.
+This automatically associates the ***`label` with the correct input field***, requiring no additional configuration.
 
 ### Creating new tasks
 
@@ -396,16 +439,16 @@ const getAll = () => {
   return request.then(response => response.data)
 }
 
-// highlight-start
 const create = async newObject => {
+  // highlight-start
   const config = {
-    headers: { Authorization: token },
+    headers: { Authorization: token }
   }
+  // highlight-end
 
   const response = await axios.post(baseUrl, newObject, config)
   return response.data
 }
-// highlight-end
 
 const update = (id, newObject) => {
   const request = axios.put(`${ baseUrl }/${id}`, newObject)
@@ -415,8 +458,8 @@ const update = (id, newObject) => {
 export default { getAll, create, update, setToken } // highlight-line
 ```
 
-This *taskService* module contains a private variable `token`.
-Its value can be changed with a function `setToken`, which is exported by the module.
+This *taskService* module contains a private variable called `token`.
+Its value can be changed with the `setToken` function, which is exported by the module.
 `create`, now with `async`/`await` syntax, sets the token to the `Authorization` header.
 The header is given to *`axios`* as the third parameter of the `post` method.
 
@@ -426,16 +469,14 @@ we'll need to change *App.jsx*'s `handleLogin` so that it saves the user's token
 ```js
 const handleLogin = async (event) => {
   event.preventDefault()
-  try {
-    const user = await loginService.login({
-      username, password,
-    })
 
+  try {
+    const user = await loginService.login({ username, password })
     taskService.setToken(user.token) // highlight-line
     setUser(user)
     setUsername('')
     setPassword('')
-  } catch (exception) {
+  } catch {
     // ...
   }
 }
@@ -472,7 +513,7 @@ The value of a key can be found with the method [`getItem`](https://developer.mo
 window.localStorage.getItem('name')
 ```
 
-and [`removeItem`](https://developer.mozilla.org/en-US/docs/Web/API/Storage/removeItem) removes a key.
+while [`removeItem`](https://developer.mozilla.org/en-US/docs/Web/API/Storage/removeItem) removes a key.
 
 Values in the local storage are persisted even when the page is re-rendered.
 The storage is [origin-specific](https://developer.mozilla.org/en-US/docs/Glossary/Origin) so each web application has its separate storage.
@@ -490,9 +531,7 @@ Our `handleLogin` method now adds code to set the local storage:
   const handleLogin = async (event) => {
     event.preventDefault()
     try {
-      const user = await loginService.login({
-        username, password,
-      })
+      const user = await loginService.login({ username, password })
 
       // highlight-start
       window.localStorage.setItem(
@@ -509,14 +548,14 @@ Our `handleLogin` method now adds code to set the local storage:
   }
 ```
 
-The details of a logged-in user are now saved to the local storage, and they can be viewed on the console (*by typing `window.localStorage` to the console*):
+The details of a logged-in user are now saved to the local storage, and they can be viewed on the console (*by typing `window.localStorage` in it*):
 
-![browser showing someone logged into tasks](../../images/5/3e.png)
+![browser showing user data in console saved in local storage](../../images/5/3e.png)
 
 You can also inspect the local storage using the developer tools.
 On Chrome, go to the ***Application*** tab and select ***Local Storage***
-([details here](https://developers.google.com/web/tools/chrome-devtools/storage/localstorage)).
-On Firefox go to the ***Storage*** tab and select ***Local Storage*** ([details here](https://developer.mozilla.org/en-US/docs/Tools/Storage_Inspector)).
+([details here](https://developer.chrome.com/docs/devtools/storage/localstorage)).
+On Firefox go to the ***Storage*** tab and select ***Local Storage*** ([details here](https://firefox-source-docs.mozilla.org/devtools-user/storage_inspector/index.html)).
 
 We still have to modify our application so that when we enter the page,
 the application checks if local storage has details for a logged-in user.
@@ -534,17 +573,16 @@ const App = () => {
   const [newTask, setNewTask] = useState('')
   const [showAll, setShowAll] = useState(true)
   const [errorMessage, setErrorMessage] = useState(null)
-  const [username, setUsername] = useState('') 
-  const [password, setPassword] = useState('') 
-  const [user, setUser] = useState(null) 
+  const [username, setUsername] = useState('')
+  const [password, setPassword] = useState('')
+  const [user, setUser] = useState(null)
 
   useEffect(() => {
-    taskService
-      .getAll().then(initialTasks => {
-        setTasks(initialTasks)
-      })
+    taskService.getAll().then(initialTasks => {
+      setTasks(initialTasks)
+    })
   }, [])
-
+  
   // highlight-start
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem('loggedTaskappUser')
@@ -582,7 +620,7 @@ Now a user stays logged in to the application forever.
 > ```
 
 The current application code can be found on
-[GitHub](https://github.com/comp227/part2-tasks/tree/part5-3), branch *part5-3*.
+[GitHub](https://github.com/comp227/part2-tasks/tree/part5-3), in the branch *part5-3*.
 
 </div>
 
@@ -617,7 +655,7 @@ While doing the exercises, remember all of the debugging methods we have talked 
 > **Warning:** If you notice you are mixing in the functions `async`/`await` and `then` commands, it's 99.9%  certain you are doing something wrong.
 > Use either or, never both.
 
-#### 5.1: watchlist frontend, Step 1
+#### 5.1: Watchlist frontend, Step 1
 
 Implement login functionality to the frontend.
 The token returned with a successful login is saved to the application's state `user`.
@@ -657,7 +695,7 @@ User details of the logged-in user do not have to be saved to the local storage 
 > }
 > ```
 
-#### 5.2: watchlist frontend, Step 2
+#### 5.2: Watchlist frontend, Step 2
 
 Make the login 'permanent' by using the local storage.
 Also, implement a way to log out.
@@ -666,22 +704,22 @@ Also, implement a way to log out.
 
 Ensure the browser does not remember the details of the user after logging out.
 
-#### 5.3: watchlist frontend, Step 3
+#### 5.3: Watchlist frontend, Step 3
 
 Expand your application to allow a logged-in user to add new shows:
 
 ![browser showing new show form](../../images/5/7e.png)
 
-#### 5.4: watchlist frontend, Step 4
+#### 5.4: Watchlist frontend, Step 4
 
 Implement notifications that inform the user about successful and unsuccessful operations at the top of the page.
 For example, when a new show is added, the following notification can be shown:
 
-![browser showing a successful operation](../../images/5/8e.png)
+![browser showing a successful operation notification](../../images/5/8e.png)
 
 Failed login can show the following notification:
 
-![browser showing failed login attempt](../../images/5/9e.png)
+![browser showing failed login attempt notification](../../images/5/9e.png)
 
 The notifications must be visible for a few seconds.
 It is not compulsory to add colors.

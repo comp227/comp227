@@ -186,7 +186,8 @@ module.exports = User;
 
 The highlighted text above helps us conceptualize that the IDs of the `tasks` are stored within the user document as an *array of Mongo IDs*.
 
-The type of the field is `ObjectId`, which references *task*-style documents.
+The field type is `ObjectId`, meaning it refers to another document.
+The `ref` field specifies the name of the model being referenced.
 Mongo does not inherently know that this is a field that references `tasks`, the syntax is purely related to and defined by Mongoose.
 
 Let's **expand the schema of the task defined in the *models/task.js*** file so that the task contains information about the user who created it:
@@ -199,8 +200,8 @@ const taskSchema = new mongoose.Schema({
     minlength: 5
   },
   date: {
-        type: Date,
-        required: true,
+    type: Date,
+    required: true,
   },
   important: Boolean,
   // highlight-start
@@ -238,11 +239,14 @@ by making an HTTP POST request to the ***users*** path.
 **Let's first add this new router handler in our application via the *app.js* file**, so that it handles requests made to the ***/api/users*** URL:
 
 ```js
-const usersRouter = require("./controllers/users");
+// ...
+const tasksRouter = require('./controllers/tasks')
+const usersRouter = require("./controllers/users"); // highlight-line
 
 // ...
 
-app.use("/api/users", usersRouter);
+app.use('/api/tasks', tasksRouter)
+app.use("/api/users", usersRouter); // highlight-line
 ```
 
 The contents of the file, (*controllers/users.js*), that defines the router is as follows:
@@ -275,7 +279,7 @@ module.exports = usersRouter;
 **We store the *hash* of the password that is generated with the `bcrypt.hash` function**.
 The password sent in the request is ***not*** stored in the database.
 
-The fundamentals of [storing passwords](https://codahale.com/how-to-safely-store-a-password/) are outside the scope of this course material.
+The fundamentals of [storing passwords](https://bytebytego.com/guides/how-to-store-passwords-in-the-database/) are outside the scope of this course material.
 For example, we will not discuss what assigning the magic number *`10`* to [`saltRounds`](https://github.com/kelektiv/node.bcrypt.js/#a-task-on-rounds) does,
 but you can read more about it in the linked material.
 
@@ -322,10 +326,10 @@ describe("when there is initially one user in db", () => {
       .expect("Content-Type", /application\/json/);
 
     const usersAtEnd = await helper.usersInDb();
-    expect(usersAtEnd).toHaveLength(usersAtStart.length + 1);
+    assert.strictEqual(usersAtEnd.length, usersAtStart.length + 1)
 
     const usernames = usersAtEnd.map(u => u.username);
-    expect(usernames).toContain(newUser.username);
+    assert(usernames.includes(newUser.username))
   });
 });
 
@@ -361,7 +365,7 @@ We can write a new test in *user_api.test.js* that verifies that a new user with
 describe("when there is initially one user in db", () => {
   // ...
 
-  test("creation fails with proper statuscode and message if username already taken", async () => {
+  test("creation fails with proper status code and message if username already taken", async () => {
     const usersAtStart = await helper.usersInDb();
 
     const newUser = {
@@ -376,57 +380,30 @@ describe("when there is initially one user in db", () => {
       .expect(400)
       .expect("Content-Type", /application\/json/);
 
-    expect(result.body.error).toContain("expected `username` to be unique");
-
     const usersAtEnd = await helper.usersInDb();
-    expect(usersAtEnd).toEqual(usersAtStart);
-  });
-});
+    assert(result.body.error.includes('expected `username` to be unique'))
+    assert.strictEqual(usersAtEnd.length, usersAtStart.length)
+  })
+})
 ```
 
 The test case obviously will not pass at this point.
 We are essentially practicing [**Test-Driven Development (TDD)**](https://en.wikipedia.org/wiki/Test-driven_development),
 where tests for new functionality are written before the functionality is implemented.
 
-Mongoose does not have a built-in validator for checking the uniqueness of a field.
-Fortunately, there is a ready-made solution for this, the
-[*mongoose-unique-validator* library](https://www.npmjs.com/package/mongoose-unique-validator).
-Let's install the library:
-
-```bash
-npm i mongoose-unique-validator
-```
-
-> **FYI:** when installing the *mongoose-unique-validator* library, did you encounter an error?
->
-> - If yes, *then read this sub-section*.
-> - If no, *go ahead and skip it*.
->
-> If you were installing the library you may encounter an error message like this:
->
-> ![screenshot showing mongoose compatibility error](../../images/4/uniq.png)
->
-> The reason was that the library was not yet compatible with early version of Mongoose version 8.
-> If you encounter this error, **first try installing the latest 8.+ version of Mongoose**.
-> If you still encouter the error,
-> you can revert to an older version of Mongoose by running the command
->
-> ```bash
-> npm install mongoose@7.6.5
-> ```
-
-Once installed, let's extend the code by following the library documentation in *models/user.js*:
+Mongoose validations *do not provide a direct way to check the uniqueness of a field value*.
+However, it is possible to achieve uniqueness by defining a [**uniqueness index**](https://mongoosejs.com/docs/schematypes.html) for a field.
+The definition is done as follows:
 
 ```js
-const mongoose = require("mongoose");
-const uniqueValidator = require("mongoose-unique-validator"); // highlight-line
+const mongoose = require('mongoose')
 
 const userSchema = mongoose.Schema({
   // highlight-start
   username: {
     type: String,
     required: true,
-    unique: true
+    unique: true // this ensures the uniqueness of username
   },
   // highlight-end
   name: String,
@@ -439,10 +416,36 @@ const userSchema = mongoose.Schema({
   ],
 });
 
-userSchema.plugin(uniqueValidator); // highlight-line
-
 // ...
 ```
+
+However, we want to be careful when using the uniqueness index.
+If there are already documents in the database that violate the uniqueness condition,
+[no index will be created](https://dev.to/akshatsinghania/mongoose-unique-not-working-16bf).
+So when adding a uniqueness index, ***make sure that the database is in a healthy state***!
+The test above added the user with username `root` to the database twice,
+and these must be removed for the index to be formed and the code to work.
+
+Mongoose validations do not detect the index violation, and instead of `ValidationError` they return an error of type `MongoServerError`.
+We therefore need to extend the error handler for that case:
+
+```js
+const errorHandler = (error, request, response, next) => {
+  if (error.name === 'CastError') {
+    return response.status(400).send({ error: 'malformatted id' })
+  } else if (error.name === 'ValidationError') {
+    return response.status(400).json({ error: error.message })
+// highlight-start
+  } else if (error.name === 'MongoServerError' && error.message.includes('E11000 duplicate key error')) {
+    return response.status(400).json({ error: 'expected `username` to be unique' })
+  }
+  // highlight-end
+
+  next(error)
+}
+```
+
+After these changes, the tests will pass.
 
 > **FYI:** We could also implement other validations into the user creation.
 > We could check that the:
@@ -498,6 +501,8 @@ The code for creating a new task has to be updated so that the task is assigned 
 Let's expand our current implementation in *controllers/tasks.js* so that the information about the user who created a task is sent in the `userId` field of the request body:
 
 ```js
+const tasksRouter = require('express').Router()
+const Task = require('../models/task')
 const User = require("../models/user"); //highlight-line
 
 //...
@@ -507,20 +512,29 @@ tasksRouter.post("/", async (request, response) => {
 
   const user = await User.findById(body.userId); //highlight-line
 
+  // highlight-start
+  if (!user) {
+    return response.status(400).json({ error: 'userId missing or not valid' })
+  }
+  // highlight-end
+
   const task = new Task({
     content: body.content,
-    important: Boolean(body.important) || false,
+    important: body.important || false,
     date: new Date(),
     user: user._id //highlight-line
-  });
+  })
 
-  const savedTask = await task.save();
-  user.tasks = user.tasks.concat(savedTask._id); //highlight-line
-  await user.save();  //highlight-line
+  const savedTask = await task.save()
+  user.tasks = user.tasks.concat(savedTask._id) //highlight-line
+  await user.save()  //highlight-line
   
-  response.status(201).json(savedTask);
-});
+  response.status(201).json(savedTask)
+})
 ```
+
+The database is first queried for a user using the `userId` provided in the request.
+If the user is not found, the response is sent with a status code of 400 (***Bad Request***) and an error message: *`userId missing or not valid`*.
 
 It's worth noting that the `user` object also changes.
 The `id` of the task is stored in the `tasks` field of the `user` object:
@@ -547,7 +561,11 @@ We can see that the user has two tasks.
 
 Likewise, the IDs of the users who created the tasks can be seen when we visit the route for fetching all tasks:
 
-![api/tasks shows ids of numbers in JSON](../../images/4/12e.png)
+![api/tasks shows ids of users in JSON](../../images/4/12e.png)
+
+Due to the changes we made, the tests no longer pass, but we leave fixing the tests as an optional exercise.
+The changes we made have also not been accounted for in the frontend, so the task creation functionality no longer works.
+We will fix the frontend in part 5 of the course.
 
 ### Populate
 
@@ -575,16 +593,18 @@ usersRouter.get("/", async (request, response) => {
 ```
 
 We chain `populate` after the `find` method making the initial query.
-The parameter given to `populate` (i.e. *`tasks`*) will take **task IDs** from that array in the `user` document
-and ***replace each ID with the referenced `task` document***.
+The argument given to `populate` (i.e. *`tasks`*) will take **task IDs** from that array in the `user` document
+and ***replace each ID with the referenced `task` documents***.
+Mongoose first queries the `users` collection for the list of users,
+and then queries the collection corresponding to the model object specified by the `ref` property in the users schema for data with the given object id.
 
 The result is almost exactly what we wanted:
 
 ![JSON data showing populated tasks and users data with repetition](../../images/4/13ea.png)
 
-We can use the *`populate`* parameter for choosing the fields we want to include from the documents.
+We can use the *`populate`* method for choosing the fields we want to include from the documents.
 In addition to the field *`id`*, we are now only interested in *`content`* and *`important`*.
-The selection of fields is done with the [Mongo syntax](https://docs.mongodb.com/manual/tutorial/project-fields-from-query-results/#return-the-specified-fields-and-the-id-field-only):
+The selection of fields is done with the [Mongo syntax](https://www.mongodb.com/docs/manual/tutorial/project-fields-from-query-results/#return-the-specified-fields-and-the-_id-field-only):
 
 ```js
 usersRouter.get("/", async (request, response) => {
@@ -641,9 +661,5 @@ const taskSchema = new mongoose.Schema({
 
 You can find the code for our current application in its entirety in the *part4-8* branch of
 [this GitHub repository](https://github.com/comp227/part3-tasks-backend/tree/part4-8).
-
-> **Pertinent**: At this stage, firstly, some tests will fail.
-> We will leave fixing the tests as an optional exercise.
-> Secondly, in the deployed tasks app, *creating a task will not work at this moment as we have yet to link the user to the frontend*.
 
 </div>

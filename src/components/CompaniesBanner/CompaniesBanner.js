@@ -75,7 +75,9 @@ export const CompaniesBanner = ({ isFrontPage, lang }) => {
               applyPadding
               companyPath={company.url}
               image={{
-                src: require(`../../images/company_logos/${company.image.name}`),
+                src: require(
+                  `../../images/company_logos/${company.image.name}`
+                ),
                 alt: company.image.alt,
               }}
               className={`col-3 col-5--mobile col-5--tablet`}
@@ -94,13 +96,13 @@ export const CompaniesBanner = ({ isFrontPage, lang }) => {
               flex
               className="col-10 flex-fix-aligning space-between--mobile"
             >
-              {inChallenge.map(company => (
+              {inChallenge.map((company) => (
                 <Image
                   key={company}
                   contain
-                  src={require(`../../images/company_logos/${snakeCase(
-                    company
-                  )}.svg`)}
+                  src={require(
+                    `../../images/company_logos/${snakeCase(company)}.svg`
+                  )}
                   alt={company}
                   className={`company__logo col-3--mobile col-3--tablet`}
                   backdrop

@@ -125,7 +125,8 @@ and the value of the `right` property is the same as the value of the `right` pr
 > If properties from the previous state object are not changed, they need to simply be copied,
 > which is done by copying those properties into a new object and setting that as the new state.
 
-We can define the new state object a bit more neatly by using the [**object spread**](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Spread_syntax)
+We can define the new state object a bit more neatly by using the
+[**object spread**](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Spread_syntax)
 syntax that was added to the language specification in the summer of 2018:
 
 ```js
@@ -248,8 +249,7 @@ However, **don't use `push`, as it mutates `allClicks`**.
 Remember, the state of React components (like `allClicks`) must not be changed directly.
 Even if mutating the state appears to work in some cases, *it can lead to problems that are very hard to debug*.
 
-Let's take a closer look at how the clicking
-is rendered to the page:
+Let's take a closer look at how the clicking is rendered to the page:
 
 ```js
 const App = () => {
@@ -267,9 +267,9 @@ const App = () => {
 }
 ```
 
-We call the [`join` method](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/join)
-on the `allClicks` array that joins all the items into a single string,
-separated by the string passed as the function parameter, which in our case is a single space.
+We call the [`join` method](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/join) on the `allClicks` array.
+This method joins all the items into a single string,
+separated by the string (`' '`) passed in as the function argument.
 
 ### Update of the state is asynchronous
 
@@ -343,7 +343,8 @@ setTotal(left + right) // computer evaluates as '4 + 1'
 ```
 
 The reason for this is that *a state update in React happens* [***asynchronously***](https://react.dev/learn/queueing-a-series-of-state-updates),
-i.e. not immediately but "at some point" before the component is rendered again.
+i.e. not immediately but "at some point" after the current component function is finished,
+and before the component is rendered again.
 
 We can fix the app as follows:
 
@@ -362,6 +363,22 @@ const App = () => {
 ```
 
 So now the number of button presses is based on the correct number of left button presses.
+
+We can also handle asynchronous updates for the right button:
+
+```js
+const App = () => {
+  // ...
+  const handleRightClick = () => {
+    setAll(allClicks.concat('R'));
+    const updatedRight = right + 1;
+    setRight(updatedRight);
+    setTotal(left + updatedRight);
+  };
+
+  // ...
+}
+```
 
 ### Conditional rendering
 
@@ -468,8 +485,8 @@ const App = () => {
     <div>
       {left}
       // highlight-start
-      <Button handleClick={handleLeftClick} text='left' />
-      <Button handleClick={handleRightClick} text='right' />
+      <Button onClick={handleLeftClick} text='left' />
+      <Button onClick={handleRightClick} text='right' />
       // highlight-end
       {right}
       <History allClicks={allClicks} />
@@ -514,7 +531,7 @@ Keep both your code and the web page open together **at the same time, all the t
 
 If and when your code fails to compile and your browser lights up like a nightclub:
 
-![screenshot of code](../../images/1/6x.png)
+![screenshot of error pointing at the code line where it has been generated](../../images/1/6x.png)
 
 don't write more code but rather find and fix the problem **immediately**.
 Code will not miraculously start working after writing large amounts of additional code.
@@ -538,7 +555,7 @@ This brings up the following dialog box, where you'll choose the *plus icon* to 
 
 The most important part here is to specify the URL, which will be *`http://localhost:5173`*.
 You can name the Configuration so that it is easier to remember, for me, I just named it `localhost:5173`.
-The configuation should look something like this:
+The configuration should look something like this:
 
 ![WebStorm's run configuration options for localhost:5173](../../images/1/custom/webstorm_run_config.png)
 
@@ -713,9 +730,12 @@ Dev tools show the state of hooks in the order of their definition:
 The first *State* contains the value of the `left` state,
 the next contains the value of the `right` state and the last contains the value of the `allClicks` state.
 
+You can also learn about debugging JavaScript in Chrome, for example, with the [Chrome DevTools guide video](https://developer.chrome.com/docs/devtools/javascript).
+
 ### Rules of Hooks
 
-There are a few limitations and rules we have to follow to ensure that our application uses hooks-based state functions correctly.
+There are a few limitations and [rules](https://react.dev/warnings/invalid-hook-call-warning#breaking-rules-of-hooks)
+that we have to follow to ensure that our application uses hooks-based state functions correctly.
 
 ***Hooks should be called at the base level of React function components, before any `return` statements***
 
@@ -957,7 +977,7 @@ The event handler is now set to a function call:
 <button onClick={hello()}>button</button>
 ```
 
-Earlier on we stated that an event handler may not be a call to a function and that it has to be a function or a reference to a function.
+Earlier, we stated that an event handler may not be a function call; rather, it has to be either a function definition or a reference to one.
 ***Why then does a function call work in this case?***
 
 When the component is rendered, the following function gets executed:
@@ -1252,7 +1272,7 @@ const App = () => {
 
   return (
     <div>
-      <Display value={value} />
+      <Display value={value} /> // highlight-line
       <Button handleClick={() => setToValue(1000)} text="thousand" />
       <Button handleClick={() => setToValue(0)} text="reset" />
       <Button handleClick={() => setToValue(value + 1)} text="increment" />
@@ -1261,9 +1281,10 @@ const App = () => {
 }
 ```
 
-The application still appears to work, but **don't implement components like this!** Never define components inside of other components.
-The method provides no benefits and leads to many unpleasant problems.
-The biggest problems are because React treats a component defined inside of another component as a new component in every render.
+The application still appears to work, but **do not implement components like this!**
+Never define components inside of other components.
+The method provides no benefits and only leads to many unpleasant problems.
+One such problem is because React will treat a component defined inside of another component *as a new component in every render*.
 **This makes it impossible for React to optimize the component.**
 
 Let's instead move the `Display` component function to its correct place, which is *outside of the `App` component function*:
@@ -1334,6 +1355,76 @@ Here it is:
 > - *Consider that I can rollback my changes when I go in small steps if I cannot find an issue.*
 > - *Formulate my questions on Discord [using this guide from part 0](/part0/general_info#how-to-ask-help-in-discord)*
 
+### Utilization of Large language models
+
+Large language models such as [ChatGPT](https://chat.openai.com/auth/login),
+[Claude](https://claude.ai/) and [GitHub Copilot](https://github.com/features/copilot) have proven to be very useful in software development.
+
+Know that GitHub Copilot is now [natively integrated into Visual Studio Code](https://code.visualstudio.com/docs/copilot/overview)
+As a reminder, you can access Copilot Pro for free through the [GitHub Student Developer Pack](https://education.github.com/pack).
+
+Copilot is useful in a wide variety of scenarios. For example, Copilot can be asked to generate code for an open file by describing the desired functionality in text:
+
+![copilot input on vscode](../../images/1/gpt1.png)
+
+If the code looks good, Copilot adds it to the file:
+
+![code added by copilot](../../images/1/gpt2.png)
+
+In the case of our example, Copilot only created a button, the event handler *handleResetClick* is undefined.
+
+An event handler may also be generated. By writing the first line of the function, Copilot offers the functionality to be generated:
+
+![copilot´s code suggestion](../../images/1/gpt3.png)
+
+In Copilot's chat window, it is possible to ask for an explanation of the function of the selected code area:
+
+![copilot explaining how the selected code works in the chat window](../../images/1/gpt4.png)
+
+Copilot is also useful for debugging. If you copy an error message into Copilot's chat, you will get an explanation of the problem and a suggested fix:
+
+![copilot explaining the error and suggesting a fix](../../images/1/gpt5.png)
+
+Copilot's chat also enables the creation of larger set of functionality. For example, the image below shows Copilot creating a login component using the `useState` hook.
+
+![copilot creating a login component on request](../../images/1/gpt6.png)
+
+The usefulness of Copilot and other language models in programming varies.
+The biggest problem with language models is [hallucination](https://en.wikipedia.org/wiki/Hallucination_(artificial_intelligence)).
+Large language models sometimes generate answers that may seem correct, but are completely wrong.
+In programming, errors in hallucinated code are often caught quickly when the code fails to run.
+However, some code generated by a language model may work at first but still have hidden issues, such as logic errors or security vulnerabilities.
+
+Another problem in applying language models to software development is that it is difficult for language models to "understand" larger projects.
+One major limitation of language models is that they are unable to implement changes across several files. Language models are also currently unable to generalize code.
+For example, if the programmer requests for new functionality that can be implemented with existing functions or components
+(even with minor adjustments), the language model may fail to use them.
+This deteriorates the code base quality because the language models generate duplicate functions and components.
+For more information about this, read [this article](https://visualstudiomagazine.com/articles/2024/01/25/copilot-research.aspx).
+
+If you choose to use language models when programming, remember that its output is your responsibility.
+
+The rapid development of language models puts programming students in a challenging position.
+Is it worth, or even necessary, to learn programming to a detailed level when you can get almost everything ready-made from language models?
+
+At this point, it is worth remembering the old wisdom of [Brian Kernighan](https://en.wikipedia.org/wiki/Brian_Kernighan),
+co-author of *The C Programming Language*:
+
+![Everyone knows that debugging is twice as hard as writing a program in the first place. So if you're as clever as you can be when you write it, how will you ever debug it? ― Brian Kernighan](../../images/1/kerningham.png)
+
+In other words, since debugging is twice as difficult as programming, it is not worth creating code that you barely understand.
+How can debugging even be possible when the software developer does not understand the debugged code because they outsourced programming to a language model?
+
+So far, the development of language models and artificial intelligence is still at the stage where they are not self-sufficient,
+and the most difficult problems are left for humans to solve.
+Because of this, even novice software developers must learn to program really well just in case.
+It may be that, despite the development of language models, even more in-depth knowledge is needed.
+Artificial intelligence does the easy things, but a human is needed to sort out the most complicated messes caused by AI.
+GitHub Copilot is a very well-named product because it's a Copilot; a second pilot who helps the main pilot in an aircraft.
+The programmer is still the main pilot, the captain, and the one who ultimately bears the responsibility.
+
+Throughout this course, it may be in your own interest that you turn off Copilot by default and only rely on it in a real emergency.
+
 </div>
 
 <div class="tasks">
@@ -1376,9 +1467,9 @@ Any mistakes here will impact your grade.
 >>
 >> Remember what was discussed [in part 1 on how to fix it](/part1/introduction_to_react#do-not-render-objects).
 
-#### 1.6: studytracker Step 1
+#### 1.6: Studytracker, Step 1
 
-> **Pertinent:** Notice how this is labeled *studytracker*?
+> **Pertinent:** Notice how this is labeled *Studytracker*?
 > This means it should follow the rules as outlined in [part 1 related to folders](/part1/introduction_to_react#exercises-1-1-1-2)
 
 Let's figure out a way to devise a web application that helps track your self-reported feelings on whether or not you had a good study day.
@@ -1426,20 +1517,20 @@ export default App
 
 > Don't forget your empty commit with the message `Completed Exercise 1.6` once you feel you have completed this exercise!
 
-#### 1.7: studytracker Step 2
+#### 1.7: Studytracker, Step 2
 
 Expand your application so that it shows more statistics about the gathered data.
 The application should show:
 
 - the total number of days recorded (total number of times the buttons were pressed),
-- the average score using this scoring system - (nah: -1, kinda: 0, yeah: 1)
+- the average score using this scoring system; *the feedback values are (nah: -1, kinda: 0, yeah: 1)*,
 - the percentage of days that the user clicked ***yeah***.
 
 ![average and percentage good screenshot feedback](../../images/1/14e.png)
 
 > Don't forget your empty commit with the message `Completed Exercise 1.7` once you feel you have completed this exercise!
 
-#### 1.8: studytracker Step 3
+#### 1.8: Studytracker, Step 3
 
 Refactor your application so that displaying the statistics is extracted into its own `Statistics` component.
 The state of the application should remain in the `App` root component.
@@ -1471,13 +1562,13 @@ const App = () => {
 > Don't forget your empty commit with the message `Completed Exercise 1.8` once you feel you have completed this exercise!
 > I will not provide any further reminders
 
-#### 1.9: studytracker Step 4
+#### 1.9: Studytracker, Step 4
 
 Change your application to display the statistics only once a response has been gathered.
 
 ![no answers recorded yet text screenshot](../../images/1/15e.png)
 
-#### 1.10: studytracker Step 5
+#### 1.10: Studytracker, Step 5
 
 Let's continue refactoring the application.
 Extract the following two components:
@@ -1493,9 +1584,9 @@ const Statistics = (props) => {
   /// ...
   return(
     <div>
-      <StatisticLine text="yeah" value ={...} />
-      <StatisticLine text="kinda" value ={...} />
-      <StatisticLine text="nah" value ={...} />
+      <StatisticLine text="yeah" value={...} />
+      <StatisticLine text="kinda" value={...} />
+      <StatisticLine text="nah" value={...} />
       // ...
     </div>
   )
@@ -1505,9 +1596,9 @@ const Statistics = (props) => {
 
 The application's state should still be kept in the root `App` component.
 
-#### 1.11*: studytracker Step 6
+#### 1.11*: Studytracker, Step 6
 
-> *Why is there a star/asterisk on the exercise? See [here](/part0/general_info#taking-the-course) for the explanation.*
+> *Why is there a star/asterisk on the exercise? [See here](/part0/general_info#taking-the-course) for the explanation.*
 
 Display the statistics in an HTML [table](https://developer.mozilla.org/en-US/docs/Learn/HTML/Tables/Basics),
 so that your application looks roughly like this:
@@ -1523,12 +1614,12 @@ Then perform the necessary actions to make the warning disappear.
 Try pasting the error message into a search engine if you get stuck.
 
 *Typical source of an error `Unchecked runtime.lastError: Could not establish connection.
-Receiving end does not exist.` is a Chrome extension.
+Receiving end does not exist.` is from a Chrome extension.
 Try going to `chrome://extensions/` and try disabling them one by one and refreshing React app page; the error should eventually disappear.*
 
 **Make sure that from now on you don't see any warnings in your console!**
 
-#### 1.12*: jokes Step 1
+#### 1.12*: Jokes, Step 1
 
 The world of software engineering is filled with [bad jokes](https://www.devtopics.com/best-programming-jokes/).
 
@@ -1572,7 +1663,7 @@ Your finished application could look something like this:
 
 **WARNING** Make sure that when you call `vite`, you are inside of your repo's base folder - not inside of your other folders (like *reading*!)!
 
-#### 1.13*: jokes Step 2
+#### 1.13*: Jokes, Step 2
 
 Expand your application so that you can vote for the displayed joke.
 
@@ -1584,9 +1675,9 @@ Remember that the correct way of updating state stored in complex data structure
 > You can create a copy of an object like this:
 >
 > ```js
-> const points = { 0: 1, 1: 3, 2: 4, 3: 2 }
+> const votes = { 0: 1, 1: 3, 2: 4, 3: 2 }
 > 
-> const copy = { ...points }
+> const copy = { ...votes }
 > // increment the property 2 value by one
 > copy[2] += 1     
 > ```
@@ -1594,9 +1685,9 @@ Remember that the correct way of updating state stored in complex data structure
 > OR a copy of an array like this:
 >
 > ```js
-> const points = [1, 4, 6, 3]
+> const votes = [1, 4, 6, 3]
 > 
-> const copy = [...points]
+> const copy = [...votes]
 > // increment the value in position 2 by one
 > copy[2] += 1     
 > ```
@@ -1605,7 +1696,7 @@ Remember that the correct way of updating state stored in complex data structure
 Searching the Internet will provide you with lots of hints on how to
 [create a zero-filled array of the desired length](https://stackoverflow.com/questions/20222501/how-to-create-a-zero-filled-javascript-array-of-arbitrary-length/22209781).
 
-#### 1.14*: jokes Step 3
+#### 1.14*: Jokes, Step 3
 
 Now implement the final version of the application that displays the joke with the largest number of votes:
 

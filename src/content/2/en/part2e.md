@@ -7,7 +7,7 @@ lang: en
 
 <div class="content">
 
-The appearance of our current application is quite modest.
+The appearance of our current Tasks application is quite modest.
 In [exercise 0.2](/part0/fundamentals_of_web_apps#exercises-0-1-0-6),
 the assignment was to go through Mozilla's [CSS tutorial](https://developer.mozilla.org/en-US/docs/Learn/Getting_started_with_the_web/CSS_basics).
 
@@ -62,7 +62,7 @@ we could use the selector `li`, as all of the tasks are wrapped inside `li` tags
 const Task = ({ task, toggleImportance }) => {
   const label = task.important 
     ? 'make not important' 
-    : 'make important';
+    : 'make important'
 
   return (
     <li>
@@ -102,7 +102,7 @@ With this in mind, let's make the following changes to our `Task` component:
 const Task = ({ task, toggleImportance }) => {
   const label = task.important 
     ? 'make not important' 
-    : 'make important';
+    : 'make important'
 
   return (
     <li className='task'> // highlight-line
@@ -151,11 +151,13 @@ const Notification = ({ message }) => {
   }
 
   return (
-    <div className='error'>
+    <div className="error">
       {message}
     </div>
   )
 }
+
+export default Notification
 ```
 
 If the value of the `message` prop is `null`, then nothing is rendered to the screen,
@@ -165,6 +167,11 @@ Let's add a new piece of state called `errorMessage` to the `App` component.
 Let's initialize it with some error message so that we can immediately test our component:
 
 ```js
+import { useState, useEffect } from 'react'
+import Task from './components/Task'
+import taskService from './services/tasks'
+import Notification from './components/Notification' // highlight-line
+
 const App = () => {
   const [tasks, setTasks] = useState([]) 
   const [newTask, setNewTask] = useState('')
@@ -247,14 +254,13 @@ Any React component or element can be provided with a set of CSS properties as a
 [style](https://react.dev/reference/react-dom/components/common#applying-css-styles) attribute.
 
 ***CSS rules follow a different format/case convention in JavaScript compared to normal CSS***.
-Let's say that we wanted to give some element the color green and italic font that's 16 pixels in size.
+Let's say that we wanted to give some element the color green and italic font.
 In CSS, it would look like this:
 
 ```css
 {
   color: green;
   font-style: italic;
-  font-size: 16px;
 }
 ```
 
@@ -263,8 +269,7 @@ But as a React inline-style object it would look like this:
 ```js
 {
   color: 'green',
-  fontStyle: 'italic',
-  fontSize: 16
+  fontStyle: 'italic'
 }
 ```
 
@@ -272,10 +277,10 @@ Every CSS property is defined as a separate property of the JavaScript object.
 Numeric values for pixels can be simply defined as integers.
 One of the major differences compared to regular CSS, is that hyphenated (*kebab-case*) CSS properties are written in *camelCase*.
 
-Next, we could add a "bottom block" to *App.jsx* by creating a `Footer` component and defining the following inline styles for it:
+Let's add a footer component, `Footer`, to our application and define inline styles for it.
+The component is defined in the file *components/Footer.jsx* and used in the file *App.jsx* as follows:
 
 ```js
-// highlight-start
 const Footer = () => {
   const footerStyle = {
     marginTop: 30,
@@ -287,12 +292,22 @@ const Footer = () => {
 
   return (
     <div style={footerStyle}>
-      <br />
+      <p>
       Task app, Department of Computer Science, University of the Pacific
+      </p>
     </div>
   )
 }
-// highlight-end
+
+export default Footer
+```
+
+```js
+import { useState, useEffect } from 'react'
+import Footer from './components/Footer' // highlight-line
+import Task from './components/Task'
+import Notification from './components/Notification'
+import taskService from './services/tasks'
 
 const App = () => {
   // ...
@@ -334,7 +349,7 @@ The code of the final version of our application can be found in the *part2-8* b
 
 ### Exercises 2.16-2.17
 
-#### 2.16: Communities Step 11
+#### 2.16: Communities, Step 11
 
 Use the [improved error message](/part2/adding_styles_to_react_app#improved-error-message)
 example from part 2 as a guide to show a notification that lasts for a few seconds after a successful operation is executed (a group is added or a number is changed).
@@ -342,7 +357,7 @@ In these examples, use the gray and green colors.
 
 ![successful green added screenshot](../../images/2/27e.png)
 
-#### 2.17*: Communities Step 12
+#### 2.17*: Communities, Step 12
 
 Open your application in two browsers.
 **If you delete a group in browser A** a short while before attempting to ***change the group's URL*** in browser B, you will get the following error message:
@@ -382,9 +397,9 @@ const App = () => {
 
 This is a reasonable initial value for `tasks` since we will be storing multiple tasks in that state.
 
-If the state were to hold a ***single thing***,
+If the state *were only saving **one thing***,
 it would be better to initialize that state to `null` since it indicates that there is *nothing* initially.
-Let us see what happens if we initialize our state to `null`:
+Let's see what happens if we initialize our state to `null`:
 
 ```js
 const App = () => {
@@ -447,7 +462,7 @@ const App = () => {
   // ...
 ```
 
-on the first render, the following code gets executed
+on the first render, the following code gets executed:
 
 ```js
 tasksToShow = tasks // has the value null
@@ -500,7 +515,7 @@ and at the second render, the tasks get rendered to the screen.
 
 ***This conditional rendering is suitable in cases where it is impossible to define the state so that the initial rendering is possible.***
 
-The other thing that we still need to have a closer look at is the second parameter of `useEffect`:
+The other thing that we still need to have a closer look at is `useEffect`'s second parameter:
 
 ```js
   useEffect(() => {
@@ -512,7 +527,7 @@ The other thing that we still need to have a closer look at is the second parame
   }, []) // highlight-line
 ```
 
-The second parameter of `useEffect` is used to [specify how often the effect is run](https://react.dev/reference/react/useEffect#parameters).
+`useEffect`'s second parameter specifies [how often the effect is run](https://react.dev/reference/react/useEffect#parameters).
 The principle is that the effect is always executed after the first render of the component
 *and* when the value of the second parameter changes.
 
@@ -610,6 +625,8 @@ The effect function is therefore executed after the first render,
 and *always* after the table as its second parameter `currency` changes.
 That is, ***when the state `currency` gets a new value, the content of the table changes and the effect function is executed***.
 
+It is natural to choose `null` as the initial value for the variable `currency`, because `currency` represents a single item.
+The initial value `null` indicates that there is nothing in the state yet, and it is also easy to check with an `if` statement whether a value has been assigned to the variable.
 The effect has the following condition:
 
 ```js
@@ -652,7 +669,7 @@ Notice that this depends on the approach you selected.
 
 ### Exercises 2.18-2.20
 
-#### 2.18* Data for countries, Step 1
+#### 2.18*: Data for countries, Step 1
 
 The API [https://restcountries.com](https://restcountries.com) provides data for different countries in a machine-readable format, a so-called REST API.
 
@@ -705,7 +722,7 @@ Notice that it might take some minutes until a generated API key is valid.
 
 ![weather report added feature](../../images/2/19x.png)
 
-If you use Open weather map, [here](https://openweathermap.org/weather-conditions#Icon-list) is the description for how to get weather icons.
+If you use Open weather map, here is the description for [how to get weather icons](https://openweathermap.org/weather-conditions#Icon-list).
 
 > **Pertinent:** In some browsers (such as Firefox) the chosen API might send an error response,
 which indicates that HTTPS encryption is not supported, although the request URL starts with `http://`.
@@ -713,7 +730,9 @@ This issue can be fixed by completing the exercise using Chrome.
 
 *You will need an api-key to use almost every weather service.*
 **Do not save the api-key to source control!** Nor hardcode the api-key to your source code.
-Instead use an [environment variable](https://vitejs.dev/guide/env-and-mode.html) to save the key.
+Instead use an [environment variable](https://vitejs.dev/guide/env-and-mode.html) to save keys.
+In real-life applications, it's considered insecure sending these keys directly from the browser, *as anyone who can open the dev console would be able to intercept your keys*!
+We will focus on implementing a separate backend in the next part of the course.
 
 Assuming the api-key is `t0p53cr3t4p1k3yv4lu3`, when the application is started like so:
 
@@ -757,5 +776,7 @@ REACT_APP_API_KEY=t0p53cr3t4p1k3yv4lu3
 ```
 
 Either way, you will need to restart the server to apply the changes.
+
+> **FYI:** To prevent accidentally leaking environment variables to the client, only variables prefixed with `VITE_` are exposed to Vite.
 
 </div>

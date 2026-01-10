@@ -85,6 +85,16 @@ const age = 22;
 console.log(birthdayGreeter(birthdayHero, age));
 ```
 
+#### Keywords
+
+**Keywords** in TypeScript are specially reserved words that embody designated teleological meaning within the construct of the language.
+They cannot be used as identifiers (*variable names, function names, class names, etc.*) because ***they are part of the syntax of the language***.
+An attempt to use these keywords will result in syntax or semantics error.
+There are about 40-50 keywords in TypeScript.
+Some of these keywords include: *`type`*, *`enum`*, *`interface`*, *`void`*, *`null`*, *`instanceof`* etc.
+One thing to remember is that, *TypeScript inherits all the reserved keywords from JavaScript*,
+plus it adds a few of its own type-related keywords like *`interface`*, *`type`*, *`enum`*, etc.
+
 #### Structural typing
 
 TypeScript is a ***structurally-typed language***.
@@ -95,7 +105,7 @@ Two types are considered to be **identical** if they are compatible with each ot
 #### Type inference
 
 The TypeScript compiler can *attempt to infer the type information if no type has been specified*.
-Variables' type can be inferred based on their assigned value and their usage.
+Variables' types can be inferred based on their assigned value and their usage.
 
 The ***type inference takes place when***:
 
@@ -121,9 +131,9 @@ Thus, we can infer the return value for `add` to be of type `number`.
 
 TypeScript removes all type system constructs during compilation.
 
-|Typescript |After Transpile |
-|:--|:--|
-`let x: SomeType;`|`let x;`|
+| Typescript | After Transpile |
+| :-- | :-- |
+| `let x: SomeType;` | `let x;` |
 
 This means that ***no type information remains at runtime***.
 After transpiling, you are left with `let x`, there is no longer any information about `x` having been of `SomeType`.
@@ -133,7 +143,7 @@ The lack of runtime type information can be surprising for programmers who are u
 ### Why should one use TypeScript?
 
 On different forums, you may stumble upon a lot of different arguments either for or against TypeScript.
-The truth is probably as vague as: it depends on your needs and use of the functions that TypeScript offers.
+The truth is probably as vague: it depends on your needs and use of the functions that TypeScript offers.
 However, I would advocate for its use - overall it helps constrain our wild tendencies as programmers to
 
 - [*make*](https://xkcd.com/292/)

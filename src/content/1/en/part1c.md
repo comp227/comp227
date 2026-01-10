@@ -60,14 +60,14 @@ const Greet = (props) => {
 }
 ```
 
-The logic for guessing the year of birth is separated into a function of its own that is called when the component is rendered.
+The logic for guessing the year of birth is encapsulated within a function of its own, which is invoked when the component is rendered.
 
-The person's age does not have to be passed as a parameter to the function,
-since it can directly access all props that are passed to the component.
+The person's age does not need to be explicitly passed as a parameter to this function because
+the function can directly access all the props provided to the component.
 
-If we examine our current code closely, we'll notice that the helper function is defined inside of another function that defines the behavior of our component.
-In Java programming, defining a function inside another one is complex and cumbersome, so not all that common.
-In JavaScript, however, defining functions within functions is a commonly used technique.
+If we examine the current code, we'll notice that the helper function is defined within another function that determines the component's behavior.
+In Java programming, defining a function within another function is complex and uncommon.
+In JavaScript however, defining functions within functions is a commonly used technique.
 
 ### Destructuring
 
@@ -139,7 +139,7 @@ const Greet = (props) => {
 }
 ```
 
-If the object we are destructuring has the values
+When the object that we are destructuring has the values
 
 ```js
 props = {
@@ -184,8 +184,8 @@ const Greet = ({ name, age }) => {
 
 ### Page re-rendering
 
-So far all of our applications have been such that their appearance remains the same after the initial rendering.
-What if we wanted to create a counter where the value increased as a function of time or at the click of a button?
+Up to this point, our applications have been static; their appearance remains unchanged after the initial rendering.
+But what if we wanted to create a counter that increased over time or at the click of a button?
 
 Let's start with the following.
 *App.jsx* becomes:
@@ -210,7 +210,9 @@ import App from './App'
 
 let counter = 1
 
-ReactDOM.createRoot(document.getElementById('root')).render(
+const root = ReactDOM.createRoot(document.getElementById('root'))
+
+root.render(
   <App counter={counter} />
 )
 ```
@@ -230,8 +232,10 @@ We can get the component to re-render by calling the `render` method a second ti
 ```js
 let counter = 1
 
+const root = ReactDOM.createRoot(document.getElementById('root'))
+
 const refresh = () => {
-  ReactDOM.createRoot(document.getElementById('root')).render(
+  root.render(
     <App counter={counter} />
   )
 }
@@ -268,7 +272,7 @@ All of our components up until now have been simple in the sense that they have 
 Next, let's add state to our application's `App` component with the help of React's [**state hook**](https://react.dev/learn/state-a-components-memory).
 
 We will change the application as follows.
-*main.jsx* goes back to
+*main.jsx* goes back to:
 
 ```js
 import ReactDOM from 'react-dom/client'
@@ -317,7 +321,7 @@ The function call adds ***state*** to the component and renders it initialized w
 The function returns an array that contains two items.
 We assign the items to the variables `counter` and `setCounter` by using the destructuring assignment syntax shown earlier.
 
-The `counter` variable is assigned the initial value of ***state*** which is zero.
+The `counter` variable is assigned the initial value of ***state***, which is zero.
 The variable `setCounter` is assigned to a function that will be used to *modify the state*.
 
 The application calls the
@@ -399,7 +403,7 @@ const App = () => {
 
 It's easy to follow and track the calls made to the `App` component's `render` function:
 
-![screenshot of render function with dev tools](../../images/1/4e.png)
+![screenshot of rendering log on dev tools](../../images/1/4e.png)
 
 Was your browser console open?
 If it wasn't, do yourself a favor and keep it open.
@@ -408,7 +412,7 @@ Or keep using the same browser tab.
 
 ### Event handling
 
-We have already mentioned **event handlers** that are registered to be called when specific events occur a few times in [part 0](/part0).
+We have already mentioned **event handlers**, which are registered to be called when specific events occur a few times in [part 0](/part0).
 A user's interaction with the different elements of a web page can cause a collection of various kinds of events to be triggered.
 
 Let's change the application so that increasing the counter happens when a user clicks a button,
@@ -535,7 +539,7 @@ We define the event handlers for our buttons where we declare their `onClick` at
 > In the beginning, the value of the `counter` variable is **`0`**.
 > When React renders the component for the first time,
 > it executes the function call `setCounter(0+1)` and changes the value of the component's state to **`1`**.
-> ***This will cause the component to be re-rendered, React will execute the `setCounter` function call again, and the state will change leading to another rerender...***
+> ***This will cause the component to be re-rendered, React will execute the `setCounter` function call again, and the state will change leading to another re-render...***
 >
 > In our original version:
 >
@@ -694,13 +698,14 @@ Since we now have an easily reusable `Button` component,
 we added a button that decrements the counter with little code.
 
 The event handler is passed to the `Button` component through the `onClick` prop.
-The name of the prop itself is not that significant, but our naming choice wasn't completely random.
+When creating your own components, you can name the props whatever you want.
+However, in our case, the naming choice wasn't entirely arbitrary.
 
 React's official [tutorial](https://react.dev/learn/tutorial-tic-tac-toe) suggests this convention.
 > *"In React, it’s conventional to use `onSomething` names for props which take functions which handle events*
 > *and `handleSomething` for the actual function definitions which handle those events."*
 
-### Changes in state cause rerendering
+### Changes in state cause re-rendering
 
 Let's go over the main principles of how an application works once more.
 
@@ -713,7 +718,7 @@ The buttons all have event handlers, which are used to change the state of the c
 
 When one of the buttons is clicked, the event handler is executed.
 The event handler changes the state of the `App` component with the `setCounter` function.
-**Calling a function that changes the state causes the component to rerender.**
+**Calling a function that changes the state causes the component to re-render.**
 
 So, if a user clicks the ***plus*** button, the button's event handler changes the value of `counter` to **`1`**.
 This triggers the `App` component, and its subcomponents `Display` and `Button`, to be re-rendered.
@@ -783,8 +788,8 @@ const Display = ({ counter }) => {
 }
 ```
 
-The function defining the component contains only the `return` statement, so
-we can define the function using the more compact form of arrow functions:
+The function defining the component contains only the `return` statement,
+so we can define the function using the more compact form of arrow functions:
 
 ```js
 const Display = ({ counter }) => <div>{counter}</div>
@@ -841,6 +846,6 @@ const Button = ({ onSmash, text }) => (
 > ```
 >
 > In this situation, such a refactoring is fine.
-> *Nevertheless, be careful with oversimplifying your components, as this may make it more tedious to add complexity in the future.*
+> *Nevertheless, remember how to use both formats so that you can make effective changes in the future*
 
 </div>

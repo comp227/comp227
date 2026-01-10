@@ -16,7 +16,7 @@ In this part, we will take a look at a few other ways.
 One approach to defining styles for an application is to use a ready-made "UI framework".
 
 One of the first widely popular UI frameworks was the [Bootstrap](https://getbootstrap.com/) toolkit
-created by Twitter which may still be the most popular framework.
+created by Twitter which may still be the most popular.
 Recently, there has been an explosion in the number of new UI frameworks that have entered the arena.
 The selection is so vast that there is little hope of creating an exhaustive list of options.
 
@@ -127,7 +127,7 @@ React Bootstrap provides built-in [components](https://react-bootstrap.github.io
 for creating forms (although the documentation for them is slightly lacking):
 
 ```js
-let Login = (props) => {
+const Login = (props) => {
   // ...
   return (
     <div>
@@ -260,7 +260,7 @@ Chrome's developer tools make it possible to simulate using our application in t
 
 ![chrome devtools with mobile browser preview of tasks app](../../images/7/12ea.png)
 
-You can find the complete code for the application [here](https://github.com/comp227/misc/blob/main/tasks-bootstrap.js).
+Here's the [complete code for the application](https://github.com/comp227/misc/blob/main/tasks-bootstrap.js).
 
 ### Material UI
 
@@ -461,7 +461,7 @@ our navigation works, but it could look better
 
 ![browser tasks app materialUI blue navbar](../../images/7/66ea.png)
 
-The [documentation](https://mui.com/material-ui/guides/composition/#routing-libraries) provides a better way for us to work through this.
+[mUI's Button documentation](https://mui.com/material-ui/integrations/routing/#button) provides a better way for us to work through this.
 We can use [**component props**](https://mui.com/material-ui/guides/composition/#component-prop) to define *how the root element of a MaterialUI component is rendered*.
 
 By defining
@@ -472,7 +472,7 @@ By defining
 </Button>
 ```
 
-the `Button` component is rendered so that its root component is react-router-dom's `Link` which receives its path as the prop field `to`.
+the `Button` component is rendered so that its root component is react-router-dom's `Link`, which receives its path as the prop field `to`.
 
 The code for the navigation bar is the following:
 
@@ -502,7 +502,7 @@ and it looks like we want it to:
 
 ![browser tasks app MaterialUI blue nav bar white text](../../images/7/67ea.png)
 
-The code of the application can be found [here](https://github.com/comp227/misc/blob/main/tasks-materialui.js).
+Here's the [code of the application](https://github.com/comp227/misc/blob/main/tasks-materialui.js).
 
 ### Closing thoughts
 
@@ -557,7 +557,7 @@ However, for people lacking knowledge in CSS and web design, using these framewo
 
 There are plenty of other UI frameworks out there.
 I would not spend a lot of time with any of them unless you are extremely curious or have heard a lot about one or the other.
-If you do not see your favorite UI framework in the list, please make a pull request to the course material.
+If you do not see your favorite UI framework in the list, please make a pull request for adding it.
 
 - <https://bulma.io/>
 - <https://ant.design/>
@@ -575,7 +575,6 @@ If you do not see your favorite UI framework in the list, please make a pull req
 - <https://www.radix-ui.com/>
 - <https://react-spectrum.adobe.com/react-aria/index.html>
 - <https://master.co/>
-- <https://www.radix-ui.com/>
 - <https://nextui.org/>
 - <https://daisyui.com/>
 - <https://ui.shadcn.com/>

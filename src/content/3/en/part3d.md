@@ -15,7 +15,7 @@ The validity of the task is checked in the route handler:
 app.post('/api/tasks', (request, response) => {
   const body = request.body
   // highlight-start
-  if (body.content === undefined) {
+  if (!body.content) {
     return response.status(400).json({ error: 'content missing' })
   }
   // highlight-end
@@ -98,29 +98,6 @@ When validating an object fails, we return the following default error message f
 
 ![postman showing error message](../../images/3/50.png)
 
-We may notice that the backend has now a problem: ***validations are not done when editing a task***.
-The [documentation](https://github.com/blakehaswell/mongoose-unique-validator#find--updates) explains what the problem is:
-validations are not run by default when `findOneAndUpdate` is executed.
-
-The fix is easy.
-Let us also reformulate the route code a bit:
-
-```js
-app.put('/api/tasks/:id', (request, response, next) => {
-  const { content, important } = request.body // highlight-line
-
-  Task.findByIdAndUpdate(
-    request.params.id, 
-    { content, important }, // highlight-line
-    { new: true, runValidators: true, context: 'query' } // highlight-line
-  ) 
-    .then(updatedTask => {
-      response.json(updatedTask)
-    })
-    .catch(error => next(error))
-})
-```
-
 ### Deploying the database backend to production
 
 The application should work almost as-is in Render.
@@ -200,7 +177,7 @@ the server must respond with an appropriate status code and error message.
 
 #### 3.21 Deploying the database backend to production
 
-Generate a new "comp227" version of the application by creating a new production build of the frontend, and copying it to the backend repository.
+Generate a new "comp227" version of the application by creating a new production build of the frontend, and copying it to the backend directory.
 Verify that everything works locally by using the entire application from the address <http://localhost:3001/>.
 
 Push the latest version to Render and verify that everything works there as well.
@@ -209,7 +186,8 @@ Push the latest version to Render and verify that everything works there as well
 > Make sure that your backend is at the root of your repository.
 >
 > ***You shall NOT be deploying the frontend directly at any stage for this part.***
-> It is just backend repository that is deployed throughout part 3, nothing else.
+> It is just backend repository that is deployed throughout part 3 and described in the section
+> [Serving static files from the backend](/en/part3/deploying_app_to_internet#serving-static-files-from-the-backend).
 
 </div>
 
@@ -231,11 +209,32 @@ can be used for expanding the capabilities of the IDE to also point out problems
 In the JavaScript universe, the current leading tool for static analysis
 (AKA "linting") is [ESlint](https://eslint.org/).
 
-Let's install ESlint as a development dependency to the backend project with the command:
+Let's install ESlint as a ***development dependency*** to the backend project with the command:
 
 ```bash
-npm i -D eslint
+npm i -D eslint @eslint/js
 ```
+
+**Development dependencies** are tools that are only needed during the development of the application, and not used in production (like testing).
+
+The contents of the package.json file will change as follows:
+
+```js
+{
+  //...
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "express": "^5.1.0",
+    "mongoose": "^8.11.0"
+  },
+  "devDependencies": { // highlight-line
+    "@eslint/js": "^9.22.0", // highlight-line
+    "eslint": "^9.22.0" // highlight-line
+  }
+}
+```
+
+The command added a *`devDependencies`* section to the file and included the packages *`eslint`* and *`@eslint/js`*, and installed the required libraries into the *node_modules* directory.
 
 After this we can initialize a default ESlint configuration with the command:
 
@@ -245,68 +244,104 @@ npx eslint --init
 
 We will answer all of the questions:
 
-![terminal output from ESlint init](../../images/3/52be.png)
+![terminal output from ESlint init](../../images/3/lint1.png)
 
-The configuration will be saved in the *.eslintrc.js* file.
-We will change `browser` to `node` in the `env` configuration:
+The configuration will be saved in the generated *eslint.config.mjs* file.
 
-```js
-module.exports = {
-    "env": {
-        "browser": true,
-        "commonjs": true,
-        "es2021": true
-    },
-    "extends": "eslint:recommended",
-    "overrides": [
-        {
-            "env": {
-                "node": true
-            },
-            "files": [
-                ".eslintrc.{js,cjs}"
-            ],
-            "parserOptions": {
-                "sourceType": "script"
-            }
-        }
-    ],
-    "parserOptions": {
-        "ecmaVersion": "latest"
-    },
-    "rules": {
-        "indent": [
-            "error",
-            4
-        ],
-        "linebreak-style": [
-            "error",
-            "unix"
-        ],
-        "quotes": [
-            "error",
-            "double"
-        ],
-        "semi": [
-            "error",
-            "always"
-        ]
-    }
-};
+### Formatting the Configuration File
 
-```
-
-Let's change the rule concerning semicolons so that it only raises a warning and not an error.
-You can also change the rule regarding indentation or others like the linebreak style if you are using Windows.
-I had to change my configuration a little bit this first time around, and that's fine.
-The point is to be consistent.
+Let's reformat the configuration file *eslint.config.mjs* from its current form to the following:
 
 ```js
-"semi": [
-    "warn",
-    "always"
-],
+import globals from 'globals'
+
+export default [
+  {
+    files: ['**/*.js'],
+    languageOptions: {
+      sourceType: 'commonjs',
+      globals: { ...globals.node },
+      ecmaVersion: 'latest',
+    },
+  },
+]
 ```
+
+So far, our ESLint configuration file defines the `files` option with *`["\*\*/\*.js"]`*, which tells ESLint to look at all JavaScript files in our project folder.
+The `languageOptions` property specifies options related to language features that ESLint should expect, in which we defined the `sourceType` option as `commonjs`.
+This indicates that the JavaScript code in our project uses the CommonJS module system, allowing ESLint to parse the code accordingly.  
+
+The `globals` property specifies global variables that are predefined.
+The spread operator applied here tells ESLint to include all global variables defined in the *globals.node* settings such as the `process`.
+In the case of browser code we would define here `globals.browser` to allow browser specific global variables like `window`, and `document`.
+
+Finally, the `ecmaVersion` property is set to *`latest`*.
+This sets the ECMAScript version to the latest available version, meaning ESLint will understand and properly lint the latest JavaScript syntax and features.
+
+We want to make use of [ESLint's recommended](https://eslint.org/docs/latest/use/configure/configuration-files#using-predefined-configurations) settings along with our own.
+The *@eslint/js* package we installed earlier provides us with predefined configurations for ESLint.
+We'll import it and enable it in the configuration file:
+
+```js
+import globals from 'globals'
+import js from '@eslint/js' // highlight-line
+// ...
+
+export default [
+  js.configs.recommended, // highlight-line
+  {
+    // ...
+  },
+]
+```
+
+We've added the *js.configs.recommended* to the top of the configuration array, this ensures that ESLint's recommended settings are applied first before our own custom options.
+
+Let's continue building the configuration file.
+Install a [***plugin***](https://eslint.style/packages/js) that defines a set of code style-related rules:
+
+```bash
+npm install --save-dev @stylistic/eslint-plugin
+```
+
+Import and enable the plugin, and add these four code style rules:
+
+```js
+import globals from 'globals'
+import js from '@eslint/js'
+import stylisticJs from '@stylistic/eslint-plugin' // highlight-line
+
+export default [
+  {
+    // ...
+    // highlight-start
+    plugins: { 
+      '@stylistic/js': stylisticJs,
+    },
+    rules: { 
+      '@stylistic/js/indent': ['error', 4],
+      '@stylistic/js/linebreak-style': ['error', 'unix'],
+      '@stylistic/js/quotes': ['error', 'double'],
+      '@stylistic/js/semi': ['error', 'never'],
+    }, 
+    // highlight-end
+  },
+]
+```
+
+The [**plugins**](https://eslint.org/docs/latest/use/configure/plugins) property provides a way to extend ESLint's functionality
+by adding custom rules, configurations, and other capabilities that are not available in the core ESLint library.
+We've installed and enabled the *`@stylistic/eslint-plugin`*, which adds JavaScript stylistic rules for ESLint.
+In addition, rules for indentation, line breaks, quotes, and semicolons have been added.
+These four rules are all defined in the [Eslint styles plugin](https://eslint.style/packages/js).
+
+**Notice for Windows users:** The linebreak style is set to `unix` in the style rules.
+It is recommended to use Unix-style linebreaks (`\n`) regardless of your operating system,
+as they are compatible with most modern operating systems and facilitate collaboration when multiple people are working on the same files.
+If you are using Windows-style linebreaks, ESLint will produce the following errors: *`Expected linebreaks to be 'LF' but found 'CRLF'`*.
+In this case, configure WebStorm to use Unix-style linebreaks via Settings.
+
+### Running the Linter
 
 Inspecting and validating a file like *index.js* can be done with the following command:
 
@@ -323,10 +358,10 @@ It is recommended to create separate *npm scripts* for linting:
   // ...
   "scripts": {
     "start": "node index.js",
-    "dev": "nodemon index.js",
+    "dev": "node --watch index.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "eslint ." // highlight-line
     // ...
-    "lint": "eslint .", // highlight-line
-    "lint:fix": "npm run lint -- --fix" // highlight-line
   },
   // ...
 }
@@ -335,11 +370,23 @@ It is recommended to create separate *npm scripts* for linting:
 Now the `npm run lint` command will check every file in the project, while `npm run lint:fix` can automatically go through and fix all of the errors.
 
 Also, the files in the *dist* directory get checked when the command is run.
-We do not want this to happen, and we can accomplish this by creating a [.eslintignore](https://eslint.org/docs/user-guide/configuring#ignoring-files-and-directories)
-file in the project's root with the following contents:
+We do not want this to happen, and we can accomplish this by adding an object with the [`ignores` property](https://eslint.org/docs/latest/use/configure/ignore)
+that specifies an array of directories and files we want to ignore.
 
-```bash
-dist
+```js
+// ...
+export default [
+  js.configs.recommended,
+  {
+    files: ['**/*.js'],
+    // ...
+  },
+  // highlight-start
+  { 
+    ignores: ['dist/**'], 
+  },
+  // highlight-end
+]
 ```
 
 This causes the entire *dist* directory to not be checked by ESlint.
@@ -379,73 +426,115 @@ This makes the other errors easy to spot and fix right away.
 
 ![Screenshot of WebStorm ESlint plugin showing less errors after save](../../images/3/custom/eslint_after_save.png)
 
-ESlint has a vast array of [rules](https://eslint.org/docs/rules/) that are easy to take into use by editing the *.estlintrc.js* file.
+ESlint has a vast array of [rules](https://eslint.org/docs/rules/) that are easy to take into use by editing the *.eslint.config.mjs* file.
 
 Let's add the [eqeqeq](https://eslint.org/docs/rules/eqeqeq) rule that warns us if equality is checked with anything other than `===` (like `==`).
 The rule is added under the `rules` field in the configuration file.
 
 ```js
-{
+export default [
   // ...
-  "rules": {
+  rules: {
     // ...
-   "eqeqeq": "error",
+   eqeqeq: 'error', // highlight-line
   },
-}
+  // ...
+]
 ```
 
 While we're at it, let's make a few other changes to the rules.
 
 Let's prevent unnecessary [trailing spaces](https://eslint.org/docs/rules/no-trailing-spaces) at the ends of lines,
-let's require that [there is always a space before and after curly braces](https://eslint.org/docs/rules/object-curly-spacing),
-and let's also demand a consistent use of whitespace in the function parameters of arrow functions.
+require that [there is always a space before and after curly braces](https://eslint.org/docs/rules/object-curly-spacing),
+and demand a consistent use of whitespace in the function parameters of arrow functions.
 
 ```js
-{
+export default [
   // ...
-  "rules": {
+  rules: {
     // ...
-    "eqeqeq": "error",
-    "no-trailing-spaces": "error",
-    "object-curly-spacing": [
-        "error", "always"
-    ],
-    "arrow-spacing": [
-        "error", { "before": true, "after": true }
-    ]
+    eqeqeq: 'error',
+    // highlight-start
+    'no-trailing-spaces': 'error',
+    'object-curly-spacing': ['error', 'always'],
+    'arrow-spacing': ['error', { before: true, after: true }],
+    // highlight-end
   },
-}
+]
 ```
 
-Our default configuration takes a bunch of predetermined rules into use from `eslint:recommended`:
+Our default configuration takes a bunch of predefined rules into use from:
 
-```bash
-"extends": "eslint:recommended",
+```js
+// ...
+
+export default [
+  js.configs.recommended,
+  // ...
+]
 ```
 
 This includes a rule that warns about *console.log* commands.
 [Disabling](https://eslint.org/docs/user-guide/configuring#configuring-rules) a rule can be accomplished by
-defining its "value" as *`0`* in the configuration file.
+defining its "value" as *`0`* or *`off`* in the configuration file.
 Let's do this for the `no-console` and `no-debugger` rules in the meantime,
 since we are learning and not intending to ship anything just yet.
 
-```json
-{
-  // ...
-  "rules": {
+```js
+[
+  {
     // ...
-    "eqeqeq": "error",
-    "no-trailing-spaces": "error",
-    "object-curly-spacing": [
-        "error", "always"
-    ],
-    "arrow-spacing": [
-        "error", { "before": true, "after": true }
-    ],
-    "no-console": 0, // highlight-line
-    "no-debugger": 0 // highlight-line
+    rules: {
+      // ...
+      eqeqeq: 'error',
+      'no-trailing-spaces': 'error',
+      'object-curly-spacing': ['error', 'always'],
+      'arrow-spacing': ['error', { before: true, after: true }],
+      'no-console': 'off', // highlight-line
+      'no-debugger': 'off' // highlight-line
+    },
   },
-}
+]
+```
+
+Disabling the no-console rule will allow us to use `console.log` statements without ESLint flagging them as issues.
+This can be particularly useful during development when you need to debug your code.
+Here's the complete configuration file with all the changes we have made so far:
+
+```js
+import globals from 'globals'
+import js from '@eslint/js'
+import stylisticJs from '@stylistic/eslint-plugin'
+
+export default [
+  js.configs.recommended,
+  {
+    files: ['**/*.js'],
+    languageOptions: {
+      sourceType: 'commonjs',
+      globals: { ...globals.node },
+      ecmaVersion: 'latest',
+    },
+    plugins: {
+      '@stylistic/js': stylisticJs,
+    },
+    rules: {
+      '@stylistic/js/indent': ['error', 4],
+      '@stylistic/js/linebreak-style': ['error', 'unix'],
+      '@stylistic/js/quotes': ['error', 'double'],
+      '@stylistic/js/semi': ['error', 'never'],
+      eqeqeq: 'error',
+      'no-trailing-spaces': 'error',
+      'object-curly-spacing': ['error', 'always'],
+      'arrow-spacing': ['error', { before: true, after: true }],
+      'no-console': 'off',
+      'no-debugger': 'off',
+    },
+  },
+  {
+    ignores: ['dist/**'],
+  },
+]
 ```
 
 To fix the remaining issues in the code, you can leverage WebStorm's support by clicking at the ***more actions*** link in the error.
@@ -475,7 +564,8 @@ At this point, you may end up thinking that you should use ESLint's rule to supp
 It's important with ESlint (and other tests) to be mindful of the errors so that you ***continue to have faith in seeing ESlint as informative***, instead of a hindrance.
 You also want to make sure you have faith that ESlint will catch errors for you.
 You need to keep a close balance between seeing it as being a hindrance and improving your code by maintaining a consistent style.
-In this case, a better option than suppressing error messages (which you really should avoid at this point in your learning journey) is to search for any potential ways to resolve this.
+In this case, a better option than suppressing error messages (which you really should avoid at this point in your learning journey)
+is to search for any potential ways to resolve this.
 It turns out that the best solution is not to do any suppression but to add this line to the top of your *eslintrc.js* file.
 
 ```json

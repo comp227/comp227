@@ -49,14 +49,14 @@ npm i redux
 
 #### Redux's Store and Actions
 
-Like *Flux*, the state in *Redux* is housed in a [**store**](https://redux.js.org/basics/store).
+Like *Flux*, the state in *Redux* is housed in a [**store**](https://redux.js.org/tutorials/essentials/part-1-overview-concepts#store).
 You can think of the store as like a mini-database that redux uses to house information.
 
 Unlike *Flux*, *Redux* stores this state in a ***single JavaScript object***.
 Because our application only needs the value of the counter, we will save it straight to the store.
 If the state were more complex, the different values would be saved as separate properties in the object.
 
-The state of the store is changed with [**actions**](https://redux.js.org/basics/actions).
+The state of the store is changed with [**actions**](https://redux.js.org/tutorials/essentials/part-1-overview-concepts#actions).
 *Actions are objects*, which have at least a field determining the *type* of the action.
 Our application will need for example the following action:
 
@@ -71,11 +71,12 @@ However, our counting app is so simple that the actions are fine with just the *
 
 #### Reducers
 
-The impact of the action to the state of the application is defined using a [reducer](https://redux.js.org/basics/reducers).
+The impact of the action to the state of the application is defined using a [*reducer*](https://redux.js.org/tutorials/essentials/part-1-overview-concepts#reducers).
 In practice, a **reducer** is a function that is given the current state and an action as parameters.
 It ***returns*** a new state.
 
-Let's now define a reducer for our application:
+Let's now define a reducer for our application at *main.jsx*.
+The file initially looks like this:
 
 ```js
 const counterReducer = (state, action) => {
@@ -127,11 +128,23 @@ which will handle calling the function:
 import { createStore } from 'redux' // highlight-line
 
 const counterReducer = (state = 0, action) => {
-  // ...
+  switch (action.type) {
+    case 'INCREMENT':
+      return state + 1
+    case 'DECREMENT':
+      return state - 1
+    case 'ZERO':
+      return 0
+    default:
+      return state
+  }
 }
 
 const store = createStore(counterReducer) // highlight-line
 ```
+
+The code editor may warn that `createStore` is deprecated
+Let's ignore this for now; there is a more detailed explanation about this further below.
 
 The `store` now uses the reducer to handle **actions**,
 which are **dispatched** or '***sent***' to the *`store`* with its [`dispatch`](https://redux.js.org/api/store#dispatchaction) method.
@@ -145,15 +158,20 @@ You can find out the *state* of `store` using the method [`getState`](https://re
 For example, the following code:
 
 ```js
+// ...
+
 const store = createStore(counterReducer)
+
+// highlight-start
 console.log(store.getState())
-store.dispatch({ type: 'INCREMENT' })
-store.dispatch({ type: 'INCREMENT' })
-store.dispatch({ type: 'INCREMENT' })
+store.dispatch({type: 'INCREMENT'})
+store.dispatch({type: 'INCREMENT'})
+store.dispatch({type: 'INCREMENT'})
 console.log(store.getState())
-store.dispatch({ type: 'ZERO' })
-store.dispatch({ type: 'DECREMENT' })
+store.dispatch({type: 'ZERO'})
+store.dispatch({type: 'DECREMENT'})
 console.log(store.getState())
+// highlight-end
 ```
 
 would print the following to the console
@@ -166,10 +184,10 @@ would print the following to the console
 
 At first, the *state* of `store` is ***`0`***.
 After three `INCREMENT` actions, `store`'s state is ***`3`***.
-In the end, after `ZERO` and `DECREMENT` actions, the `store`'s state is ***`-1`***.
+In the end, after the `ZERO` and `DECREMENT` actions, the `store`'s state is ***`-1`***.
 
-In addition to `dispatch` and `getState`, `store` also has the [`subscribe`](https://redux.js.org/api/store#subscribelistener) method,
-which is used to create callback functions the *`store`* calls whenever an *action is dispatched to it*.
+In addition to `dispatch` and `getState`, `store` also has the [`subscribe` method](https://redux.js.org/api/store#subscribelistener),
+which is used to create callback functions that the *`store`* calls whenever an *action is dispatched to it*.
 
 If, for example, we would add the following function to `subscribe`, ***every change in the `store` would be printed to the console***.
 
@@ -183,18 +201,24 @@ store.subscribe(() => {
 so the code
 
 ```js
+// ...
+
 const store = createStore(counterReducer)
 
+// highlight-start
 store.subscribe(() => {
   const storeNow = store.getState()
   console.log('breaking news! ', storeNow)
 })
+// highlight-end
 
+// highlight-start
 store.dispatch({ type: 'INCREMENT' })
 store.dispatch({ type: 'INCREMENT' })
 store.dispatch({ type: 'INCREMENT' })
 store.dispatch({ type: 'ZERO' })
 store.dispatch({ type: 'DECREMENT' })
+// highlight-end
 ```
 
 would cause the following to be printed
@@ -214,9 +238,7 @@ so `store` is directly available everywhere 👀.
 Later on we will focus on properly structuring our React/Redux code.
 
 ```js
-import React from 'react'
 import ReactDOM from 'react-dom/client'
-
 import { createStore } from 'redux'
 
 const counterReducer = (state = 0, action) => {
@@ -240,19 +262,13 @@ const App = () => {
       <div>
         {store.getState()} // highlight-line
       </div>
-      <button 
-        onClick={e => store.dispatch({ type: 'INCREMENT' })} // highlight-line
-      >
+      <button onClick={e => store.dispatch({ type: 'INCREMENT' })}> // highlight-line
         plus
       </button>
-      <button
-        onClick={e => store.dispatch({ type: 'DECREMENT' })} // highlight-line
-      >
+      <button onClick={e => store.dispatch({ type: 'DECREMENT' })}> // highlight-line
         minus
       </button>
-      <button 
-        onClick={e => store.dispatch({ type: 'ZERO' })} // highlight-line
-      >
+      <button onClick={e => store.dispatch({ type: 'ZERO' })}> // highlight-line
         zero
       </button>
     </div>
@@ -286,7 +302,7 @@ Otherwise, we would have only defined renderApp and so the first rendering of th
 You may have noticed that in WebStorm, `createStore` has a strikethrough.
 If you move the mouse over the name, an explanation will appear
 
-![vscode error showing createStore deprecated and to use configureStore](../../images/6/30new.png)
+![vscode error showing createStore deprecated, use configureStore instead](../../images/6/30new.png)
 
 Here's an official explanation:
 
@@ -307,7 +323,7 @@ we will start using `configureStore` in the [next section](/part6/many_reducers)
 
 > An Aside: `createStore` is defined as **deprecated**.
 > Functions/features that are deprecated are sometimes removed in a future version of a library.
-The explanation above and the discussion of [this one](https://stackoverflow.com/questions/71944111/redux-createstore-is-deprecated-cannot-get-state-from-getstate-in-redux-ac)
+The explanation above and this [discussion](https://stackoverflow.com/questions/71944111/redux-createstore-is-deprecated-cannot-get-state-from-getstate-in-redux-ac)
 reveal that `createStore` will not be removed, and it has been given the status `deprecated`, perhaps to nudge people to use `configureStore` instead.
 
 You can see the full code for the calculator on [GitHub](https://github.com/comp227/redux-tasks/tree/main) in the *main* branch.
@@ -317,16 +333,20 @@ You can see the full code for the calculator on [GitHub](https://github.com/comp
 We aim to modify our task application to use Redux for state management.
 However, let's first cover a few key concepts through a simplified task application.
 
-The first version of our application is the following
+The first version of our application, written in the file *main.jsx*, looks as follows:
 
 ```js
-const taskReducer = (state = [], action) => {
-  if (action.type === 'NEW_TASK') {
-    state.push(action.payload)
-    return state
-  }
+import ReactDOM from 'react-dom/client'
+import { createStore } from 'redux'
 
-  return state
+const taskReducer = (state = [], action) => {
+  switch (action.type) {
+    case 'NEW_TASK':
+      state.push(action.payload)
+      return state
+    default:
+      return state
+  }
 }
 
 const store = createStore(taskReducer)
@@ -350,18 +370,27 @@ store.dispatch({
 })
 
 const App = () => {
-  return(
+  return (
     <div>
       <ul>
-        {store.getState().map(task=>
+        {store.getState().map(task => (
           <li key={task.id}>
             {task.content} <strong>{task.important ? '- important' : ''}</strong>
           </li>
-        )}
-        </ul>
+        ))}
+      </ul>
     </div>
   )
 }
+
+const root = ReactDOM.createRoot(document.getElementById('root'))
+
+const renderApp = () => {
+  root.render(<App />)
+}
+
+renderApp()
+store.subscribe(renderApp)
 ```
 
 So far the application does not have the functionality for adding new tasks, *although it is possible to do so by dispatching `NEW_TASK` actions*.
@@ -390,12 +419,13 @@ If we remember the goal of a [reducer](#reducers), then our initial version of `
 
 ```js
 const taskReducer = (state = [], action) => {
-  if (action.type === 'NEW_TASK') {
-    state.push(action.payload)
-    return state
+  switch (action.type) {
+    case 'NEW_TASK':
+      state.push(action.payload)
+      return state
+    default:
+      return state
   }
-
-  return state
 }
 ```
 
@@ -420,11 +450,12 @@ Calling `state.concat` *creates a new array* that contains all the elements of t
 
 ```js
 const taskReducer = (state = [], action) => {
-  if (action.type === 'NEW_TASK') {
-    return state.concat(action.payload) // highlight-line
+  switch (action.type) {
+    case 'NEW_TASK':
+      return state.concat(action.payload) // highlight-line
+    default:
+      return state
   }
-
-  return state
 }
 ```
 
@@ -455,70 +486,76 @@ In short, TDD follows this three-step process:
 2. Change the code so that it passes all the tests again (***green***)
 3. Refactor the code while ensuring the tests still pass (***refactor***)
 
-To follow TDD, we'll need to configure the [Jest](https://jestjs.io/) testing library for the project.
-First, install the following dependencies:
+To follow TDD, we'll need to configure the [Vitest](https://vitest.dev/) testing library for the project.
+Let's install it as a development dependency for the application:
 
 ```js
-npm i -D jest @babel/preset-env @babel/preset-react eslint-plugin-jest 
-```
-
-Next we'll create the file *.babelrc*, with the following content:
-
-```json
-{
-    "presets": [
-        "@babel/preset-env",
-        ["@babel/preset-react", { "runtime": "automatic" }]
-    ]
-}
+npm i -D vitest 
 ```
 
 Let us expand *package.json* with a script for running the tests:
 
 ```json
 {
-    // ...
-    "scripts": {
-        "dev": "vite",
-        "build": "vite build",
-        "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
-        "preview": "vite preview",
-        "test": "jest" // highlight-line
-    },
-    // ...
+  // ...
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "lint": "eslint .",
+    "preview": "vite preview",
+    "test": "vitest" // highlight-line
+  },
+  // ...
 }
 ```
 
-And finally, *.eslintrc.cjs* needs to be altered as follows:
+To make testing easier, we'll first move the reducer's code to its own module to file *src/reducers/taskReducer.js*.
 
 ```js
-module.exports = {
-    root: true,
-    env: { 
-        browser: true,
-        es2020: true,
-        "jest/globals": true // highlight-line
-    },
-    // ...
+const taskReducer = (state = [], action) => {
+  switch (action.type) {
+    case 'NEW_TASK':
+      return state.concat(action.payload)
+    default:
+      return state
+  }
 }
+
+export default taskReducer
+```
+
+The file *main.jsx* changes as follows:
+
+```js
+import ReactDOM from 'react-dom/client'
+import { createStore } from 'redux'
+import taskReducer from './reducers/taskReducer' // highlight-line
+
+const store = createStore(taskReducer)
+
+// ...
 ```
 
 ### Testing and Deep Freeze
 
-To make testing easier, we'll first move the reducer's code to its own module to file *src/reducers/taskReducer.js*.
 We'll also add the library [deep-freeze](https://www.npmjs.com/package/deep-freeze),
 which can help ensure that our reducer has been correctly defined as an immutable function.
-Let's install the library as a development dependency
+Let's install the library as a development dependency:
 
 ```js
 npm i -D deep-freeze
 ```
 
-The test, which we define in file *src/reducers/taskReducer.test.js*, has the following content:
+We are now ready to write tests.
+
+Let's start by creating a test for handling the action *`NEW_TASK`*.
+The test, which we define in the file *src/reducers/taskReducer.test.js*, has the following content:
 
 ```js
 import taskReducer from './taskReducer'
 import deepFreeze from 'deep-freeze'
+import { describe, expect, test } from 'vitest'
+import taskReducer from './taskReducer'
 
 describe('taskReducer', () => {
   test('returns new state with action NEW_TASK', () => {
@@ -541,8 +578,12 @@ describe('taskReducer', () => {
 })
 ```
 
+Run the test with `npm test`.
+The test ensures that the new state returned by the *reducer is an array containing a single element*,
+which is the same object as the one in the action’s *`payload`* field.
+
 The `deepFreeze(state)` command ensures that the reducer does not change the state of the store given to it as a parameter.
-If the reducer uses the `push` command to manipulate the state, the test will not pass
+If the reducer uses the `push` command to manipulate the state, the test will fail:
 
 ![terminal showing test failure and error about not using array.push](../../images/6/2.png)
 
@@ -564,7 +605,8 @@ test('returns new state with action TOGGLE_IMPORTANCE', () => {
       content: 'understand more fully how state changes are made with actions',
       important: false,
       id: 2
-    }]
+    }
+  ]
 
   const action = {
     type: 'TOGGLE_IMPORTANCE',
@@ -610,6 +652,7 @@ const taskReducer = (state = [], action) => {
   switch(action.type) {
     case 'NEW_TASK':
       return state.concat(action.payload)
+    // highlight-start
     case 'TOGGLE_IMPORTANCE': {
       const id = action.payload.id
       const taskToChange = state.find(t => t.id === id)
@@ -618,9 +661,10 @@ const taskReducer = (state = [], action) => {
         important: !taskToChange.important 
       }
       return state.map(task =>
-        task.id !== id ? task : changedTask 
+        task.id === id ? changedTask : task
       )
-     }
+    }
+    // highlight-end
     default:
       return state
   }
@@ -650,7 +694,7 @@ We create a new state by taking all of the tasks from the old state (via `map`) 
 
 ```js
 state.map(task =>
-  task.id !== id ? task : changedTask 
+  task.id === id ? changedTask : task
 )
 ```
 
@@ -669,8 +713,9 @@ const taskReducer = (state = [], action) => {
   switch(action.type) {
     case 'NEW_TASK':
       return [...state, action.payload] // highlight-line
-    case 'TOGGLE_IMPORTANCE':
+    case 'TOGGLE_IMPORTANCE': {
       // ...
+    }
     default:
     return state
   }
@@ -724,10 +769,10 @@ Once it's been setup, make sure to clone the repository.
 Here we will have three projects in the same folder.
 *Remember that you'll need to run `npm install` in the correct subfolder before being able to work on that particular project.*
 
-Let's make a simplified version of the studytracker exercise from part 1.
+Let's make a simplified version of the Studytracker exercise from part 1.
 Let's handle the state management with Redux.
 
-#### 6.1: studytracker revisited, Step 1
+#### 6.1: Studytracker revisited, Step 1
 
 Before implementing the functionality of the UI, let's implement the functionality required by the store.
 
@@ -761,9 +806,9 @@ const counterReducer = (state = initialState, action) => {
       return state
     case 'ZERO':
       return state
-    default: return state
+    default:
+      return state
   }
-
 }
 
 export default counterReducer
@@ -773,6 +818,7 @@ and a base for its tests
 
 ```js
 import deepFreeze from 'deep-freeze'
+import { describe, expect, test } from 'vitest'
 import counterReducer from './reducer'
 
 describe('studytracker reducer', () => {
@@ -783,7 +829,6 @@ describe('studytracker reducer', () => {
   }
 
   test('should return a proper initial state when called with undefined state', () => {
-    const state = {}
     const action = {
       type: 'DO_NOTHING'
     }
@@ -817,12 +862,12 @@ Ensure that the provided first test passes, because Redux expects that the reduc
 which represents the previous state, is `undefined`.
 
 Start by expanding the reducer so that both tests pass.
-Then add the rest of the tests, and finally the functionality that they are testing.
+After that, add the remaining tests for the different actions of the reducer and implement the corresponding functionality in the reducer.
 
 A good model for the reducer is the [redux-tasks](/part6/flux_architecture_and_redux#pure-functions-immutable)
 example above.
 
-#### 6.2: studytracker revisited, Step 2
+#### 6.2: Studytracker revisited, Step 2
 
 Now implement the actual functionality of the application.
 
@@ -839,11 +884,13 @@ Your application can have a modest appearance, nothing else is needed but button
 Let's add the functionality for adding new tasks and changing their importance:
 
 ```js
+// ...
+
 const generateId = () => Number((Math.random() * 1000000).toFixed(0)) // highlight-line
 
 const App = () => {
   // highlight-start
-  const addTask = (event) => {
+  const addTask = event => {
     event.preventDefault()
     const content = event.target.task.value
     event.target.task.value = ''
@@ -859,7 +906,7 @@ const App = () => {
   // highlight-end
 
   // highlight-start
-  const toggleImportance = (id) => {
+  const toggleImportance = id => {
     store.dispatch({
       type: 'TOGGLE_IMPORTANCE',
       payload: { id }
@@ -888,6 +935,8 @@ const App = () => {
     </div>
   )
 }
+
+// ...
 ```
 
 The implementation of both actions is straightforward.
@@ -919,7 +968,13 @@ addTask = (event) => {
 ```
 
 We can get the content of the new task straight from our form's `task` input field.
-Because this field has a name, we access its content via the `event` object: `event.target.task.value`.
+Because this field has a name, we access its content via the `event` object: `event.target.task.value`:
+
+```js
+const content = event.target.task.value
+```
+
+Notice that the *input field must have a name in order to access its value*:  
 
 ```js
 <form onSubmit={addTask}>
@@ -932,7 +987,7 @@ A `task`'s *importance* can be changed by clicking its name.
 The event handler is modest:
 
 ```js
-toggleImportance = (id) => {
+toggleImportance = id => {
   store.dispatch({
     type: 'TOGGLE_IMPORTANCE',
     payload: { id }
@@ -949,7 +1004,7 @@ However, we can do a lot better.
 **Let's separate the creation of action objects into functions**:
 
 ```js
-const createTask = (content) => {
+const createTask = content => {
   return {
     type: 'NEW_TASK',
     payload: {
@@ -960,7 +1015,7 @@ const createTask = (content) => {
   }
 }
 
-const toggleImportanceOf = (id) => {
+const toggleImportanceOf = id => {
   return {
     type: 'TOGGLE_IMPORTANCE',
     payload: { id }
@@ -968,20 +1023,20 @@ const toggleImportanceOf = (id) => {
 }
 ```
 
-Functions that create these action objects are called [**action creators**](https://redux.js.org/advanced/async-actions#synchronous-action-creators).
+Functions that create these action objects are called [**action creators**](https://redux.js.org/tutorials/essentials/part-1-overview-concepts#action-creators).
 
 The `App` component ***does not have to know anything about the inner representation of the actions anymore***, *it just gets the right action by calling the creator function*:
 
 ```js
 const App = () => {
-  const addTask = (event) => {
+  const addTask = event => {
     event.preventDefault()
     const content = event.target.task.value
     event.target.task.value = ''
     store.dispatch(createTask(content)) // highlight-line
   }
   
-  const toggleImportance = (id) => {
+  const toggleImportance = id => {
     store.dispatch(toggleImportanceOf(id))// highlight-line
   }
 
@@ -1005,13 +1060,12 @@ First, let's install react-redux
 npm i react-redux
 ```
 
-Next, if you haven't done so already, move the `App` component into its own file *App.jsx*.
-Let's see how this affects the rest of the application files.
+Let's organize the application code more sensibly into several different files.
+If you haven't done so already, move the `App` component into its own file *App.jsx*.
 
-*main.jsx* becomes:
+Once moved, *main.jsx* becomes:
 
 ```js
-import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { createStore } from 'redux'
 import { Provider } from 'react-redux' // highlight-line
@@ -1024,19 +1078,45 @@ const store = createStore(taskReducer)
 ReactDOM.createRoot(document.getElementById('root')).render(
   <Provider store={store}>  // highlight-line
     <App />
-  </Provider>  // highlight-line
+  </Provider>
 )
 ```
 
 Notice that the application is now defined *as a child of* a [`Provider`](https://react-redux.js.org/api/provider) component provided by the react-redux library.
 The application's *`store`* is given to the `Provider` as its attribute `store`.
 
+```js
+const store = createStore(taskReducer)
+
+ReactDOM.createRoot(document.getElementById('root')).render(
+  <Provider store={store}> // highlight-line
+    <App />
+  </Provider> // highlight-line
+)
+```
+
 Defining the action creators has been moved to the file *reducers/taskReducer.js* where the reducer is defined.
 That file looks like this:
 
 ```js
 const taskReducer = (state = [], action) => {
-  // ...
+  switch (action.type) {
+    case 'NEW_TASK':
+      return [...state, action.payload]
+    case 'TOGGLE_IMPORTANCE': {
+      const id = action.payload.id
+      const taskToChange = state.find(t => t.id === id)
+      const changedTask = {
+        ...taskToChange,
+        important: !taskToChange.important
+      }
+      return state.map(task => 
+        task.id === id ? changedTask : task
+      )
+    }
+    default:
+      return state
+  }
 }
 
 const generateId = () =>
@@ -1053,7 +1133,7 @@ export const createTask = (content) => { // highlight-line
   }
 }
 
-export const toggleImportanceOf = (id) => { // highlight-line
+export const toggleImportanceOf = (id) => {
   return {
     type: 'TOGGLE_IMPORTANCE',
     payload: { id }
@@ -1063,9 +1143,12 @@ export const toggleImportanceOf = (id) => { // highlight-line
 export default taskReducer
 ```
 
-If the application has many components which need the `store`, the `App` component must pass *`store`* as props to all of those components.
+The module now has multiple [`export` commands](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/export).
+The reducer function is still returned with the `export default` command, so the reducer can be imported the usual way:
 
-The module now has multiple [`export`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/export) commands.
+```js
+import taskReducer from './reducers/taskReducer'
+```
 
 A module can have only ***one default** export*, but *multiple **normal** exports*
 
@@ -1079,19 +1162,14 @@ export const toggleImportanceOf = (id) => {
 }
 ```
 
-The reducer function is still returned with the `export default` command, so the reducer can be imported the usual way:
-
-```js
-import taskReducer from './reducers/taskReducer'
-```
-
 In contrast, the normal exports (`createTask` and `toggleImportanceOf`) are imported via the curly brace syntax:
 
 ```js
-import { createTask } from './../reducers/taskReducer'
+import { createTask } from '../../reducers/taskReducer'
 ```
 
-Below is the revised code for our `App` component
+Next, we move the `App` component into its own file *src/App.jsx*.
+The content of the file is as follows:
 
 ```js
 import { createTask, toggleImportanceOf } from './reducers/taskReducer' // highlight-line
@@ -1204,14 +1282,14 @@ The current version of the application can be found on [GitHub](https://github.c
 
 ### More components
 
-Let's separate creating a new task into a component (*components/NewTask.js*).
+Let's separate the form responsible for creating a new task into its own component in the file *components/TaskForm.jsx*:
 
 ```js
-import { useDispatch } from 'react-redux' // highlight-line
-import { createTask } from '../reducers/taskReducer' // highlight-line
+import { useDispatch } from 'react-redux'
+import { createTask } from '../reducers/taskReducer'
 
--const NewTask = () => {
-  const dispatch = useDispatch() // highlight-line
+const TaskForm = () => { // highlight-line
+  const dispatch = useDispatch()
 
   const addTask = (event) => {
     event.preventDefault()
@@ -1228,23 +1306,23 @@ import { createTask } from '../reducers/taskReducer' // highlight-line
   )
 }
 
-export default NewTask
+export default TaskForm
 ```
 
 Unlike in the React code we did without Redux, the event handler for changing the state of the app (which now lives in Redux)
 *has been moved away from the `App` to a child component*.
 The logic for changing the state in Redux is still neatly separated from the whole React part of the application.
 
-We'll also separate the list of tasks and displaying a single task into their own components (both of which will be placed in the *components/Tasks.js* file):
+We'll also separate the list of tasks and displaying a single task into their own components Let's place both in the file *components/Tasks.jsx*:
 
 ```js
-import { useDispatch, useSelector } from 'react-redux' // highlight-line
-import { toggleImportanceOf } from '../reducers/taskReducer' // highlight-line
+import { useDispatch, useSelector } from 'react-redux'
+import { toggleImportanceOf } from '../reducers/taskReducer'
 
 const Task = ({ task, handleClick }) => {
-  return(
+  return (
     <li onClick={handleClick}>
-      {task.content} 
+      {task.content}
       <strong> {task.important ? '- important' : ''}</strong>
     </li>
   )
@@ -1254,17 +1332,15 @@ const Tasks = () => {
   const dispatch = useDispatch() // highlight-line
   const tasks = useSelector(state => state) // highlight-line
 
-  return(
+  return (
     <ul>
       {tasks.map(task =>
         <Task
           key={task.id}
           task={task}
-          handleClick={() => 
-            dispatch(toggleImportanceOf(task.id))
-          }
+          handleClick={() => dispatch(toggleImportanceOf(task.id))}
         />
-      )}
+      ))}
     </ul>
   )
 }
@@ -1274,18 +1350,22 @@ export default Tasks
 
 The logic for changing the importance of a task is now in the component managing the list of tasks.
 
-With this refactoring, there is not much code left in `App`:
+With this refactoring, only a small amount of code remains in *App.jsx*:
 
 ```js
-const App = () => {
+import TaskForm from './components/TaskForm'
+import Tasks from './components/Tasks'
 
+const App = () => {
   return (
     <div>
-      <NewTask />
+      <TaskForm />
       <Tasks />
     </div>
   )
 }
+
+export default App
 ```
 
 `Task`, responsible for rendering a single task, is very simple and is not aware that the event handler it gets as props dispatches an action.
@@ -1321,33 +1401,33 @@ After completing the exercises below, your application should look like this:
 
 ![browser showing jokes and vote buttons](../../images/6/3.png)
 
-#### 6.3: jokes, Step 1
+#### 6.3: Jokes, Step 1
 
 Implement the functionality for voting jokes.
 The number of votes must be saved to a Redux store.
 
-#### 6.4: jokes, Step 2
+#### 6.4: Jokes, Step 2
 
 Implement the functionality for adding new jokes.
 
 You can keep the form uncontrolled like we did [earlier](/part6/flux_architecture_and_redux#uncontrolled-form).
 
-#### 6.5: jokes, Step 3
+#### 6.5: Jokes, Step 3
 
 Make sure that the jokes are ordered by the number of votes.
 
-#### 6.6: jokes, Step 4
+#### 6.6: Jokes, Step 4
 
 If you haven't done so already, separate the creation of action-objects to [*action creator functions*](https://read.reduxbook.com/markdown/part1/04-action-creators.html)
 functions and place them in the *src/reducers/jokeReducer.js* file,
 so do what we have been doing since the chapter [action creators](/part6/flux_architecture_and_redux#action-creators).
 
-#### 6.7: jokes, Step 5
+#### 6.7: Jokes, Step 5
 
 Separate the creation of new jokes into a component called `JokeForm`.
 Move all logic for creating a new joke into this new component.
 
-#### 6.8: jokes, Step 6
+#### 6.8: Jokes, Step 6
 
 Separate the rendering of the list of jokes into a component called `Jokes`.
 Move all logic related to voting for a joke into this new component.

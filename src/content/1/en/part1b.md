@@ -11,8 +11,8 @@ During the course, we have a goal and a need to learn a sufficient amount of Jav
 
 JavaScript has advanced rapidly in the last few years and in this course, we use features from the newer versions.
 The official name of the JavaScript standard is [ECMAScript](https://en.wikipedia.org/wiki/ECMAScript).
-At this moment, the latest version is the one released in June of 2023 with the name
-[ECMAScript®2023](https://tc39.es/ecma262/2023/), otherwise known as ES14.
+At this moment, the latest version is the one released in June of 2024 with the name
+[ECMAScript®2024](https://www.ecma-international.org/ecma-262/), otherwise known as ES15.
 
 Browsers do not yet support all of JavaScript's newest features.
 Due to this fact, a lot of code run in browsers has been *transpiled* from a newer version of JavaScript to an older, more compatible version.
@@ -48,11 +48,11 @@ In JavaScript there are a few ways to go about defining variables:
 const x = 1
 let y = 5
 
-console.log(x, y)   // 1, 5 are printed
+console.log(x, y)   // 1 5 are printed
 y += 10
-console.log(x, y)   // 1, 15 are printed
+console.log(x, y)   // 1 15 are printed
 y = 'sometext'
-console.log(x, y)   // 1, sometext are printed
+console.log(x, y)   // 1 sometext are printed
 x = 4               // causes an error
 ```
 
@@ -64,8 +64,8 @@ In the example above, we also see that the variable's data type can change durin
 At the start, `y` stores an integer; at the end, it stores a string.
 
 It is also possible to define variables in JavaScript using the keyword [`var`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/var).
-`var` was, for a long time, the only way to define variables.
-`const` and `let` were only recently added in version ES6.
+For a long time, `var` was the only way to define variables.
+The keywords `const` and `let` were only recently introduced in 2015 with ES6.
 In specific situations, `var` works differently compared to variable definitions in most languages - see
 [JavaScript Variables - Should You Use let, var or const? on Medium](https://medium.com/craft-academy/javascript-variables-should-you-use-let-var-or-const-394f7645c88f) or
 [Keyword: var vs let on JS Tips](http://www.jstips.co/en/javascript/keyword-var-vs-let/) for more information.
@@ -93,8 +93,9 @@ profits.forEach(value => {
 ```
 
 Notable in this example is the fact that the contents of array `profits` can be modified even though it is defined as a `const`.
-Because *the array `profits` is an object*, it always points to the same object.
+What stays constant is *the address that `profits` refers to*, `profits` always points to the same array.
 However, the content of `profits` changes as new items are added to it.
+Think of this like not being able to change your home address, but still being able to change what your home looks like and what's inside.
 
 One way of iterating through the items of the array is using `forEach` as seen in the example.
 `forEach` receives a **function** defined using the arrow syntax as a parameter.
@@ -158,12 +159,12 @@ const ratings = [1, 2, 3, 4, 5]
 
 const [first, second, ...rest] = ratings
 
-console.log(first, second)  // 1, 2 is printed
+console.log(first, second)  // 1 2 is printed
 console.log(rest)          // [3, 4, 5] is printed
 ```
 
-Thanks to the assignment, the variables `first` and `second` will receive the first two integers of the array as their values.
-The remaining integers are *collected into an array of their own* which is then assigned to the variable `rest`.
+In the code above, `first` and `second` will receive the first two integers of the array as their values.
+The variable `rest` contains the remaining integers in its own array.
 
 ### Objects
 
@@ -221,7 +222,7 @@ This is why they are only discussed briefly during the course.
 
 Objects can also be defined using so-called constructor functions, which results in a mechanism reminiscent of many other programming languages, e.g. Java's classes.
 Despite this similarity, JavaScript does not have classes in the same sense as object-oriented programming languages.
-There has been, however, an addition of the *class syntax* starting from version ES6, which in some cases helps structure object-oriented classes.
+There has been, however, the addition of the *class syntax* starting from version ES6, which in some cases helps structure object-oriented classes.
 
 ### Functions
 
@@ -268,14 +269,14 @@ const ratingsSquared = ratings.map(r => r * r)
 // ratingsSquared is now [1, 4, 9]
 ```
 
-The arrow function feature was added to JavaScript only a couple of years ago, with version [ES6](http://es6-features.org/).
+The arrow function feature was added to JavaScript only a couple of years ago, with version [ES6](https://rse.github.io/es6-features//).
 Before this, the only way to define functions was by using the keyword `function`.
 
 There are two ways to reference the function via the old way.
 
-|[function declaration](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/function)|[function expression](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/function)|
+| [function declaration](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/function) | [function expression](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/function) |
 | :--- | :--- |
-|<pre>function subtract(a, b) {<br/>  return a - b<br/>}<br/><br/>const result = subtract(6, 2)<br>// result is now 4|<pre>const subtract = function(a, b) {<br/>  return a - b<br/>}<br/><br/>const result = subtract(6, 2)<br>// result is now 4|
+| <pre>function subtract(a, b) {<br/>  return a - b<br/>}<br/><br/>const result = subtract(6, 2)<br>// result is now 4 | <pre>const subtract = function(a, b) {<br/>  return a - b<br/>}<br/><br/>const result = subtract(6, 2)<br>// result is now 4 |
 
 In the function expression case, there is no need to give the function a name and the definition may reside among the rest of the code:
 
@@ -301,16 +302,16 @@ You can write the code into the same project since you have been committing your
 > **Pro-tips:**
 >
 > 1. If and *when* you encounter an error message
-> *`Objects are not valid as a React child`*, keep in mind the things told [here](/part1/introduction_to_react#do-not-render-objects).
+> *`Objects are not valid as a React child`*, keep in mind [the things told here](/part1/introduction_to_react#do-not-render-objects).
 > 2. You may run into issues when it comes to the structure of the `props` that components receive.
 > A good way to make things clearer is by printing the props to the console, e.g. as follows:
 >>
->>  ```js
->>  const Header = (props) => {
->>    console.log(props) // highlight-line
->>    return <h1>{props.course}</h1>
->>  }
->>  ```
+>> ```js
+>> const Header = (props) => {
+>>   console.log(props) // highlight-line
+>>   return <h1>{props.course}</h1>
+>> }
+>> ```
 
 Also remember to keep using the empty commits from the previous exercises to mark when you have finished an exercise:
 
@@ -318,7 +319,7 @@ Also remember to keep using the empty commits from the previous exercises to mar
 git commit --allow-empty -m "Completed Exercise #.##"
 ```
 
-#### 1.3: handheld arcade info Step 3
+#### 1.3: Handheld arcade info, Step 3
 
 Let's move forward to integrate objects into our existing application.
 Modify the variable definitions of the `App` component as follows and also refactor the application so that it still works with the components we made earlier
@@ -348,9 +349,9 @@ const App = () => {
 }
 ```
 
-#### 1.4: handheld arcade info Step 4
+#### 1.4: Handheld arcade info, Step 4
 
-And then place the objects into an array.
+Place the objects into an array.
 Modify the variable definitions of `App` into the following form and modify the other parts of the application accordingly:
 
 ```js
@@ -399,7 +400,7 @@ const App = () => {
 }
 ```
 
-#### 1.5: handheld arcade info Step 5
+#### 1.5: Handheld arcade info, Step 5
 
 Let's take the changes one step further.
 Change the company and its handhelds into a single JavaScript object.
@@ -604,10 +605,10 @@ const osvaldo = new Fan('Too Hard to Pronounce', 'Roots')
 osvaldo.cheer()
 ```
 
-When it comes to syntax, the classes and the objects created from them are very reminiscent of Java classes and objects.
+When it comes to syntax, JavaScript classes and the instances created from them are very reminiscent of how classes and objects work in Java.
 Their behavior is also quite similar to Java objects.
-At the core, they are still objects based on JavaScript's [prototypal inheritance](https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Objects/Inheritance).
-Both objects are explicitly of the type `Object`, since JavaScript essentially only defines the types
+At their core, however, they are still plain Javascript objects built on [prototypal inheritance](https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Objects/Inheritance).
+The type of any such class instance is still `Object`, because JavaScript fundamentally defines only a limited set of types:
 [Boolean, Null, Undefined, Number, String, Symbol, BigInt, and Object](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures).
 
 The introduction of the class syntax was a controversial addition.
@@ -615,7 +616,7 @@ Check out [Not Awesome: ES6 Classes](https://github.com/petsel/not-awesome-es6-c
 or [Is “Class” In ES6 The New “Bad” Part? on Medium](https://medium.com/@rajaraodv/is-class-in-es6-the-new-bad-part-6c4e6fe1ee65) for more details.
 
 The ES6 class syntax is used a lot in "old" React and also in Node.js, hence an understanding of it is beneficial even in this course.
-However, since we are using the new [Hooks](https://react.dev/reference/react) feature of React throughout this course,
+However, since we are using the new [Hooks](https://react.dev/reference/react/hooks) feature of React throughout this course,
 we have no concrete use for JavaScript's class syntax.
 
 ### JavaScript materials
@@ -623,9 +624,8 @@ we have no concrete use for JavaScript's class syntax.
 There exist both good and poor guides for JavaScript on the Internet.
 Most of the links on this page relating to JavaScript features reference [Mozilla's JavaScript Guide](https://developer.mozilla.org/en-US/docs/Web/JavaScript).
 
-It is highly recommended to immediately read
-[A Re-introduction to JavaScript (JS tutorial)](https://developer.mozilla.org/en-US/docs/Web/JavaScript/A_re-introduction_to_JavaScript)
-on Mozilla's website.
+It is highly recommended to immediately read Mozilla's
+[JavaScript language overview](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Language_overview).
 
 If you wish to get to know JavaScript deeply there is a great free book series on the Internet called [You-Dont-Know-JS](https://github.com/getify/You-Dont-Know-JS).
 

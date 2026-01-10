@@ -1,0 +1,11 @@
+src/content/*/fr/** merge=ours
+src/content/*/es/** merge=ours
+src/content/*/fi/** merge=ours
+src/content/*/ptbr/** merge=ours
+src/content/*/zh/** merge=ours
+src/content/8/** merge=ours
+src/content/10/** merge=ours
+src/content/11/** merge=ours
+src/content/12/** merge=ours
+src/content/13/** merge=ours
+

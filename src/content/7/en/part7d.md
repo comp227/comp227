@@ -78,7 +78,7 @@ the bundled JavaScript file will also contain the contents of each of these libr
 
 #### Creating a webpack configuration
 
-Next, we will create a suitable webpack configuration for a React application by hand from scratch.
+Next, we will create a webpack configuration by hand, suitable for a new React application.
 
 Let's ***create a new project*** with the following subdirectories (*build* and *src*) and files:
 
@@ -232,7 +232,7 @@ The [*`entry`*](https://webpack.js.org/concepts/#entry) property of the configur
 The [*`output`*](https://webpack.js.org/concepts/#output) property defines the location where the bundled code will be stored.
 The target directory must be defined as an ***absolute path***,
 which is easy to create with the [**`path.resolve`**](https://nodejs.org/docs/latest-v8.x/api/path.html#path_path_resolve_paths) method.
-We also use [**`__dirname`**](https://nodejs.org/docs/latest/api/globals.html#globals_dirname)
+We also use [**`__dirname`**](https://nodejs.org/docs/latest/api/modules.html#__dirname)
 which is a global variable in Node that stores the path to the current directory.
 
 ### Bundling React
@@ -271,7 +271,7 @@ export default App
 ```
 
 We also need the *build/index.html* file.
-This file will serve as the "main page" of our application that will load our bundled JavaScript code with a *`script`* tag:
+This file will serve as the "main page" of our application, which will load our bundled JavaScript code with a *`script`* tag:
 
 ```html
 <!DOCTYPE html>
@@ -397,7 +397,7 @@ that is [core-js](https://www.npmjs.com/package/core-js) and [regenerator-runtim
 npm i core-js regenerator-runtime
 ```
 
-You need to import those dependencies at the top of the *index.js* file:
+You need to import these dependencies at the top of the *index.js* file:
 
 ```js
 import 'core-js/stable/index.js'
@@ -418,10 +418,10 @@ which is currently the most popular tool for the job.
 As mentioned in part 1, most browsers do not support the latest features that were introduced in ES6 and ES7,
 and for this reason, the code is usually transpiled to a version of JavaScript that implements the ES5 standard.
 
-The transpilation process that is executed by Babel is defined with **plugins**.
+The transpilation process that is executed by Babel is defined with [**plugins**](https://babeljs.io/docs/plugins/).
 In practice, most developers use ready-made [presets](https://babeljs.io/docs/plugins/) that are groups of pre-configured plugins.
 
-Currently, we are using the [@babel/preset-react](https://babeljs.io/docs/plugins/preset-react/) preset for transpiling the source code of our application:
+Currently, we are using the [@babel/preset-react](https://babeljs.io/docs/babel-preset-react/) preset for transpiling the source code of our application:
 
 ```js
 {
@@ -433,7 +433,7 @@ Currently, we are using the [@babel/preset-react](https://babeljs.io/docs/plugin
 }
 ```
 
-Let's add the [@babel/preset-env](https://babeljs.io/docs/plugins/preset-env/)
+Let's add the [@babel/preset-env](https://babeljs.io/docs/babel-preset-env/)
 plugin that contains everything needed to take code using all of the latest features
 and transpile it to code that is compatible with the ES5 standard:
 
@@ -526,9 +526,9 @@ and the job of the [*style loader*](https://webpack.js.org/loaders/style-loader/
 is to generate and inject a *`style`* element that contains all of the styles of the application.
 
 With this configuration, the *CSS definitions are included in the **main.js** file of the application*.
-For this reason, there is no need to separately import the *CSS* styles in the main *index.html* file of the application.
+For this reason, there is no need to separately import the *CSS* styles in the main *index.html* file.
 
-If needed, the application's CSS can also be generated into its own separate file
+If needed, the application's CSS can also be generated into its own separate file,
 by using the [mini-css-extract-plugin](https://github.com/webpack-contrib/mini-css-extract-plugin).
 
 Once we install the loaders:
@@ -542,7 +542,7 @@ The bundling will succeed again and the application gets new styles.
 ### Webpack-dev-server
 
 The current configuration makes it possible to develop our application but the workflow is bad (so bad it almost resembles the development workflow of Java).
-*Every time we make a change to the code, we have to bundle it and refresh the browser to test the code* 🤦.
+*Every time we make a change to the code, we have to bundle it and refresh the browser to test it* 🤦.
 
 The [webpack-dev-server](https://webpack.js.org/guides/development/#using-webpack-dev-server) offers a solution to our problems.
 Let's install it with the command:
@@ -663,7 +663,7 @@ If we click the error message, we notice that the displayed source code does not
 
 We prefer to see our actual source code instead.
 
-Luckily, fixing the error message in this respect is quite easy.
+Luckily, fixing this error message is quite easy.
 We will ask webpack to generate a so-called [**source map**](https://webpack.js.org/configuration/devtool/) for the bundle,
 which makes it possible to ***map errors** that occur during the execution of the bundle to the corresponding part in the original source code*.
 
@@ -685,7 +685,7 @@ const config = {
 ```
 
 Webpack has to be restarted when we make changes to its configuration.
-It is also possible to make webpack watch for changes made to itself but we will not do that this time.
+It is also possible to make webpack watch for changes made to itself, but we will not do that this time.
 
 The error message is now a lot better
 
@@ -723,7 +723,7 @@ If we inspect the contents of the bundle file, we notice that it could be greatl
 There's no point in manually optimizing these files, as there are many existing tools for the job.
 
 The optimization process for JavaScript files is called **minification**.
-One of the leading tools intended for this purpose is [UglifyJS](http://lisperator.net/uglifyjs/).
+One of the leading tools intended for this purpose is [UglifyJS](https://github.com/mishoo/UglifyJS).
 
 Starting from version 4 of webpack, the minification plugin does not require additional configuration to be used.
 It is enough to modify the npm script in the *package.json* file to specify that webpack will execute the bundling of the code in **production** mode:
@@ -732,7 +732,7 @@ It is enough to modify the npm script in the *package.json* file to specify that
 {
   "name": "webpack-part7",
   "version": "0.0.1",
-  "description": "practising webpack",
+  "description": "practicing webpack",
   "scripts": {
     "build": "webpack --mode=production", // highlight-line
     "start": "webpack serve --mode=development"
@@ -977,7 +977,7 @@ if (!window.Promise) {
 If the global `Promise` object does not exist, meaning that the browser does not support Promises, the polyfilled Promise is stored in the global variable.
 If the polyfilled Promise is implemented well enough, the rest of the code should work without issues.
 
-One exhaustive list of existing polyfills can be found [here](https://github.com/Modernizr/Modernizr/wiki/HTML5-Cross-browser-Polyfills).
+Here is [one exhaustive list of existing polyfills](https://github.com/Modernizr/Modernizr/wiki/HTML5-Cross-browser-Polyfills).
 
 The browser compatibility of different APIs can be checked by visiting <https://caniuse.com> or [Mozilla's website](https://developer.mozilla.org/en-US/).
 

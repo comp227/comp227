@@ -19,7 +19,7 @@ which will probably never be completely rewritten using the updated syntax.
 
 Let's get to know the main features of Class Components by producing yet another very familiar joke application.
 We store the jokes in the file *db.json* using *json-server*.
-The contents of the file are lifted from [here](https://github.com/comp227/misc/blob/main/jokes.json).
+The contents of the file are lifted [from here](https://github.com/comp227/misc/blob/main/jokes.json).
 
 The initial version of the Class Component looks like this
 
@@ -321,13 +321,13 @@ In small applications, data handled by the application is stored in the state of
 the state of the components can be thought of as **models** of an MVC architecture.
 
 However, MVC architecture is not usually mentioned when talking about React applications.
-Furthermore, if we are using Redux, then our applications follow the [Flux](https://facebook.github.io/flux/docs/in-depth-overview) architecture
+Furthermore, if we are using Redux, then our applications follow the [Flux](https://facebookarchive.github.io/flux/docs/in-depth-overview) architecture
 and the role of React is even more focused on creating the views.
 The business logic of the application is handled using the Redux state and its action creators.
 If we're using [Redux Thunk](/part6/communicating_with_a_server_in_a_redux_application#asynchronous-actions-and-redux-thunk) familiar from part 6,
 then the business logic can be almost completely separated from the React code.
 
-Because both React and [Flux](https://facebook.github.io/flux/docs/in-depth-overview) were created at Facebook,
+Because both React and [Flux](https://facebookarchive.github.io/flux/docs/in-depth-overview) were created at Facebook,
 one could say that using React only as a UI library is the intended use case, with Flux taking care of the logic.
 
 > Keep in mind that the Flux architecture adds some overhead to the application.
@@ -349,7 +349,7 @@ We will, however, take a look now at some security topics that relate to COMP 22
 
 The Open Web Application Security Project, otherwise known as [OWASP](https://www.owasp.org),
 publishes an annual list of the most common security risks in Web applications.
-The most recent list can be found [here](https://owasp.org/www-project-top-ten/).
+Here's the [most recent list](https://owasp.org/Top10/).
 The same risks can be found from one year to another.
 Let's review a couple of these threats.
 
@@ -362,7 +362,7 @@ The most famous type of injection is probably [SQL injection](https://bobby-tabl
 ![xkcd bobby tables comic](https://imgs.xkcd.com/comics/exploits_of_a_mom.png)
 *From [xkcd](https://xkcd.com/327/)*
 
-In case you haven't seen many of the (great explanations out there) [https://www.explainxkcd.com/wiki/index.php/Little_Bobby_Tables],
+In case you haven't seen many of the [great explanations out there](https://www.explainxkcd.com/wiki/index.php/Little_Bobby_Tables),
 let's review.
 Imagine you have some form and you have this query for searching users.
 
@@ -392,7 +392,7 @@ execute("SELECT * FROM Users WHERE name = ?", [userName])
 
 Injection attacks are also possible in NoSQL databases.
 However, mongoose helps by [sanitizing](https://zanon.io/posts/nosql-injection-in-mongodb) the queries.
-More on the topic can be found e.g. [here](https://blog.websecurify.com/2014/08/hacking-nodejs-and-mongodb).
+Here's [more on the topic](https://blog.websecurify.com/2014/08/hacking-nodejs-and-mongodb).
 
 #### Security Threat - XSS
 
@@ -410,7 +410,7 @@ the code is not executed, but is only rendered as 'text' on the page:
 
 ![browser showing tasks with XSS attempt](../../images/7/32e.png)
 
-since React [takes care of sanitizing data in variables](https://reactjs.org/docs/introducing-jsx.html#jsx-prevents-injection-attacks).
+since React [takes care of sanitizing data in variables](https://legacy.reactjs.org/docs/introducing-jsx.html#jsx-prevents-injection-attacks).
 Some versions of React [have been vulnerable](https://medium.com/dailyjs/exploiting-script-injection-flaws-in-reactjs-883fb1fe36c1) to XSS attacks.
 The security holes have of course been patched, but there is no guarantee that there couldn't be anymore.
 
@@ -418,7 +418,7 @@ One needs to remain vigilant when using libraries; if there are security updates
 I would also recommend that you continue updating node.
 While we did not start that here, this is a good reason for using nvm, since we can more easily make the switch.
 Security updates for Express are found in the [library's documentation](https://expressjs.com/en/advanced/security-updates.html)
-and the ones for Node are found in [this blog](https://nodejs.org/en/blog/).
+and the ones for Node are found in [this blog](https://nodejs.org/en/blog/vulnerability/).
 
 You can check how up-to-date your dependencies are using the command
 
@@ -723,13 +723,9 @@ If you have complex forms in your apps, have a look at whether [React Hook Form]
 If your application displays graphs, there are multiple options to choose from.
 Both [recharts](http://recharts.org/en-US/) and [highcharts](https://github.com/highcharts/highcharts-react) are well-recommended.
 
-The [Immer](https://github.com/mweststrate/immer) provides immutable implementations of some data structures.
-The library could be of use when using Redux, since as we [remember](/part6/flux_architecture_and_redux#pure-functions-immutable) in part 6,
-reducers must be pure functions, meaning they must not modify the store's state but instead have to replace it with a new one when a change occurs.
-
 The [Immer](https://github.com/mweststrate/immer) library provides immutable implementations of some data structures.
 The library could be of use when using Redux,
-since as we [remember](/part6/flux_architecture_and_redux#pure-functions-immutable) in part 6,
+since as we [remember](/part6/flux_architecture_and_redux#pure-functions-immutable) from part 6,
 reducers must be pure functions, meaning they must not modify the store's state but instead have to replace it with a new one when a change occurs.
 
 [Redux-saga](https://redux-saga.js.org/) provides an alternative way to make asynchronous actions for
@@ -738,9 +734,9 @@ Some embrace the hype and like it.
 I'm meh.
 
 For single-page applications, the gathering of analytics data on the interaction between the users and the page is
-[more challenging](https://developers.google.com/analytics/devguides/collection/gtagjs/single-page-applications)
+[more challenging](https://developers.google.com/analytics/devguides/collection/ga4/single-page-applications?implementation=browser-history)
 than for traditional web applications where the entire page is loaded.
-The [React Google Analytics](https://github.com/react-ga/react-ga) library offers a solution.
+The [React Google Analytics 4](https://github.com/codler/react-ga4) library offers a solution.
 
 You can take advantage of your React know-how when developing mobile applications using Facebook's extremely popular
 [React Native](https://facebook.github.io/react-native/) library, which is the topic of [part 9](/part9) of the course.
@@ -752,12 +748,13 @@ Best practices have changed rapidly (the years are approximations):
 - 2012 [Grunt](https://www.npmjs.com/package/grunt)
 - 2013-14 [Gulp](https://www.npmjs.com/package/gulp)
 - 2012-14 [Browserify](https://www.npmjs.com/package/browserify)
-- 2015- [Webpack](https://www.npmjs.com/package/webpack)
-- 2017- [esbuild](https://www.npmjs.com/package/esbuild)
+- 2015-2023 [Webpack](https://www.npmjs.com/package/webpack)
+- 2023- [esbuild](https://esbuild.github.io/)
 
 Hipsters seem to have lost their interest in tool development after webpack started to dominate the markets.
 A few years ago, [Parcel](https://parceljs.org) started to make the rounds marketing itself as simple (which Webpack is not) and faster than Webpack.
 However, after a promising start, Parcel has not gathered any steam.
+But recently, [esbuild](https://esbuild.github.io/) has been trending and is starting to replace Webpack.
 
 Recently, [esbuild](https://esbuild.github.io/) has been on a relatively high rise and is already seriously challenging Webpack.
 Nonetheless for now, Webpack remains popular.

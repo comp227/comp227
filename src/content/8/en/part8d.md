@@ -83,9 +83,6 @@ Everything else should be more or less fine.
 In our previous project, we used ESlint to help us enforce a coding style, and we'll do the same with this app.
 We do not need to install any dependencies, since Vite has taken care of that already.
 
-In our previous project, we used ESlint to help us enforce a coding style, and we'll do the same with this app.
-We do not need to install any dependencies, since Vite has taken care of that already.
-
 When we look at the *main.tsx* file that Vite has generated, it looks familiar but there is a small but remarkable difference.
 There is an exclamation mark after the statement `document.getElementById('root')`:
 
@@ -190,7 +187,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
 
 <div class="tasks">
 
-### Exercise 8.14
+### Exercise 8.15
 
 Create a new Vite App with TypeScript.
 
@@ -406,7 +403,7 @@ const App = () => {
 Notice that we have now added the attribute `category` with a proper value to each element of the array.
 
 Our editor will automatically warn us if we use the wrong type for an attribute, use an extra attribute, or forget to set an expected attribute.
-If we eg. try to add the following to the array
+If we e.g. try to add the following to the array
 
 ```js
 {
@@ -549,11 +546,11 @@ This tells us that something needs to be fixed.
 
 <div class="tasks">
 
-### Exercise 8.15
+### Exercise 8.16
 
-#### 8.15
+#### 8.16
 
-Let us now continue extending the app created in exercise 8.14.
+Let us now continue extending the app created in exercise 8.15.
 First, add the type information and replace the variable `companyHandhelds` with the one from the example below.
 
 ```js
@@ -701,11 +698,11 @@ So with the line `const [newTask, setNewTask] = useState('');`,
 we can deduce that `newTask` is a `string` since that is what `useState` returns.
 The second element that we assigned `setNewTask` has a slightly more complex type: `React.Dispatch<React.SetStateAction<string>>`.
 We notice that there is a `string` mentioned there, so we know that it must be the type of a function that sets a valued data.
-See [here](https://codewithstyle.info/Using-React-useState-hook-with-TypeScript/) if you want to learn more about `useState`'s types.
+[See here](https://codewithstyle.info/Using-React-useState-hook-with-TypeScript/) if you want to learn more about `useState`'s types.
 
-From this all we see that TypeScript has indeed
+From all this we see that TypeScript has indeed
 [inferred](https://www.typescriptlang.org/docs/handbook/type-inference.html#handbook-content)
-the type of the first `useState` quite right, it is creating a state with type `string`.
+the type of the first `useState` correctly, it is creating a state with type `string`.
 
 When we look at the second line, `const [tasks, setTasks] = useState([]);`, the type looks quite different
 
@@ -714,19 +711,19 @@ useState<never[]>(initialState: never[] | (() => never[])):
   [never[], React.Dispatch<React.SetStateAction<never[]>>] 
 ```
 
-*TypeScript can just infer that the state has type `never[]`*, it is an array but it ***has no clue what are the elements stored to array***,
+*TypeScript can just infer that the state has type `never[]`*, it is an array but it ***has no clue what the elements stored in the array are***,
 so we clearly need to help the compiler and provide the type explicitly.
 
 One of the best sources for information about typing React is the [React TypeScript Cheatsheet](https://react-typescript-cheatsheet.netlify.app/).
 
 The chapter about [useState](https://react-typescript-cheatsheet.netlify.app/docs/basic/getting-started/hooks#usestate) hook
-instructs to use a **type parameter** in situations where the compiler can not infer the type.
+instructs us to use a **type parameter** in situations where the compiler can not infer the type.
 
 Let us now define a type for `tasks`:
 
 ```js
 interface Task {
-  id: number,
+  id: string,
   content: string
 }
 ```
@@ -783,7 +780,7 @@ The next task is to add a form that makes it possible to create new tasks:
 ```js
 const App = () => {
   const [tasks, setTasks] = useState<Task[]>([
-    { id: 1, content: 'testing' }
+    { id: '1', content: 'testing' }
   ]);
   const [newTask, setNewTask] = useState('');
 
@@ -846,16 +843,16 @@ It does not quite work, there is an Eslint error complaining about implicit any:
 
 ![vscode error event implicitly has any type](../../images/8/68new.png)
 
-TypeScript compiler has now no clue what is the type of the parameter,
-so that is why the type is the infamous implicit any that we want to [avoid](/part8/first_steps_with_type_script#the-horrors-of-any) at all costs.
-The React TypeScript cheatsheet comes again to rescue, the chapter about
+TypeScript compiler now has no clue what the type of the parameter is.
+This is why the type is the infamous implicit `any` that we want to [avoid](/part8/first_steps_with_type_script#the-horrors-of-any) at all costs.
+The React TypeScript cheatsheet comes to the rescue again, the chapter about
 [forms and events](https://react-typescript-cheatsheet.netlify.app/docs/basic/getting-started/forms_and_events) reveals that the right type of event handler is `React.SyntheticEvent`.
 
 The code becomes
 
 ```js
 interface Task {
-  id: number,
+  id: string,
   content: string
 }
 
@@ -868,7 +865,7 @@ const App = () => {
     event.preventDefault();
     const taskToAdd = {
       content: newTask,
-      id: tasks.length + 1
+      id: String(tasks.length + 1)
     }
     setTasks(tasks.concat(taskToAdd));
 
@@ -945,7 +942,7 @@ With the correct type, we can call `setTasks` to get the code working:
 ```
 
 So just like with `useState`, we gave a *type parameter* to `axios.get` to instruct it how the typing should be done.
-Like `useState`, **`axios.get`** is a [generic function](https://www.typescriptlang.org/docs/handbook/2/generics.html#working-with-generic-type-variables).
+Like `useState`, **`axios.get`** is also a [**generic function**](https://www.typescriptlang.org/docs/handbook/2/generics.html#working-with-generic-type-variables).
 Unlike some generic functions, the type parameter of `axios.get` has a default value `any`.
 *If the function is used without defining the type parameter, the type of the response data would be `any`*.
 
@@ -953,7 +950,7 @@ The code works, and we see no large errors from eslint or the compiler.
 However, ***giving a type parameter to `axios.get` is potentially dangerous***.
 The *request body can be **anything***, and when giving a type parameter we are essentially just telling to TypeScript compiler to trust us that the data has type `Task[]`.
 
-So our code is essentially as safe as it would be if a [type assertion](/part8/first_steps_with_type_script#type-assertion) were used:
+So our code is essentially as safe as it would be if a [type assertion](/part8/first_steps_with_type_script#type-assertion) were used (not good):
 
 ```js
   useEffect(() => {
@@ -967,8 +964,8 @@ So our code is essentially as safe as it would be if a [type assertion](/part8/f
 Since the TypeScript types do not even exist in runtime, **our code does not *safeguard* against malformed data** from the request body.
 
 Type casting `axios.get` might be ok if we are *absolutely sure* that the backend behaves correctly and always sends the right data.
-If we want to build a robust system, we should prepare for surprises and parse the response data in the frontend
-similarly to what we did [in the previous section](/part8/typing_an_express_app#proofing-requests) for the requests to the backend.
+If we want to build a robust system, we should prepare for surprises and parse the response data
+(similar to what we did [in the previous section](/part8/typing_an_express_app#proofing-requests) for the requests to the backend).
 
 Let's finish our app's functionality by integrating axios into our task creation:
 
@@ -994,7 +991,7 @@ Let's move some type definitions into a new file named *types.ts*:
 
 ```js
 export interface Task {
-  id: number,
+  id: string,
   content: string
 }
 
@@ -1063,7 +1060,7 @@ const App = () => {
 
 The app is now nicely typed and ready for further development!
 
-The code of the typed tasks can be found [here](https://github.com/comp227/typescript-tasks).
+The code of the typed tasks can be [found here](https://github.com/comp227/typescript-tasks).
 
 ### About defining object types
 
@@ -1114,12 +1111,12 @@ TypeScript documentation [recommends using interfaces](https://www.typescriptlan
 
 <div class="tasks">
 
-### Exercises 8.16-8.19
+### Exercises 8.17-8.20
 
 Let us now build a frontend for the Tails' flight diaries that was developed in [the previous section](/part8/typing_an_express_app).
 The source code of the backend can be found in [this GitHub repository](https://github.com/comp227/flight-diary).
 
-#### Exercise 8.16
+#### Exercise 8.17
 
 Create a TypeScript React app with similar configurations as the apps of this section.
 Fetch the diaries from the backend and render those to screen.
@@ -1132,12 +1129,12 @@ You can decide how the diary entries are rendered.
 If you wish, you may take inspiration from the figure below.
 Notice that the backend API does not return the diary comments, you may modify it to return those on a GET request.
 
-#### Exercise 8.17
+#### Exercise 8.18
 
 Make it possible to add new diary entries from the frontend.
 In this exercise you may skip all validations and assume that the user just enters the data in a correct form.
 
-#### Exercise 8.18
+#### Exercise 8.19
 
 Notify the user if the the creation of a diary entry fails in the backend.
 Make sure to also show the reason for the failure.
@@ -1148,7 +1145,7 @@ Your solution may look like this:
 
 ![browser showing error incorrect visibility best ever](../../images/8/71new.png)
 
-#### Exercise 8.19
+#### Exercise 8.20
 
 The addition of a diary entry is now very error prone since the user can type anything to the input fields.
 We must improve this situation.

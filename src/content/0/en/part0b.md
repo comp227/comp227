@@ -45,9 +45,9 @@ Other parts do not have asterisk-marked exercises since there is no similar depe
 
 While there is no late penalty for not completing exercises for a given assignment,
 there is a cap on how many exercises you can submit in a given week.
-You are not superhuman, as such, you can only submit 110% of the exercise workload for any given week.
+You are not superhuman, as such, you can only submit 110% of your average exercise workload for any given week.
 This means that if you fall behind, while you will not be penalized for being late,
-it will impact how much you will be able to submit and learn, and thus will ultimately impact your grade.
+you'll need to address what you have learned in your assessments and meetings with me.
 This is also done to encourage the idea of regular and consistent work throughout the semester, instead of **cramming**,
 which leads to not paying attention to the work as you move forward.
 
@@ -59,7 +59,7 @@ How to study the course – instructions in a nutshell:
   You'll need to show your work on the exercises.  The exercises are submitted through GitHub and marking them as done on Canvas.
 - You need to work regularly.
   The easiest way to fall behind in the course is to not work on it every couple of days.
-  Set yourself an alarm...do anything! But make it a habit of working on it at least 3 times a week for a little bit of time.
+  Set yourself an alarm...do anything! But make it a habit of working on it at least 2 times a week outside of class for a little bit of time.
 
 ### How to ask for help in Discord
 
@@ -89,7 +89,7 @@ A better question would be:
 >
 > *The network tab looks like the following*
 >
-> [screen shot from the network or console]
+> `[screen shot from the network or console]`
 
 If you are asking the teaching staff directly for help, then please also include a link to your GitHub repo, however, this should not be shared with your classmates.
 Notice the details in the second response and a plan of action for what you've tried.

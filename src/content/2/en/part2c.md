@@ -19,19 +19,19 @@ Create a file named *db.json* in the root directory of our *reading* project wit
 {
   "tasks": [
     {
-      "id": 1,
+      "id": "1",
       "content": "Wash the dishes",
       "date": "2022-1-17T17:30:31.098Z",
       "important": true
     },
     {
-      "id": 2,
+      "id": "2",
       "content": "Take out the trash",
       "date": "2022-1-17T18:39:34.091Z",
       "important": false
     },
     {
-      "id": 3,
+      "id": "3",
       "content": "Buy salty snacks",
       "date": "2022-1-17T19:20:14.298Z",
       "important": true
@@ -40,36 +40,20 @@ Create a file named *db.json* in the root directory of our *reading* project wit
 }
 ```
 
-You can run a JSON server in two ways.
-
-One way is to [install](https://github.com/typicode/json-server#getting-started) a JSON server globally on your machine using the command `npm i -g json-server`.
-A global installation requires administrative privileges, which means that it is not possible on school computers.
-
-After installing run the following command to run the json-server.
-The *json-server* starts running on port *`3000`* by default;
-The `--watch` option automatically looks for any saved changes to *db.json*.
-Nonetheless, we will now define an alternate port *`3001`* for the json-server.
-  
-```js
-json-server --port 3001 --watch db.json
-```
-
-> **Pertinent:** If you get a security prompt from your firewall, make sure you allow access to port 3001.
-
-Another way to run a JSON server *does not require a global installation*.
-From the root directory of your app, we can run the *json-server* using the command `npx`:
+You can start a JSON Server without a separate installation by running the following *`npx`* command from the root directory of your app:
 
 ```js
-npx json-server --port 3001 --watch db.json
+npx json-server --port 3001 db.json
 ```
 
+While the JSON Server runs on port 3000 by default, in the command above we specified an alternate port of 3001.
 Let's navigate to the address <http://localhost:3001/tasks> in the browser.
 We can see that *json-server* serves the tasks we previously wrote to the file in JSON format:
 
-![json data of tasks](../../images/2/14e.png)
+![json data of tasks in browser at localhost:3001/tasks](../../images/2/14e.png)
 
 > **Pertinent:** If your browser doesn't display the data as nicely as you see above, install an appropriate plugin,
-like [JSONVue](https://chrome.google.com/webstore/detail/jsonview/chklaanhfefbnpoihckbnefhakgolnmc) to make your life easier.
+like [JSONView](https://chromewebstore.google.com/detail/gmegofmjomhknnokphhckolhcffdaihd) to make your life easier.
 
 Going forward, we will want to save the tasks ***to the server***, which in this case means saving them to the json-server.
 We also want the React code to fetch the tasks from the server and render them to the screen.
@@ -195,9 +179,9 @@ It is standardized and supported by all modern browsers (excluding IE).
 
 That being said, we will be using the [*axios*](https://github.com/axios/axios) library instead for communication between the browser and server.
 It functions like `fetch` but is somewhat more pleasant to use.
-Another good reason to use axios is to familiarize ourselves with adding external libraries, so-called *npm packages*, to React projects.
+Another good reason to use axios is to familiarize ourselves with adding external libraries, or *npm packages*, to React projects.
 
-Nowadays, practically all JavaScript projects are defined using the node package manager, aka [***npm***](https://docs.npmjs.com/getting-started/what-is-npm).
+Nowadays, practically all JavaScript projects are defined using the node package manager, aka [***npm***](https://docs.npmjs.com/about-npm).
 The projects created using Vite also follow the npm format.
 A clear indicator that a project uses npm is the *package.json* file located at the root of the project:
 
@@ -210,22 +194,24 @@ A clear indicator that a project uses npm is the *package.json* file located at 
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
+    "lint": "eslint .",
     "preview": "vite preview"
   },
   "dependencies": {
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react": "^22.21.1",
+    "react-dom": "^22.21.1"
   },
   "devDependencies": {
-    "@types/react": "^18.2.43",
-    "@types/react-dom": "^18.2.17",
-    "@vitejs/plugin-react": "^4.2.1",
-    "eslint": "^8.55.0",
-    "eslint-plugin-react": "^7.33.2",
-    "eslint-plugin-react-hooks": "^4.6.0",
-    "eslint-plugin-react-refresh": "^0.4.5",
-    "vite": "^5.0.8"
+    "@eslint/js": "^9.17.0",
+    "@types/react": "^22.21.18",
+    "@types/react-dom": "^22.21.5",
+    "@vitejs/plugin-react": "^4.3.4",
+    "eslint": "^9.17.0",
+    "eslint-plugin-react": "^7.37.2",
+    "eslint-plugin-react-hooks": "^5.0.0",
+    "eslint-plugin-react-refresh": "^0.4.16",
+    "globals": "^15.14.0",
+    "vite": "^6.0.5"
   }
 }
 ```
@@ -257,13 +243,13 @@ Axios is now included among the other dependencies:
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
+    "lint": "eslint .",
     "preview": "vite preview"
   },
   "dependencies": {
-    "axios": "^1.6.5", // highlight-line
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "axios": "^1.7.9", // highlight-line
+    "react": "^22.21.1",
+    "react-dom": "^22.21.1"
   },
   // ...
 }
@@ -291,9 +277,9 @@ and making a small addition to the *scripts* part of the *package.json* file:
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
+    "lint": "eslint .",
     "preview": "vite preview",
-    "server": "json-server -p3001 --watch db.json" // highlight-line
+    "server": "json-server -p 3001 db.json" // highlight-line
   },
 }
 ```
@@ -341,7 +327,7 @@ Going forward, we will assume that *json-server* is running on port 3001.
 > One to keep *json-server* running and the other to run vite.
 > Normally I have a third terminal window open as well to work with *git* to push changes and amend commits.
 
-The library can be brought into use the same way other libraries, e.g. React, are, i.e., by using an appropriate `import` statement.
+The library can be brought in to be used the same way as other libraries can: by using an appropriate `import` statement.
 
 Add the following to the file *main.jsx*:
 
@@ -375,9 +361,12 @@ The documentation on Mozilla's site states the following about promises:
 In other words, a promise is an object that represents an asynchronous operation.
 ***A promise can have three distinct states***:
 
-1. **pending**: the final value (one of the following two) is not available yet.
-2. **fulfilled**: the operation has been completed and the final value is available; also called **resolved**.
+1. **pending**: the promise has not yet finished and the final value is not available yet.
+2. **fulfilled**: the operation has been completed and the final value is available.
 3. **rejected**: an error prevented the final value from being determined, which generally represents a failed operation.
+
+> There are many details related to promises, but understanding these three states is sufficient for us for now.
+> If you want, you can read more about promises in [Mozilla's documentation](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise).
 
 The first promise in our code, *`axios.get('http://localhost:3001/tasks')`*, is ***fulfilled***, which represents a successful request.
 The second one, however, *`axios.get('http://localhost:3001/foobar')`* is ***rejected***, and the console tells us the reason.
@@ -456,7 +445,7 @@ What's not immediately obvious, however, *is where the command `axios.get` shoul
 We have already used [**state hooks**](https://react.dev/learn/state-a-components-memory)
 that were introduced along with React version [16.8.0](https://www.npmjs.com/package/react/v/16.8.0),
 which provide state to React components defined as functions - the so-called **functional components**.
-Version 16.8.0 also introduces [**effect hooks**](https://react.dev/reference/react#effect-hooks) as a new feature.
+Version 16.8.0 also introduces [**effect hooks**](https://react.dev/reference/react/hooks#effect-hooks) as a new feature.
 As per the official docs:
 
 > *Effects let a component [connect to and synchronize with external systems](https://react.dev/learn/synchronizing-with-effects).*
@@ -619,7 +608,7 @@ Understanding the order of events is critical!
 > A reference to an event handler function is assigned to the variable `eventHandler`.
 > The promise returned by the `get` method of Axios is stored in the variable `promise`.
 > The registration of the callback happens by giving the `eventHandler` variable,
-> referring to the event-handler function, as a parameter to the `then` method of the promise.
+> referring to the event-handler function, as an argument to the `then` method of the promise.
 > It is unnecessary to assign functions and promises to variables;
 > the compact way we used (shown again below) is sufficient.
 >
@@ -675,7 +664,7 @@ We will do this in [part 3](/part3).
 
 ### Exercise 2.11
 
-#### 2.11: The Communities Step 6
+#### 2.11: The Communities, Step 6
 
 We continue with developing our community directory.
 Store the initial state of the application in the file *db.json*, which should be placed in the root of the project.
@@ -685,23 +674,23 @@ Store the initial state of the application in the file *db.json*, which should b
   "groups":[
     { 
       "name": "COMP 227 Students", 
-      "url": "https://discord.gg/VRUKRxCJ95",
-      "id": 1
+      "url": "https://discord.gg/85rgmTtxHm",
+      "id": "1"
     },
     { 
       "name": "PySlackers", 
       "url": "https://pythondev.slack.com",
-      "id": 2
+      "id": "2"
     },
     { 
       "name": "Code Support", 
       "url": "https://discord.gg/XQ9C3sY",
-      "id": 3
+      "id": "3"
     },
     { 
       "name": "Front End Developers", 
       "url": "https://discord.gg/XHsumw2C39",
-      "id": 4
+      "id": "4"
     }
   ]
 }

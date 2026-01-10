@@ -63,8 +63,17 @@ it might make sense to do so now.
 With your terminal now open you can type the following:
 
 ```bash
-npm create vite@latest reading -- --template react
+npm create vite@latest
+```
 
+Now use the following image to help you enter the following options.
+
+![create-vite tool selection view, where the project is named reading, the framework is React, the variant is JavaScript, and all other questions are answered with No](../../images/1/1-create-vite.png)
+
+We answered no so that we can do some of these steps manually so you can see how to do each part.
+Next, let's move into the application's directory and install the required libraries:
+
+```bash
 cd reading
 npm i
 ```
@@ -170,7 +179,7 @@ You should not have one at this moment.
 If you do, then you may not have setup file watchers correctly.
 You can create that arrow by going to terminal, and creating an empty commit message, which I'll have you do everytime you complete the exercises.
 
-We'll use the empty commits to give us a non-standard way of leaving notes in our code.
+We'll use the empty commits to give us a non-standard way of leaving memos in our code.
 Go to terminal and write this line.
 
 ```bash
@@ -235,7 +244,7 @@ renders its contents into the file *public/index.html*, inside a `div` element t
 >     <meta charset="UTF-8" />
 >     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
 >     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
->     <title>Vite + React</title>
+>     <title>reading</title>
 >   </head>
 >   <body>
 >     <div id="root"></div>
@@ -278,13 +287,14 @@ const App = ...
 
 There are a few ways to define functions in JavaScript.
 Here we will use [*arrow functions*](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/Arrow_functions),
-which are described in a newer version of JavaScript known as [ECMAScript 6](http://es6-features.org/#Constants), also called ES6.
+which are described in a newer version of JavaScript known as
+[ECMAScript 6](https://rse.github.io/es6-features/#Constants), also called ES6.
 
 Because the function consists of only a single expression we have used a shorthand, which represents this piece of code:
 
 | original shorthand | long form |
 | --- | --- |
-|<pre><code class="languagejs">const App = () => (<br><br>  \<div><br>    \<p>Hola COMP 227!\</p><br>  \</div><br><br>)<br>|<pre><code class="languagejs">const App = () => {<br>  return (<br>    \<div><br>      \<p>Hola COMP 227!\</p><br>    \</div><br>  )<br>}|
+| <pre><code class="languagejs">const App = () => (<br><br>  \<div><br>    \<p>Hola COMP 227!\</p><br>  \</div><br><br>)<br> | <pre><code class="languagejs">const App = () => {<br>  return (<br>    \<div><br>      \<p>Hola COMP 227!\</p><br>    \</div><br>  )<br>} |
 
 **Notice the return and curly braces instead of parenthesis**!
 In other words, the function returns the value of the expression.
@@ -379,7 +389,7 @@ const App = () => {
 ```
 
 The compilation is handled by [Babel](https://babeljs.io/repl/).
-Projects created with *vite* or *create-react-app* are configured to compile automatically.
+Projects created with *Vite* are configured to compile automatically.
 We will learn more about this topic in [part 7](/part7) of this course.
 
 It is also possible to write React as "pure JavaScript" without using JSX.
@@ -493,36 +503,48 @@ const App = () => {
 
 ### Possible error message
 
-If you have set everything up correctly you will receive the following error message at this point:
+If your project has React version 18 or earlier installed, you may receive the following error message at this point:
 
 ![WebStorm showing name is missing in props validation](../../images/1/1-vite5.png)
 
 It's not an actual error, but a warning caused by the [ESLint](https://eslint.org/) tool.
 You can silence the warning [`react/prop-types`](https://github.com/jsx-eslint/eslint-plugin-react/blob/master/docs/rules/prop-types.md)
-by adding to the file *.eslintrc.cjs* the next line
+by adding the following to the file *eslint.config.js*:
 
 ```js
-module.exports = {
-   root: true,
-   env: { browser: true, es2020: true },
-   extends: [
-     'eslint:recommended',
-     'plugin:react/recommended',
-     'plugin:react/jsx-runtime',
-     'plugin:react-hooks/recommended',
-   ],
-   ignorePatterns: ['dist', '.eslintrc.cjs'],
-   parserOptions: { ecmaVersion: 'latest', sourceType: 'module' },
-   settings: { react: { version: '18.2' } },
-   plugins: ['react-refresh'],
-   rules: {
-     'react-refresh/only-export-components': [
-       'warn',
-       { allowConstantExport: true },
-     ],
-     'react/prop-types': 0 // highlight-line
-   },
-}
+export default [
+  { ignores: ['dist'] },
+  {
+    files: ['**/*.{js,jsx}'],
+    languageOptions: {
+      ecmaVersion: 2020,
+      globals: globals.browser,
+      parserOptions: {
+        ecmaVersion: 'latest',
+        ecmaFeatures: { jsx: true },
+        sourceType: 'module',
+      },
+    },
+    settings: { react: { version: '22.21' } },
+    plugins: {
+      react,
+      'react-hooks': reactHooks,
+      'react-refresh': reactRefresh,
+    },
+    rules: {
+      ...js.configs.recommended.rules,
+      ...react.configs.recommended.rules,
+      ...react.configs['jsx-runtime'].rules,
+      ...reactHooks.configs.recommended.rules,
+      'react/jsx-no-target-blank': 'off',
+      'react-refresh/only-export-components': [
+        'warn',
+        { allowConstantExport: true },
+      ],
+      'react/prop-types': 0, // highlight-line
+    },
+  },
+]
 ```
 
 We will get to know ESLint in more detail [in part 3](/part3/validation_and_es_lint#lint).
@@ -609,7 +631,7 @@ const App = () => {
 }
 ```
 
-the page is not going to display the content defined within the footer component,
+the page is not going to display the content defined within the `footer` component,
 and instead React only creates an empty [footer](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/footer) element,
 i.e. the built-in HTML element instead of the custom React element of the same name.
 If you change the first letter of the component name to a capital letter,
@@ -805,7 +827,7 @@ You should submit the exercises in each part with the corresponding repo that is
 In this case, you will use the repo that was generated from <http://go.djosv.com/227lab1>.
 
 We will use Vite in each of the exercises to create the following file structure for our submission repository,
-(**do not do this now; you should already have a *reading* rolder from our previous exercises**):
+(**do not do this now; you should already have a *reading* folder from our previous exercises**):
 
 ```text
 lab1
@@ -828,7 +850,7 @@ Remember that your files should all be white in color.
 
 Notice that in this part, there are more exercises besides those found below.
   
-#### 1.1: handheld arcade info, Step 1
+#### 1.1: Handheld arcade info, Step 1
 
 This exercise will start the ongoing development of a small application that will be further developed in a few of the following exercises.
 Please make sure to commit often and that you do not have any files in your project that are any color other than white.
@@ -885,7 +907,7 @@ const App = () => {
 export default App
 ```
 
-and remove extra files (*App.css*, *index.css*, *logo.svg*)).
+and remove extra files (*App.css*, *index.css*, *logo.svg*, and *assets*).
 
 Unfortunately, the entire application is in the same component.
 Refactor the code so that it consists of three new components: `Header`, `Content`, and `Total`.
@@ -920,7 +942,7 @@ const App = () => {
 
 ***Make sure to type `git commit --allow-empty -m "Completed Exercise 1.1"` in the terminal before moving onto 1.2***
 
-#### 1.2: handheld arcade info, Step 2
+#### 1.2: Handheld arcade info, Step 2
 
 Refactor the `Content` component so that it does not render any names of handhelds or their number of games by itself.
 Instead, it only renders three `Handheld` components of which each renders the name and number of games of one handheld.

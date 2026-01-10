@@ -7,13 +7,13 @@ lang: en
 
 <div class="content">
 
-  | | |
+| | |
 | --- | --- |
-| COURSE NAME| Web Development
-| SEMESTER|  Spring 2024
-| NUMBER AND TYPE OF UNITS|  3
-| COURSE TIME AND LOCATION|  Online (Meetings will be asynchronous)
-| INSTRUCTOR NAME| Osvaldo Jiménez
+| COURSE NAME | Web Development |
+| SEMESTER | Spring 2026 |
+| NUMBER AND TYPE OF UNITS | 3 |
+| COURSE TIME AND LOCATION | 8:25am-9:45am & CTC 114 |
+| INSTRUCTOR NAME | Osvaldo Jiménez |
 
 ### Course Description
 
@@ -25,10 +25,10 @@ Students are expected to read online resources and apply techniques to develop a
 
 | | |
 | --- | --- |
-Email | ojimenez AT pacific.edu
-Discord |  <https://discord.gg/VRUKRxCJ95>
-Virtual Office Hours| MW 3pm-5pm
-Other meetings | by email/discord appointment
+| Email | ojimenez AT pacific.edu |
+| Discord | <https://discord.gg/85rgmTtxHm> |
+| Office Hours | TTh 1pm-2:45pm |
+| Other meetings | by email/discord appointment |
 
 ### Prerequisites
 
@@ -77,17 +77,17 @@ This course helps students meet the following Computer Science Program Learning 
 ### Learning Resources
 
 - [canvas.pacific.edu](https://pacific.instructure.com)
-- [Discord](https://discord.gg/VRUKRxCJ95)
+- [Discord](https://discord.gg/85rgmTtxHm)
 - [Class website](http://comp227.djosv.com)
 
 ### Other Responsibilities
 
-You will find that the following attitude will significantly contribute to your success in this online class:
+You will find that the following attitude will significantly contribute to your success in this class:
 
 - A positive attitude toward technology
-- An open mind toward online education
+- An open mind toward this style of education
 - Willingness to share your experiences with others
-- Strong writing skills for expressing yourself in the discussion area
+- Strong communication skills for expressing yourself
 - Strong analytical and critical thinking skills for when you "get stuck"
 - Resourcefulness - don't be afraid to click on links and explore and ask questions that give you just enough information to get unstuck
 - Time management
@@ -99,7 +99,7 @@ The next [reading](/part0/general_info) in the course will discuss more informat
 It's crucial to seek help when you can't access Canvas or class materials.
 It's up to you to ask questions!
 
-1. We will be using [Discord](https://discord.gg/VRUKRxCJ95).
+1. We will be using [Discord](https://discord.gg/85rgmTtxHm).
    - if you have not used Discord before it is fairly intuitive, but [here's a guide should you need it](https://support.discord.com/hc/en-us/articles/360045138571-Beginner-s-Guide-to-Discord)
 2. Canvas has live help that will assist you with any technical issues.
     To access help, click the question mark at the far left side of the screen.
@@ -111,93 +111,17 @@ An overview of available Canvas help resources can be found here: <https://commu
 Further in-depth information can be accessed in The Canvas Student Guide which can be found here:
 <https://community.canvaslms.com/docs/DOC-10701>
 
-#### Important Tips for Success as an Online Learner
-
-- Begin planning now for private, uninterrupted time in your schedule to go through the course materials and complete the assignments
-    - preferably in at least two-hour blocks and at least five times a week.
-It can be easy to fall behind!
-- Check your email account and the class [discord](https://discord.gg/VRUKRxCJ95) regularly for updated information.
-- Use Discord for private messages to the instructor.
-Discord is a great place to ask questions in the correct categories (make sure you read the rules there).
-- If you have questions or are confused about an assignment, act promptly! Check #announcements, #help or #sos to see if your concern has been addressed already.
-If not, post your question to this discussion.
-- We may use Canvas tools such as WebEx for Q&A sessions and please follow the instructions the instructor sends out through Canvas Announcement.
-- Read directions carefully.
-
-For posts to online discussions, conventions of online etiquette ("netiquette") which include courtesy to all users, will be observed.
-Please see Guidelines for Online Discussion for details.
-
-### Discord & Course Netiquette
-
-You can discuss the course and related topics in our [Discord](https://discord.gg/VRUKRxCJ95).
-Discord will have different channels for both your learning partners as well as course-related conversations.
-You will be expected to be active on Discord!
-If you have not used Discord before, then you can review their [official beginner's guide](https://support.discord.com/hc/en-us/articles/360045138571-Beginner-s-Guide-to-Discord).
-However, I think merely using the software is the best way to learn it.
-
-For those of you who are new to online learning and online discussion, there are some important differences between how you communicate online and in the classroom.
-These differences are frequently the cause of misunderstandings in courses that have an online component.
-The following guidelines are intended to help you understand the differences and communicate in a way that minimizes the chances of misunderstandings.
-
-#### Remember you cannot see each other
-
-The most important difference between face-to-face communication and using an online discussion is that you cannot see each other.
-For the most part, humans rely on visual and audio cues when talking to each other.
-When we speak face to face we can interpret what the other person is saying through their posture, tone of voice, and expression.
-All of this is missing when communicating through discussion forums.
-You can’t easily tell what the intent is when reading a response to a message in a discussion board.
-There are no visual cues.
-There is no tone of voice to convey emotion.
-There is only text.
-It is easy to make assumptions about a person’s intent when you are lacking the cues that you would take for granted otherwise.
-Below are some guidelines for communication in online courses that will help you make the most out of your online interactions.
-
-#### Keep a positive tone
-
-Everyone in your class is there to learn, just as you are.
-Discussions are a great way to understand different perspectives.
-If a conversation remains positive, then it is a lot more likely that everyone will get something useful out of it.
-Avoid any language that can be construed as angry, sarcastic, or even humorous.
-
-#### Don’t take things personally
-
-As mentioned above, there is no way for you to know for sure what that person writing intends.
-Given that the discussions are supposed to be a community-building experience, assume that the responses are meant to be helpful.
-If you have questions about a post, contact your instructor.
-
-#### When in doubt, take a break before posting
-
-If you do find yourself becoming emotionally involved in the discussion, take a break for a half hour.
-Then revisit what you were about to post with an eye to how others would interpret it.
-Once you post a message there is no deleting or taking it back.
-
-#### Be patient, few are online 24/7
-
-Remember that all the people in your course have lives outside of the class they are taking.
-If you ask a question or need clarification, it may be a day or two before you get a response.
-As for me, I vow that I'll respond to you as quickly as I can, but I am not always available immediately.
-
-#### Help others
-
-You are all in this together.
-If someone in the course has a problem with the system or needs help in another way, feel free.
-Many of you will have more experience and your assistance will be appreciated.
-
 ### Attendance policies
 
-Even though this is an asynchronous online course, attendance will be counted by how responsive you are on Discord.
-You will be expected to respond to any discussion via Discord in a reasonable time frame (24-48 hours).
-After having to contact you via other methods or bringing responsiveness in discord to your attention,
-any subsequent attempts to contact you will lower part of your social learning exercises grade by two percentage points.
-In addition to me reaching out, you will be expected to:
+***Attendance in the class is mandatory***.
+We will be tracking attendance and we have a variety of group exercises that we'll do in class.
+Your presence and engagement directly impact not only your learning experience, but that of your peers.
+We also need the course time to be able to check in and for me to be able to provide feedback to you all (and vice-versa).
+While there will be some asynchronous portions, coming to class will allow me to observe you and provide tips.
+It will also serve as an opportunity for you to work on exercises and to help each other out in a community fashion.
 
-- Be in contact with others via our official discord server channels.
-- Communicate in those discord channels with your learning groups regularly.
-- Meet with your learning groups regularly to go over the material.
-    - *This means that you'll be expected to meet online with those groups either over Discord or via Zoom (or in person if you prefer).*
-
-**Chatting privately via DMs will not count towards your expectations of regular communication.**
-Those meetings are crucial to your learning and your peers, and so you will be expected to make them up if you cannot make it, or forfeit your ability to pass the course.
+You can discuss the course and related topics in our [Discord](https://discord.gg/85rgmTtxHm) outside of class hours.
+Discord will have different channels for both your learning partners as well as course-related conversations to help augment class exercises.
 
 ### Pronouns
 
@@ -207,20 +131,21 @@ Please let me know your preferred name and pronoun anytime throughout the semest
 
 ### Grading Scale
 
-The following minimum percentages are required to achieve the corresponding grades:
+In this course, we’re experimenting with an ***ungrading*** approach.
+Instead of assigning traditional letter or number grades on every assignment,
+**I’ll give you frequent feedback and expect you to reflect on your own growth, as well as to adjust based on that feedback**.
+We’ll set goals together, discuss how to evaluate your own work, and use feedback (from me and from peers) to track progress.
+At four different points in the semester, *you’ll propose what your final grade would be based on your reflections, effort, and learning milestones* that I’ll take into consideration.
+The aim is to focus on understanding and improvement rather than chasing points.
+We’ll talk more in class about how this works and answer any questions you have along the way.
+In terms of how to put your effort in and as a reference this is what I’m expecting to take up most of your time in order:
 
-| A | A- | B+ | B | B- | C+ | C | C- | D |
-| - | - | - | - | - | - | - | - | - |
-| 93 | 90 | 87 | 83 | 80 | 77 | 73 | 70 | 63 |
-
-The grading will come from these areas, however, the percentages are tentative and subject to change.
-
-|   |   |
+| | |
 | - | - |
-| Individual Exercises |  45%  |
-| Social Learning Exercises & Attendance | 20% |
-| Final Project | 25% |
-| Other Activities | 10% |
+| Individual Exercises | |
+| Social Learning Exercises & Attendance | |
+| Final Project | |
+| Other Activities | |
 
 ### Major Assignments and Examinations
 
@@ -234,49 +159,29 @@ The course is composed of a few parts
 
 #### Individual Exercises
 
-Part of your grade for the course will be based on the total number of submitted exercises for the required parts (including exercises marked with an asterisk).
+Part of your assessment for the course will be based on the work you do towards the exercises (including exercises marked with an asterisk).
 For all of the exercises, your work will not only come from the solution but from you showing your work as you move toward your solution.
 
-**Your grade will not completely come from these exercises**.
+**Your assessment will not come just from these exercises**.
 
-We will be having other exercises and assignments as well that will be just as important to your grade.
+We will be having other exercises and assignments as well that will be just as important to your assessment.
 
-Assume that if there are 138 exercises **(there are not 138 exercises; that count is not final)**, a rough calculation for this portion is as follows:
-
-| exercises    | approx grade for exercises    |
-| ------------ | :------: |
-| 138          | A?        |
-| 127          | B+?        |
-| 116          | B?        |
-| 105          | C?        |
-| 94           | C-?       |
-| 83           | D?        |
-| 72           | F?        |
-
-Why did I put it this way? Because this is a guideline, not a contract.
-I don't even know if there are 138 exercises to begin with!
-Nevertheless, I wanted to provide this approximation to you so that you have a better understanding of what the expectations look like.
-Also, realize that what is more important here is a continual amount of progress each week.
-This means that if you get stuck during a week, that is OK, but you'll need to do extra to catch up.
-How much you can catch up per week will also be capped, to no more than 10% of the exercises that you have left to do.
-If you wish to pass the course, you will need to work regularly and submit the assignments as listed in Canvas.
-
-For the other modules, we will determine at a later date which ones will be completed, but these may be done in a different order sequence.
-
-| Additional Modules | Module name | Minimum Exercises to submit | work needed |
-| --- | --- | --- | --- |
-| 6  | Redux | 24 | 1 |
-| 7  | React router, hooks & styling | 24 | 1 |
-| 8  | TypeScript | 24 | 1 |
+Know that there are many exercises in this course, and you do not, nor should expect that you need to finish them all.
+However, what you provide as evidence of work will be variable, but what is most important here is being able to demonstrate a continual amount of progress regularly each week.
+**You will be expected to demonstrate what you have learned.**
+This means that if you get stuck during a week, that is OK!
+If you are unproductive, that is OK too, but means there will be an expectation of trying to improve and to learn from mistakes.
+How much you can catch up per week will also be capped, to no more than 10% of your average output.
+You will be expected to work regularly and submit the assignments as listed in Canvas.
 
 With all submissions requested, please follow submission guidelines carefully.
 
 Students are responsible for reading course material and following instructions posts on Canvas.
-Students are also responsible for being aware of any announcements the instructor makes through Canvas.
+Students are also responsible for being aware of any announcements the instructor makes through Canvas and in the course.
 
-#### Course Exam
+#### Course Meetings
 
-You must also complete the course exam.
+You must also complete the course meetings and the reflections that lead up to each meeting.
 Notice though that the exam is not listed in your grade breakdown.
 The exam does not count towards your final grade, but you must pass it to pass the course.
 More info about the exam will be discussed via Canvas and Discord in the middle of the semester.
@@ -298,30 +203,38 @@ Individual exercises will follow a different policy.
 Exercises are broken into Canvas assignments.
 Students must submit one part before unlocking subsequent parts.
 There is no late penalty to submit a part.
-However, there is a cap on how many individual exercises can be submitted in a given week, which is 10% more than the regular workload.
-This means that falling behind greatly will impact your chances of finishing all of the exercises for credit.
+However, there is a cap on how many individual exercises can be submitted in a given week, to no more than 10% of your average workload.
 Your focus on that point with the individual exercises should be to focus on your current understanding.
 All work will have a hard cutoff that will be outlined in Canvas.
 
 #### Individual Work and Collaboration
 
 Computer professionals usually work in a cooperative environment, yet proper assessment requires that work be done by individuals.
+AI is also beginning to be used quite heavily in full stack development.
+However, realize that part of the issue that is being faced is that there may be an over-reliance on AI.
 To alleviate confusion, the following policy will be followed:
 
 Collaborative work is encouraged.
+You can also use AI to help you understand certain lines of code or to use as a partner.
 This includes students working together on problem sets, planning solution strategies, and helping each other to debug programs.
-Collaboration must stop short of the writing of program code or English that represents your work.
-You may not directly copy the work of another student.
-It is your responsibility to ensure that the work you submit is an honest representation of your own understanding of the material.
+Collaboration must stop short of asking to write a program or English that represents your work.
+You need to make sure that you understand well any work that you submit, as you may be asked to change the code on the fly.
 
-Marginal cases will be resolved by oral examination of the students involved.
-If they understand the material in the assignment, it will be considered honest collaboration.
-If they do not, then it will be considered academic dishonesty.
+This policy is not meant to be punitive, but to help you maximize your learning.
+Ask questions to me whenever you are unsure.
 
 ### Collection of Work for Assessment
 
-Student work may be retained to assess how course learning objectives are being met and for accreditation purposes.
-Copies of student work may be retained to assess how the learning objectives of the course are being met.
+Student work may be retained to assess how course learning objectives are being met, for accreditation purposes, and to provide examples to future students in this course.
+With COMP 227, all submitted work and electronic activity will be retained for:
+  
+- assessment
+- accreditation, and
+- learning how to improve the course for the future
+- viewing by future students.
+
+Furthermore, some of the work may end up being public, as you may end up contributing to repositories that are public (open source) in nature.
+Realize that those platforms ***will also have records of your activities and contributions***.  
 
 ### Honor Code
 
@@ -347,6 +260,7 @@ You MAY ask others (both computers and humans)
 for help understanding particular errors that appear, or in explaining high-level concepts that you feel the text does not explain well.
 However, those concepts should not contain the exercise text.
 You should be able to explain any of the code you write and you also need to cite anything longer than a line of code that you get from the internet.
+**If ChatGPT or other AI services are used, you must be prepared to send me a share link of conversations with the AI**.
 Provide links to any code and tutorials that you find that help you program.  
 Make sure to cite and credit code, libraries, videos, ideas, or other resources that are not provided directly from this website.
 Honor code cases will be resolved by an oral examination of the understanding of the material.
@@ -369,7 +283,7 @@ The Office of Services for Students with Disabilities is located in the McCaffre
 Phone: 209-946-3221.
 Email: <ssd@pacific.edu>.
 Online: <http://www.pacific.edu/disabilities>
-NOTE: The preceding information is the minimal information required in this section of the course syllabus,
+NOTICE: The preceding information is the minimal information required in this section of the course syllabus,
 instructors are free to expand on the information above and/or add any additional information below.
 See the requirements below for Program Objectives and Course Schedule.
 
@@ -394,27 +308,27 @@ Academic Catalog.
 
 If you wish to view FERPA, or locate the Non-Release of Directory Information Form,
 Please click the following link to [view the University's FERPA Policy](http://catalog.pacific.edu/stocktongeneral/generalinformation/universitypolicyondisclosureofstudentrecords/).
-NOTE: Items that can never be identified as public information are a student’s social security number, citizenship, gender, grades, GPR or class schedule.
+NOTICE: Items that can never be identified as public information are a student’s social security number, citizenship, gender, grades, GPR or class schedule.
 
 All efforts will be made in this class to protect your privacy and to ensure confidential treatment of information associated with or generated by your participation in the class.
 
 | Week | Date | Hours, Topics, and Activities |
 | - | - | - |
-| 1 | Jan 15 | 0 - General course info & Setup<br>1a-1c: React, Javascript, State & Handlers |
-|2  | Jan 22 | 1d - Debugging React<br>2a - Rendering collections |
-|3  | Jan 29 | 2b-2d - Forms and working with data on a server|
-|4 | Feb 5 | 2e - Adding styles to React<br>3a-3b Express and Deploying an app to the internet |
-|5  | Feb 12 | 3c-3d - Saving data to MongoDB and Validation |
-|6  |  Feb 19 | 4a-4b - Testing the backend |
-|7 | Feb 26 | 4c-4d - User administration & Token Authentication |
-|8  | Mar 5 | 5a-5b - Frontend logins and props|
-|9 | Mar 12 | 🌞🌴😎🌞🌴😎🌞🌴😎🌞🌴😎🌞🌴😎 |
-|10 | Mar 19 | 5c-5d - Testing React and end-to-end|
-|11  | Mar 26 | 6, 7, 8 Redux, Custom Hooks, TypeScript |
-|12  | Apr 2 | Redux, Custom Hooks, TypeScript continued |
-|13 | Apr 9 | Final Project Activities |
-|14  | Apr 16 | Final Project Activities |
-|15 |  Apr 23 | Final Project Activities |
-|16 | May 1 | Final Project Activities |
+| 1 | Jan 12 | 0 - General course info & Setup<br>1a-1c: React, Javascript, State & Handlers |
+| 2 | Jan 19 | 1d - Debugging React<br>2a - Rendering collections |
+| 3 | Jan 26 | 2b-2d - Forms and working with data on a server |
+| 4 | Feb 2 | 2e - Adding styles to React<br>3a-3b Express and Deploying an app to the internet |
+| 5 | Feb 9 | 3c-3d - Saving data to MongoDB and Validation |
+| 6 | Feb 16 | 4a-4b - Testing the backend |
+| 7 | Feb 23 | 4c-4d - User administration & Token Authentication |
+| 8 | Mar 2 | 5a-5b - Frontend logins and props |
+| 9 | Mar 9 | 🌞🌴😎🌞🌴😎🌞🌴😎🌞🌴😎🌞🌴😎 |
+| 10 | Mar 16 | 5c-5d - Testing React and end-to-end |
+| 11 | Mar 23 | 6, 7, 8 Redux, Custom Hooks, TypeScript |
+| 12 | Mar 30 | Redux, Custom Hooks, TypeScript continued |
+| 13 | Apr 6 | Final Project Activities |
+| 14 | Apr 13 | Final Project Activities |
+| 15 | Apr 20 | Final Project Activities |
+| 16 | Apr 27 | Final Project Activities |
 
 </div>

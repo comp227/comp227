@@ -12,6 +12,10 @@ Let's continue our work on the backend of the tasks application we started in [p
 
 ### Project structure
 
+> **FYI**: This course material was originally written with version *18* of Node.js,
+> but most of it has been adapted recently to use *22.21.0*.
+> If you are using NVM, you can always switch, but you can also just stick with 22.21 for now.
+
 Before we move into the topic of testing, we will modify the structure of our project to adhere to Node.js best practices.
 
 The following section will be devoted to walking us through restructuring our project.
@@ -19,20 +23,20 @@ The following section will be devoted to walking us through restructuring our pr
 > **FYI:** By the time we reach the [recap section](#directory-structure-recap), *the directory structure of our project will look like this*:
 >
 > ```bash
-> ├── index.js
-> ├── app.js
-> ├── dist
-> │   └── ...
 > ├── controllers
 > │   └── tasks.js
+> ├── dist
+> │   └── ...
 > ├── models
 > │   └── task.js
-> ├── package-lock.json
-> ├── package.json
 > ├── utils
 > │   ├── config.js
 > │   ├── logger.js
 > │   └── middleware.js  
+> ├── app.js
+> ├── index.js
+> ├── package.json
+> ├── package-lock.json
 > ```
 
 Before we get started, know that when you ask WebStorm to make a file, and you type *`dir/file`*, WebStorm will automatically create the directory if it doesn't exist.
@@ -54,14 +58,12 @@ const error = (...params) => {
   console.error(...params);
 };
 
-module.exports = {
-  info, error
-};
+module.exports = { info, error }
 ```
 
 The logger has two functions, **`info`** for printing normal log messages, and **`error`** for all error messages.
 
-Extracting logging into its own module is a good idea in more ways than one.
+Extracting logging into its own module is a good idea in several ways.
 If we wanted to start writing logs to a file or send them to an external logging service like [graylog](https://www.graylog.org/)
 or [papertrail](https://papertrailapp.com) we would only have to make changes in one place.
 
@@ -90,10 +92,6 @@ following [best practices](https://dev.to/nermineslimane/always-separate-app-and
 One of the advantages of this method is that the application can now be tested at the level of HTTP API calls
 without actually making calls via HTTP over the network, this makes the execution of tests faster.
 
-The route handlers have also been moved into a dedicated module.
-The event handlers of routes are commonly referred to as *controllers*, and for this reason we have created a new *controllers* directory.
-All of the routes related to tasks are now in the *tasks.js* module under the *controllers* directory.
-
 #### utils/config.js
 
 The handling of environment variables is extracted into a separate *utils/config.js* file:
@@ -104,10 +102,7 @@ require("dotenv").config();
 const PORT = process.env.PORT;
 const MONGODB_URI = process.env.MONGODB_URI;
 
-module.exports = {
-  MONGODB_URI,
-  PORT
-};
+module.exports = { MONGODB_URI, PORT }
 ```
 
 The other parts of the application can access the environment variables by importing the configuration module:
@@ -170,17 +165,21 @@ tasksRouter.delete("/:id", (request, response, next) => {
     .catch(error => next(error));
 });
 
-tasksRouter.put("/:id", (request, response, next) => {
-  const body = request.body;
+tasksRouter.put('/:id', (request, response, next) => {
+  const { content, important } = request.body
 
-  const task = {
-    content: body.content,
-    important: Boolean(body.important),
-  };
+  Task.findById(request.params.id)
+    .then(task => {
+      if (!task) {
+        return response.status(404).end()
+      }
 
-  Task.findByIdAndUpdate(request.params.id, task, { new: true })
-    .then(updatedTask => {
-      response.json(updatedTask);
+      task.content = content
+      task.important = important
+
+      return task.save().then((updatedTask) => {
+        response.json(updatedTask)
+      })
     })
     .catch(error => next(error));
 });
@@ -209,13 +208,13 @@ It's worth noting that the paths in the route handlers have shortened.
 In the previous version, we had:
 
 ```js
-app.delete("/api/tasks/:id", (request, response) => {
+app.delete("/api/tasks/:id", (request, response, next) => {
 ```
 
 Now in the current version, we have:
 
 ```js
-tasksRouter.delete("/:id", (request, response) => {
+tasksRouter.delete("/:id", (request, response, next) => {
 ```
 
 So what are these router objects exactly?
@@ -239,23 +238,22 @@ app.use("/api/tasks", tasksRouter);
 The router we defined earlier is used *if* the URL of the request starts with ***/api/tasks***.
 For this reason, the tasksRouter object must only define the relative parts of the routes, i.e. the empty path `/` or just the parameter `/:id`.
 
-After making these changes, our *app.js* file looks like this:
+A file defining the application, our *app.js*, has been created in the root of the repository:
 
 ```js
-const config = require("./utils/config");
 const express = require("express");
-const app = express();
-const cors = require("cors");
-const tasksRouter = require("./controllers/tasks");
-const middleware = require("./utils/middleware");
-const logger = require("./utils/logger");
 const mongoose = require("mongoose").set("strictQuery", true);
+const config = require("./utils/config");
+const logger = require("./utils/logger");
+const middleware = require("./utils/middleware");
+const tasksRouter = require("./controllers/tasks");
 
-mongoose.set("strictQuery", false);
+const app = express();
 
 logger.info("connecting to", config.MONGODB_URI);
 
-mongoose.connect(config.MONGODB_URI)
+mongoose
+  .connect(config.MONGODB_URI, { family: 4 })
   .then(() => {
     logger.info("connected to MongoDB");
   })
@@ -263,7 +261,6 @@ mongoose.connect(config.MONGODB_URI)
     logger.error("error connecting to MongoDB:", error.message);
   });
 
-app.use(cors());
 app.use(express.static("dist"));
 app.use(express.json());
 app.use(middleware.requestLogger);
@@ -354,20 +351,20 @@ module.exports = mongoose.model("Task", taskSchema);
 To recap, the directory structure looks like this after the changes have been made:
 
 ```bash
-├── index.js
-├── app.js
-├── dist
-│   └── ...
 ├── controllers
 │   └── tasks.js
+├── dist
+│   └── ...
 ├── models
 │   └── task.js
-├── package-lock.json
-├── package.json
 ├── utils
 │   ├── config.js
 │   ├── logger.js
 │   └── middleware.js  
+├── app.js
+├── index.js
+├── package-lock.json
+├── package.json
 ```
 
 For smaller applications, the structure does not matter that much.
@@ -377,12 +374,12 @@ This will make developing the application much easier.
 
 There is no strict directory structure or file naming convention that is required for Express applications.
 In contrast, other frameworks like Ruby on Rails do require a specific structure.
-Our current structure merely tries to adhere to best practices (according to the internet).
+Our current structure merely tries to adhere to best practices (according to the Internet).
 
 You can find the code for our current application in its entirety in the *part4-1* branch of
 [this GitHub repository](https://github.com/comp227/part3-tasks-backend/tree/part4-1).
 
-If you clone the project for yourself, run the `npm install` command before starting the application with `npm start`.
+If you clone the project for yourself, run the `npm install` command before starting the application with `npm run dev`.
 
 ### Notice about exports
 
@@ -398,11 +395,7 @@ const error = (...params) => {
   console.error(...params);
 };
 
-// highlight-start
-module.exports = {
-  info, error
-};
-// highlight-end
+module.exports = { info, error } // highlight-line
 ```
 
 #### Exporting a bundled object
@@ -476,40 +469,31 @@ and then search based on a variety of criteria.
 In the exercises for this part, we will be ***building the backend*** for a **Streaming Watchlist application**,
 which allows users to save information about interesting shows they have stumbled across on the internet.
 Please create this new folder in your *lab3* repo.
-For each listed show we will save the title, genre, Streaming Service URL, and amount of upvotes from users of the application.
+For each listed show we will save the title, genre, Streaming Service URL, and amount of likes from users of the application.
 From here on, I will refer to a streaming show as a **show**.
 
-> **Note** You need to install Mongoose version 7.6.5 with the command
->
-> ```bash
-> npm i mongoose@7.6.5
-> ```
->
-> since the most recent Mongoose version does not support a library that we will be using in a later part of the course!
-
-#### 4.1 Watchlist, Step 1
+#### 4.1: Watchlist, Step 1
 
 Let's imagine a situation, where you receive an email that contains the following application body:
 
 ```js
 const express = require("express");
-const app = express();
-const cors = require("cors");
 const mongoose = require("mongoose");
+
+const app = express();
 
 const showSchema = new mongoose.Schema({
   title: String,
   genre: String,
   url: String,
-  likes: Number
-});
+  likes: Number,
+})
 
 const Show = mongoose.model("Show", showSchema);
 
 const mongoUrl = "mongodb://localhost/watchlist";
-mongoose.connect(mongoUrl);
+mongoose.connect(mongoUrl, { family: 4 });
 
-app.use(cors());
 app.use(express.json());
 
 app.get("/api/shows", (request, response) => {
@@ -537,17 +521,17 @@ app.listen(PORT, () => {
 ```
 
 Turn the application into a functioning ***npm*** project.
-To keep your development productive, configure the application to be executed with ***nodemon***.
+To keep your development productive, configure the application to be executed with ***`node --watch`***.
 You can create a new database for your application with MongoDB Atlas, or use the same database from the previous part's exercises.
 
 Verify that it is possible to add shows to the list with Postman or the WebStorm REST client
 and that the application returns the added shows at the correct endpoint.
 
-#### 4.2 Watchlist, Step 2
+#### 4.2: Watchlist, Step 2
 
 Refactor the application into separate modules as shown earlier in this part of the course material.
 
-> **Remember:** refactor your application in baby steps and verify that the application works after every change you make.
+> **Remember:** refactor your application in baby steps and verify that it works after every change you make.
 If you try to take a "shortcut" by refactoring many things at once, then [Murphy's law](https://en.wikipedia.org/wiki/Murphy%27s_law)
 will kick in and it is almost certain that something will break in your application.
 The "shortcut" will end up taking more time than moving forward slowly and systematically.
@@ -597,175 +581,129 @@ module.exports = {
   [Functional Javascript](https://www.youtube.com/watch?v=BMUiFMZr7vk&list=PL0zVEGEvSaeEd9hlmCXrk5yUyqUag-n84) series on Youtube.
 
 There are many different testing libraries or **test runners** available for JavaScript.
-In this course, we will be using a testing library developed and used internally by Facebook called [**jest**](https://jestjs.io/),
-which resembles the previous king of JavaScript testing libraries [Mocha](https://mochajs.org/).
+The old king of test libraries is [Mocha](https://mochajs.org/), which was replaced a few years ago by [Jest](https://jestjs.io/).
+A newcomer to the libraries is [Vitest](https://vitest.dev/), which bills itself as a new generation of test libraries.
 
-Jest is a natural choice for this course, as it works well for testing backends, and it shines when it comes to testing React applications.
+Nowadays, Node also has a built-in test library [node:test](https://nodejs.org/docs/latest/api/test.html), which is well suited to the needs of the course.
 
-> ***Windows users:*** Jest may not work if the path of the project directory contains a directory that has spaces in its name.
+Let's define the *npm script `test`* for the test execution:
 
-Since tests are only executed during the development of our application, we will install `jest` as a development dependency with the command:
-
-```bash
-npm i -D jest
-```
-
-Let's define the *npm script `test`* to execute tests with Jest and to report about the test execution with the `verbose` style:
-
-```json
+```js
 {
-  //...
+  // ...
   "scripts": {
     "start": "node index.js",
-    "dev": "nodemon index.js",
-    "test": "jest --verbose", // highlight-line
-    "build:ui": "rm -rf dist && cd ../reading/ && npm run build && cp -r dist ../backend-reading",
-    "deploy": "npm run build:ui && git add . && git commit -m npm_generated_rebuild_of_the_UI && git push",
-    "lint": "eslint .",
-    "fixlint": "eslint . --fix"
-  },
-  //...
-}
-```
-
-Jest requires one to specify that the execution environment is Node.
-This can be done by adding the following to the end of *package.json*:
-
-```js
-{
- //...
- "jest": {
-   "testEnvironment": "node"
- }
-}
-```
-
-Alternatively, Jest can look for a configuration file with the default name *jest.config.js*, where we can define the execution environment like this:
-
-```js
-module.exports = {
-  testEnvironment: "node",
-}
-```
-
-Let's create a new file called *tests/reverse.test.js* with the following contents:
-
-```js
-const reverse = require("../utils/for_testing").reverse;
-
-test("reverse of a", () => {
-  const result = reverse("a");
-
-  expect(result).toBe("a");
-});
-
-test("reverse of react", () => {
-  const result = reverse("react");
-
-  expect(result).toBe("tcaer");
-});
-
-test("reverse of releveler", () => {
-  const result = reverse("releveler");
-
-  expect(result).toBe("releveler");
-});
-```
-
-#### Handling complaints about jest
-
-The ESLint configuration we added to the project in the previous part complains about the `test` and `expect` commands in our test file
-since the configuration does not allow *globals*.
-Let's get rid of the complaints by adding `"jest": true` to the `env` property in the *.estlintrc.js* file.
-
-```js
-module.exports = {
-  "env": {
-    "node": true,
-    "browser": true,
-    "commonjs": true,
-    "es2021": true,
-    "jest": true, // highlight-line
+    "dev": "node --watch index.js",
+    "test": "node --test", // highlight-line
+    "lint": "eslint ."
   },
   // ...
 }
 ```
 
-WebStorm also seems to complain with warnings for not knowing about `test` and `expect`.
-To get rid of these errors, you can type this command in *Terminal* so that your project is also aware of the jest's types.
+Let's create a separate directory for our tests called *tests* and create a new file called *reverse.test.js* with the following contents:
 
-```bash
-npm i -D @types/jest
+```js
+const { test } = require('node:test')
+const assert = require('node:assert')
+
+const reverse = require('../utils/for_testing').reverse
+
+test('reverse of a', () => {
+  const result = reverse('a')
+
+  assert.strictEqual(result, 'a')
+})
+
+test('reverse of react', () => {
+  const result = reverse('react')
+
+  assert.strictEqual(result, 'tcaer')
+})
+
+test('reverse of releveler', () => {
+  const result = reverse('releveler')
+
+  assert.strictEqual(result, 'releveler')
+})
 ```
 
-This should now clear all warnings when you click back into *reverse.test.js* in WebStorm.
 Let's now examine the file.
-The first line imports the function to be tested and assigns it to a variable called `reverse`:
+The test defines the keyword *test* and the library [`assert`](https://nodejs.org/docs/latest/api/assert.html),
+which is used by the tests to check the results of the functions under test.
+
+The next line imports the function to be tested and assigns it to a variable called `reverse`:
 
 ```js
 const reverse = require("../utils/for_testing").reverse;
 ```
 
 Individual test cases are defined with the `test` function.
-The first parameter of the function is the *test description* as a string.
-The second parameter is a *function that defines the functionality* for the test case.
+The first argument of the function is the *test description* as a string.
+The second argument is a *function that defines the functionality* for the test case.
 The functionality for the second test case looks like this:
 
 ```js
 () => {
   const result = reverse("react");
 
-  expect(result).toBe("tcaer");
+  assert.strictEqual(result, 'tcaer')
 };
 ```
 
 First, we execute the code to be tested, meaning that we generate a reverse for the string `react`.
-Next, we verify the results with the [`expect` function](https://jestjs.io/docs/expect#expectvalue).
-`expect` wraps the resulting value into an object that offers a collection of **matcher** functions, that can be used for verifying the correctness of the result.
-Since in this test case we are comparing two strings, we can use the [`toBe` matcher](https://jestjs.io/docs/expect#tobevalue).
+Next, we verify the results with the
+[`strictEqual` function](https://nodejs.org/docs/latest/api/assert.html#assertstrictequalactual-expected-message)
+of the [*`assert`* library](https://nodejs.org/docs/latest/api/assert.html).
 
 As expected, all of the tests pass:
 
-![terminal output from npm test](../../images/4/1x.png)
+![terminal output from npm test with all tests passing](../../images/4/1new.png)
 
-Jest expects by default that the names of test files contain *.test*.
-In this course, we will follow the convention of naming our test files with the extension *.test.js*.
+In the course, we follow the convention where test file names end with *.test.js*, as the *`node:test`* testing library automatically executes test files named this way.
 
-Jest has excellent error messages, let's break our `reverse of react` test to demonstrate this by changing the expected result from `tcaer` to the incorrect `8caer` (line 12).
+Let's break the test by changing the expected result from `tcaer` to the incorrect `67caer`:
 
 ```js
-  expect(result).toBe("8caer");
+test('reverse of react', () => {
+  const result = reverse('react')
+
+  assert.strictEqual(result, '67caer')
+})
 ```
 
-Running the tests above results in the following error message:
+Running this test results in the following error message:
 
-![terminal output shows failure from npm test](../../images/4/2x.png)
+![terminal output shows failure from npm test](../../images/4/2new.png)
 
 Change the test back.
 
-Let's add a few tests for the `average` function, into a new file *tests/average.test.js*.
+Let's add a few tests for the `average` function, into a new file *tests/average.test.js*:
 
 ```js
-const average = require("../utils/for_testing").average;
+const { test, describe } = require('node:test')
+const assert = require('node:assert')
 
-describe("average", () => {
-  test("of one value is the value itself", () => {
-    expect(average([1])).toBe(1);
-  });
+const average = require('../utils/for_testing').average
 
-  test("of many is calculated right", () => {
-    expect(average([1, 2, 3, 4, 5, 6])).toBe(3.5);
-  });
+describe('average', () => {
+  test('of one value is the value itself', () => {
+    assert.strictEqual(average([1]), 1)
+  })
 
-  test("of empty array is zero", () => {
-    expect(average([])).toBe(0);
-  });
-});
+  test('of many is calculated right', () => {
+    assert.strictEqual(average([1, 2, 3, 4, 5, 6]), 3.5)
+  })
+
+  test('of empty array is zero', () => {
+    assert.strictEqual(average([]), 0)
+  })
+})
 ```
 
 The test reveals that the function does not work correctly with an empty array (this is because in JavaScript dividing by zero results in `NaN`):
 
-![terminal output showing that an empty array fails with jest](../../images/4/3.png)
+![terminal output showing empty array fails](../../images/4/3new.png)
 
 Fixing the function in *utils/for_testing.js* requires one change:
 
@@ -792,10 +730,12 @@ describe("average", () => {
 });
 ```
 
-Describe blocks can be used for grouping tests into logical collections.
-The test output of Jest also uses the name of the `describe` block:
+**Describe blocks** can be used for grouping tests into logical collections.
+The test output also uses the name of the `describe` block:
 
-![screenshot of npm test showing describe blocks](../../images/4/4x.png)
+```bash
+![screenshot of npm test showing describe blocks](../../images/4/4new.png) // TODO: replace this image
+```
 
 As we will see later on `describe` blocks are necessary when we want to run some shared setup or teardown operations for a group of tests.
 
@@ -803,8 +743,8 @@ Another thing to notice is that we wrote the tests in quite a compact way,
 without assigning the output of the function being tested to a variable:
 
 ```js
-test("of empty array is zero", () => {
-  expect(average([])).toBe(0);
+test('of empty array is zero', () => {
+  assert.strictEqual(average([]), 0)
 })
 ```
 
@@ -818,7 +758,7 @@ Let's create a collection of helper functions that are meant to assist in dealin
 Create the functions into a file called *utils/list_helper.js*.
 Write your tests into an appropriately named test file under the *tests* directory.
 
-#### 4.3: helper functions and unit tests, Step 1
+#### 4.3: Helper functions and Unit tests, Step 1
 
 First, define a `dummy` function that receives an array of shows as a parameter and always returns the value 1.
 The contents of the *list_helper.js* file at this point should be the following:
@@ -836,17 +776,19 @@ module.exports = {
 Verify that your test configuration works with the following test:
 
 ```js
-const listHelper = require("../utils/list_helper");
+const { test, describe } = require('node:test')
+const assert = require('node:assert')
+const listHelper = require('../utils/list_helper')
 
 test("dummy returns one", () => {
   const shows = [];
 
   const result = listHelper.dummy(shows);
-  expect(result).toBe(1);
-});
+  assert.strictEqual(result, 1)
+})
 ```
 
-#### 4.4: helper functions and unit tests, Step 2
+#### 4.4: Helper functions and unit tests, Step 2
 
 Define a new `totalLikes` function that receives a list of shows as a parameter.
 The function returns the total sum of ***likes*** in all of the shows.
@@ -873,29 +815,19 @@ describe("total likes", () => {
 
   test("when list has only one show, equals the likes of that", () => {
     const result = listHelper.totalLikes(listWithOneShow);
-    expect(result).toBe(5);
+    assert.strictEqual(result, 5)
   });
 });
 ```
 
 If defining your own test input list of shows is too much work,
-you can use the ready-made list [here](https://raw.githubusercontent.com/comp227/misc/main/shows_for_test.md).
+you can use the [ready-made list](https://raw.githubusercontent.com/comp227/misc/main/shows_for_test.md).
 
 You are bound to run into problems while writing tests.
 Remember the things that we learned about [debugging](/part3/saving_data_to_mongo_db#debugging-node-applications) in part 3.
-You can print things to the console with `console.log` even during test execution.
-It is even possible to use the debugger while running tests, you can find instructions for that [here](https://jestjs.io/docs/en/troubleshooting).
+You can use the debugger or print things even during test execution.
 
-> **Pertinent:** if some test is failing, then it is recommended to only run that test while you are fixing the issue.
-You can run a single test with the [only](https://jestjs.io/docs/api#testonlyname-fn-timeout) method.
->
-> Another way of running a single test (or describe block) is to specify the name of the test to be run with the [-t](https://jestjs.io/docs/en/cli.html) flag:
->
-> ```js
-> npm test -- -t 'when list has only one show, equals the likes of that'
-> ```
-
-#### 4.5*: helper functions and unit tests, Step 3
+#### 4.5*: Helper functions and unit tests, Step 3
 
 Define a new `favoriteShow` function that receives a list of shows as a parameter.
 The function finds out which show has the most likes.
@@ -911,13 +843,15 @@ The value returned by the function could be in the following format:
 }
 ```
 
-> **Pertinent** when you are comparing objects, the [`toEqual` method](https://jestjs.io/docs/en/expect#toequalvalue) is probably what you want to use,
-since the [toBe](https://jestjs.io/docs/en/expect#tobevalue) tries to verify that the two values are the same value, and not just that they contain the same properties.
+> **Pertinent** when you are comparing objects,
+> the [`deepStrictEqual` method](https://nodejs.org/api/assert.html#assertdeepstrictequalactual-expected-message) is probably what you want to use,
+> as it ensures that the objects have the same attributes.
+> For differences between various assert module functions, you can refer to [this Stack Overflow answer](https://stackoverflow.com/a/73937068/15291501).
 
 Write the tests for this exercise inside of a new `describe` block.
 Do the same for the remaining exercises as well.
 
-#### 4.6*: helper functions and unit tests, Step 4
+#### 4.6*: Helper functions and Unit tests, Step 4
 
 This and the next exercise are a little bit more challenging.
 Finishing these two exercises is not required to advance in the course material,
@@ -927,7 +861,7 @@ Finishing this exercise can be done without the use of additional libraries.
 However, this exercise is a great opportunity to learn how to use the [Lodash](https://lodash.com/) library.
 
 Define a function called `mostShows` that receives an array of shows as a parameter.
-The function returns the ***genre*** that has the largest amount of shows.
+The function returns the ***genre*** that has the largest number of shows.
 The return value also contains the number of shows the top genre has:
 
 ```js
@@ -939,10 +873,10 @@ The return value also contains the number of shows the top genre has:
 
 If there are many top genres, then it is enough to return any one of them.
 
-#### 4.7*: helper functions and unit tests, Step 5
+#### 4.7*: Helper functions and Unit tests, Step 5
 
 Define a function called `mostLikes` that receives an array of shows as its parameter.
-The function returns the genre, whose shows collectively have the largest amount of likes.
+The function returns the ***genre*** whose shows collectively have the *largest number of likes*.
 The return value also contains the total number of likes that the genre has received:
 
 ```js

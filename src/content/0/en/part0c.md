@@ -17,6 +17,7 @@ We will try to conform to contemporary best practices starting with [part 1](/pa
 
 Open the [example application](https://227demo.djosv.com) in your browser.
 Sometimes this takes a while.
+> **FYI:** This course was done and adapted for the Chrome browser.
 
 **The 1st rule of web development**: Always keep the Developer Console open on your web browser.
 On macOS, open the console by pressing ***F12*** or ***option(⌥)-cmd(⌘)-I*** simultaneously.
@@ -231,7 +232,7 @@ We can try going to the address <https://227demo.djosv.com/data.json> straight f
 There we find the places in [JSON](https://en.wikipedia.org/wiki/JSON) "raw data".
 By default, Chromium-based browsers are not too good at displaying JSON data.
 Plugins can be used to handle the formatting.
-Install, for example, [JSONVue](https://chrome.google.com/webstore/detail/jsonview/chklaanhfefbnpoihckbnefhakgolnmc) on Chrome, and reload the page.
+Install, for example, [JSONView](https://chromewebstore.google.com/detail/gmegofmjomhknnokphhckolhcffdaihd) on Chrome, and reload the page.
 The data is now nicely formatted:
 
 ![Formatted JSON output](../../images/0/11e.png)
@@ -361,7 +362,7 @@ html
         input
 ```
 
-The same treelike structure can be seen on the console tab ***Elements***.
+The same treelike structure can be seen on the console's ***Elements*** tab.
 
 ![A screenshot of the Elements tab of the developer console](../../images/0/14e.png)
 
@@ -373,7 +374,7 @@ The DOM enables programmatic modification of the **element trees** corresponding
 
 The JavaScript code introduced in the previous chapter used the DOM-API to add a list of places to the page.
 
-The following code creates a new node to the variable `ul`, and adds some child nodes to it:
+The following code creates a new node, assigns it to the variable `ul`, and adds some child nodes to it:
 
 ```js
 var ul = document.createElement('ul')
@@ -434,8 +435,8 @@ The JavaScript code the browser fetches will always create the list of places ba
 
 ### CSS
 
-The `head` element of the HTML code of the Places page contains a [link](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/link) tag.
-This `link` tag determines that the browser must fetch a [CSS](https://developer.mozilla.org/en-US/docs/Web/CSS)
+The `head` element of the HTML code of the Places page contains a [`link` tag](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/link).
+A **`link` tag** determines that the browser must fetch a [CSS](https://developer.mozilla.org/en-US/docs/Web/CSS)
 style sheet from the address [main.css](https://227demo.djosv.com/main.css).
 
 Cascading Style Sheets, or CSS, is a style sheet language used to determine the appearance of web pages.
@@ -475,7 +476,7 @@ A class selector definition always starts with a period and contains the name of
 
 Classes are [**attributes**](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/class), which can be added to HTML elements.
 
-CSS attributes can be examined on the ***Elements*** tab of the console:  
+CSS attributes can be examined in the ***Elements*** tab of the console:  
 
 ![Screenshot of the Elements tab on the developer console](../../images/0/17e.png)
 
@@ -535,14 +536,14 @@ Let's zoom into it:
 It is an [HTTP POST](https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/POST) request to the server address ***new_place***.
 The server responds with HTTP status code 302.
 This is a [URL redirect](https://en.wikipedia.org/wiki/URL_redirection),
-with which the server asks the browser to do a new HTTP GET request to the address defined in the header's *Location* - the address `places`.
+with which the server asks the browser to perform a new HTTP GET request to the address defined in the header's *Location* - the address `places`.
 
 So, the browser reloads the *places* page.
 The reload causes three more HTTP requests: fetching the style sheet (*main.css*),
 the JavaScript code (*main.js*), and the raw data of the places (*data.json*).
 
 We can also see the data submitted in the Network tab.
-The Form Data dropdown is within the new Payload tab, located to the right of the Headers tab.
+The Form Data dropdown is within the new ***Payload*** tab, located to the right of the ***Headers*** tab.
 
 ![form data dropdown in developer tools](../../images/0/23e.png)
 
@@ -679,7 +680,8 @@ form.onsubmit = function(e) {
 }
 ```
 
-The command `document.getElementById('places_form')` instructs the code to fetch the form element from the page and to register an ***event handler*** to handle the form's submit event.
+The command `document.getElementById('places_form')` instructs the code to fetch a reference to the HTML form element on the page that has the ID *`places_form`*
+and register an ***event handler*** to handle that form's submit event.
 The event handler immediately calls the method `e.preventDefault()` to prevent the default handling of the form's submission.
 The default method would send the data to the server and cause a new GET request, which we don't want to happen.
 
@@ -738,7 +740,7 @@ Google's [AngularJS](https://angularjs.org/) quickly became almost the de facto 
 However, the popularity of Angular plummeted in October 2014 after the
 [Angular team announced that support for version 1 would end](https://web.archive.org/web/20151208002550/https://jaxenter.com/angular-2-0-announcement-backfires-112127.html),
 and Angular 2 would not be backward compatible with the first version.
-Angular 2 and the newer versions have not gotten too warm of a welcome.
+Angular 2 and the newer versions have not received too warm of a welcome.
 
 Currently, one of the most popular tools for implementing the browser-side logic of web applications is Facebook's [React](https://react.dev/) library.
 During this course, we will get familiar with React and other technologies which are frequently used together.

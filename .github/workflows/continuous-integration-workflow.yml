@@ -35,6 +35,21 @@ jobs:
           cd public
           pwd
           ls -la
+      
+      - name: Debug token presence
+        shell: bash
+        run: |
+          if [ -z "${{ secrets.GITHUB_TOKEN }}" ]; then
+            echo "GITHUB_TOKEN missing (unexpected)"; exit 1
+          fi
+          echo "GITHUB_TOKEN exists"
+
+      - name: Debug can GITHUB_TOKEN authenticate to repo?
+        shell: bash
+        run: |
+          set -e
+          git ls-remote "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/comp227/comp227.git" > /dev/null
+          echo "ls-remote succeeded (token works for HTTPS auth)"
 
       - name: Gatsby Publish
         uses: enriikke/gatsby-gh-pages-action@v2

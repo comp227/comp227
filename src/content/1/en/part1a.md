@@ -40,23 +40,13 @@ One thing we'll need to remember to do is to import our file watcher settings th
 - You should see *COMP 227 Git Watcher* appear enabled
 - Click ***OK*** to close settings.
 
-Some of the images prepared for this class use the classic UI, which you can switch to with the settings icon near the close button.
-
-![Classic UI location in WebStorm](../../images/1/custom/classic_ui.png)
-
-You can click on the project bar in the upper right
-
-![project bar in the upper right](../../images/1/custom/webstorm_project.png)
-
-This is what it looks like in the modern UI
+You can click on the project bar in the upper right to see the project files and verify that you only see *`lab1-<your username>`*.
 
 ![project bar icon in modern WebStorm UI](../../images/1/custom/webstorm_project_new_ui.png)
 
 ### Starting Development
 
-to return to see that you should now have two sets of folders: *lab0* and *lab1*.
-
-You can now right-click on lab1 and select **Open in->Terminal**.
+You can now right-click on the lab1 folder in the project and select **Open in->Terminal**.
 If you did not review [part 0d's coverage of git commands and the terminal](/part0/configuring_your_machine_for_this_course#some-git-command-line-tools),
 it might make sense to do so now.
 
@@ -167,12 +157,12 @@ If your file watcher is working correctly, you'll see that the files have turned
 ![WebStorm showing files added as white](../../images/1/custom/git_commit_white.png)
 
 For this class, you should not ever really have files in Red, Green or any color in WebStorm for very long, since this will prevent our use of our Auto-Save feature and the File Watchers.
-***To test that this is working, please go to *App.jsx* and change the word *`Hello`* to *`Hola`*.***
+***To test that this is working, please go to `App.jsx` and change the word `Hello` to `Hola`.***
 When you do this, you may notice that *App.jsx* turns blue which means that there are changes that have yet to be committed.
 
 ![WebStorm showing files changed](../../images/1/custom/git_changed_blue.png)
 
-However, the file will not stay blue for long, and our workflow automation will be triggered, which will cause the file to be white again.
+However, the file will not stay blue for long, and ***our workflow automation will be triggered, which will cause the file to be white again***.
 
 The last thing I wanted to point your attention to is to be aware of a green arrow near our main branch at the top.
 You should not have one at this moment.
@@ -208,21 +198,22 @@ To ensure that you are working through the material correctly, you will message 
 > Not following this process will most likely result in you needing to meet with me to fix things.
 > ***Let's avoid having unnecessary meetings and promise to follow these instructions***.
 
-### create-react-app
+#### FYI: *create-react-app*
 
-An alternative to Vite is the older generation tool [*create-react-app*](https://github.com/facebookincubator/create-react-app).
-This tool was used in previous versions of the course.
-
-Here are some of the most notable differences
-
-|Difference|Vite|create-react-app (AKA ***CRA***)|
-|--|--|--|
-|Application Startup filename|*main.jsx*|*index.js*|
-|Filename for `<App />` component|*App.jsx*|*App.js*|
-|command to launch application|`npm run dev`|`npm start`|
-
-This year the course has been updated to Vite,
-though some parts may still use the application base created with `create-react-app`.
+> An alternative to Vite is the older generation tool [*create-react-app*](https://github.com/facebookincubator/create-react-app).
+> This tool was used in previous versions of the course.
+>
+> Here are some of the most notable differences
+>
+> |Difference|Vite|create-react-app (AKA ***CRA***)|
+> |--|--|--|
+> |Application Startup filename|*main.jsx*|*index.js*|
+> |Filename for `<App />` component|*App.jsx*|*App.js*|
+> |command to launch application|`npm run dev`|`npm start`|
+>
+> This year the course has been updated to Vite,
+> though some parts may still use the application base created with `create-react-app`.
+>
 
 ### Component
 
@@ -363,7 +354,7 @@ Did you keep it open?
 ### JSX
 
 It seems like React components are returning HTML markup.
-However, this is not the case.
+However, *this is not the case*.
 The layout of React components is mostly written using [JSX](https://react.dev/learn/writing-markup-with-jsx).
 Although JSX looks like HTML, we are dealing with a way to write JavaScript.
 Under the hood, JSX returned by React components is compiled into JavaScript.
@@ -393,8 +384,8 @@ Projects created with *Vite* are configured to compile automatically.
 We will learn more about this topic in [part 7](/part7) of this course.
 
 It is also possible to write React as "pure JavaScript" without using JSX.
-Just like it's possible to chisel one of your old programming projects onto a stone tablet.
-In either case, I wouldn't recommend it.
+Just like it's possible to take an old programming project of yours and translate it to assembly.
+While it "builds character", at this stage, I wouldn't recommend it.
 
 In practice, JSX is much like HTML with the distinction that with JSX you can easily embed dynamic content by writing appropriate JavaScript within curly braces.
 The idea of JSX is quite similar to other templating languages, such as [Thymeleaf](https://www.thymeleaf.org/) and [Java Spring](https://spring.io/), which are used on servers.
@@ -501,53 +492,53 @@ const App = () => {
 }
 ```
 
-### Possible error message
+#### *FYI* Possible error message
 
-If your project has React version 18 or earlier installed, you may receive the following error message at this point:
-
-![WebStorm showing name is missing in props validation](../../images/1/1-vite5.png)
-
-It's not an actual error, but a warning caused by the [ESLint](https://eslint.org/) tool.
-You can silence the warning [`react/prop-types`](https://github.com/jsx-eslint/eslint-plugin-react/blob/master/docs/rules/prop-types.md)
-by adding the following to the file *eslint.config.js*:
-
-```js
-export default [
-  { ignores: ['dist'] },
-  {
-    files: ['**/*.{js,jsx}'],
-    languageOptions: {
-      ecmaVersion: 2020,
-      globals: globals.browser,
-      parserOptions: {
-        ecmaVersion: 'latest',
-        ecmaFeatures: { jsx: true },
-        sourceType: 'module',
-      },
-    },
-    settings: { react: { version: '22.21' } },
-    plugins: {
-      react,
-      'react-hooks': reactHooks,
-      'react-refresh': reactRefresh,
-    },
-    rules: {
-      ...js.configs.recommended.rules,
-      ...react.configs.recommended.rules,
-      ...react.configs['jsx-runtime'].rules,
-      ...reactHooks.configs.recommended.rules,
-      'react/jsx-no-target-blank': 'off',
-      'react-refresh/only-export-components': [
-        'warn',
-        { allowConstantExport: true },
-      ],
-      'react/prop-types': 0, // highlight-line
-    },
-  },
-]
-```
-
-We will get to know ESLint in more detail [in part 3](/part3/validation_and_es_lint#lint).
+> If your project has React version 18 or earlier installed, you may receive the following error message at this point:
+>
+> ![WebStorm showing name is missing in props validation](../../images/1/1-vite5.png)
+>
+> It's not an actual error, but a warning caused by the [ESLint](https://eslint.org/) tool.
+> You can silence the warning [`react/prop-types`](https://github.com/jsx-eslint/eslint-plugin-react/blob/master/docs/rules/prop-types.md)
+> by adding the following to the file *eslint.config.js*:
+>
+> ```js
+> export default [
+>   { ignores: ['dist'] },
+>   {
+>     files: ['**/*.{js,jsx}'],
+>     languageOptions: {
+>       ecmaVersion: 2020,
+>       globals: globals.browser,
+>       parserOptions: {
+>         ecmaVersion: 'latest',
+>         ecmaFeatures: { jsx: true },
+>         sourceType: 'module',
+>       },
+>     },
+>     settings: { react: { version: '22.21' } },
+>     plugins: {
+>       react,
+>       'react-hooks': reactHooks,
+>       'react-refresh': reactRefresh,
+>     },
+>     rules: {
+>       ...js.configs.recommended.rules,
+>       ...react.configs.recommended.rules,
+>       ...react.configs['jsx-runtime'].rules,
+>       ...reactHooks.configs.recommended.rules,
+>       'react/jsx-no-target-blank': 'off',
+>       'react-refresh/only-export-components': [
+>         'warn',
+>         { allowConstantExport: true },
+>       ],
+>       'react/prop-types': 0, // highlight-line
+>     },
+>   },
+> ]
+> ```
+>
+> We will get to know ESLint in more detail [in part 3](/part3/validation_and_es_lint#lint).
 
 ### Multiple props
 

@@ -163,9 +163,9 @@ This course will use Node.js and Express to create web servers.
 
 *Keep the Developer Console open.*
 Clear the console by clicking the 🚫 symbol, or by typing `clear()` in the console.
-Now when you go to the [places](https://227demo.djosv.com/places) page, the browser does 4 HTTP requests:
+Now when you go to the [places](https://227demo.djosv.com/places) page, the browser does 5 HTTP requests:
 
-![Screenshot of the developer console with the 4 requests visible](../../images/0/8e.png)
+![Screenshot of the developer console with the 5 requests visible](../../images/0/8e.png)
 
 All of the requests have *different* types.
 The first request type is of type **document**.
@@ -231,8 +231,11 @@ We can try going to the address <https://227demo.djosv.com/data.json> straight f
 
 There we find the places in [JSON](https://en.wikipedia.org/wiki/JSON) "raw data".
 By default, Chromium-based browsers are not too good at displaying JSON data.
-Plugins can be used to handle the formatting.
-Install, for example, [JSONView](https://chromewebstore.google.com/detail/gmegofmjomhknnokphhckolhcffdaihd) on Chrome, and reload the page.
+Though in newer versions, they have added the *`Pretty-print`* checkbox that you can click just below the address bar.
+This will autoformat the data to make it look better.
+![Standard formatted JSON output with pretty-print](../../images/0/11e-basic.png)
+Plugins can be used to make this formatting even nicer.
+Install, for example, [JSONFormatter](https://chromewebstore.google.com/detail/json-formatter/bcjindcccaagfpapjjmafapmmgkkhgoa) on Chrome, and reload the page.
 The data is now nicely formatted:
 
 ![Formatted JSON output](../../images/0/11e.png)
@@ -258,14 +261,14 @@ data.forEach(function(place) {
 document.getElementById('places').appendChild(ul)
 ```
 
-The code first creates an unordered list with an [ul](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/ul) tag...
+The code first creates an unordered list with an [`ul` tag](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/ul)...
 
 ```js
 var ul = document.createElement('ul')
 ul.setAttribute('class', 'places')
 ```
 
-...and then adds one [li](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/li) tag for each place.
+...and then adds one [`li` tag](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/li) for each place.
 Only the `name` field of each place becomes the contents of the `li` tag.
 The timestamps found in the raw data are not used for anything here.
 
@@ -278,7 +281,7 @@ data.forEach(function(place) {
 })
 ```
 
-Now open the ***Console*** tab on your Developer Console:
+Now go back to <https://227demo.djosv.com/places> and open the ***Console*** tab on your Developer Console:
 
 ![Screenshot of the console tab on the developer console](../../images/0/12e.png)
 

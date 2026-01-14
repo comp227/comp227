@@ -177,11 +177,11 @@ You can press ***Space*** to continue reviewing the changes, and ***q*** to exit
 
 Now with our handy package manager, we need to install **[node.js](https://nodejs.org/en/)** AKA **node**.
 If you already have Node installed,
-make sure it is at least version 22.21.0.
+make sure it is at least version 22.21.1.
 We will discuss node.js further in [part 1](/part1).
 
 For this class, I'm going to install nvm first so that we can use a specific version of node.
-Specifically, we'll use Node version 22.21.0.
+Specifically, we'll use Node version 22.21.1.
 However, the bulk of this course was written and fully tested with Node 18.3.2.
 So essentially we want to have two node versions 22.21 (a newer version) and 18.3.2 (as a fallback).
 Since that is the case, we will also install **[NVM](https://github.com/nvm-sh/nvm)**,
@@ -194,16 +194,16 @@ This can be done via one of these commands.
 |:---|:--|
 |`winget install -e CoreyButler.NVMforWindows`|`brew install nvm`|
 
-After installing *`nvm`*, you could use the `nvm help` to figure out the commands to install a version (like 22.21.0 and 18.3.2), and then use the later version.
+After installing *`nvm`*, you could use the `nvm help` to figure out the commands to install a version (like 22.21.1 and 18.3.2), and then use the later version.
 I'll provide the commands here, which you'll need to execute separately.
 
 ```bash
 nvm install 18.3
-nvm install 22.23
+nvm install 22.21
 nvm use 22
 ```
 
-After this, you should be able to type `node -v` and you'll notice that it should print out *`v22.21.0`*.
+After this, you should be able to type `node -v` and you'll notice that it should print out *`v22.21.1`*.
 
 To link node to our future IDE WebStorm we'll follow the next couple of instructions.
 Here's the first:

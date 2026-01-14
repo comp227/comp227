@@ -13,7 +13,7 @@ We will be building our backend on top of [NodeJS](https://nodejs.org/en/),
 which is a JavaScript runtime based on Google's [Chrome V8](https://developers.google.com/v8/) JavaScript engine.
 
 This course material was thoroughly tested with version *18.3.2* of Node.js,
-but most of it has been switched to use *22.21.0*.
+but most of it has been switched to use *22.21.1*.
 If you are using NVM, you can always switch, but you can also just stick with 22.21 for now.
 
 > **FYI:** you can check the version by running `node -v` in the command line.

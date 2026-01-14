@@ -267,7 +267,7 @@ which will have your own GitHub handle on it as part of the link.
 That will take you to the GitHub site where you will see your repository, with your handle at the end of the repository name.
 Click on the green code button ![icon showing green code button](../../images/0/partc/greencode.png)
 and then the copy button ![icon showing copy button](../../images/0/partc/image8.png) to copy the URL,
-as shown via this [animation accepting and clicking on the assignment](https://imgur.com/5Tv7mVM)
+as shown via this [**animation accepting and clicking on the assignment**](https://imgur.com/5Tv7mVM)
 
 Make sure to save this URL that was just created specifically for you.
 You will need it in the next step, so please also just keep this page open.
@@ -330,7 +330,7 @@ and then go to [*Settings->Developer settings->Personal Access Tokens->Tokens (c
 Then give the token a name,
 set expiration to *Custom* (providing a date up to 1 year from now) and select the `repo, workflow, read:org and gist` checkboxes for the scopes.
 Once you do that, scroll to the bottom and click the green ***Generate Token***.
-[I did another short animation of this as well.](https://imgur.com/LUAt5DU)
+[I did another **short animation of this** as well.](https://imgur.com/LUAt5DU)
 You'll then see a page that has the token that says to copy it because you won't be able to see it again.
 
 ![token about to expire](../../images/0/partc/github_token_ready.png)
@@ -450,9 +450,12 @@ Click ***Apply*** and then ***OK***.
 ### Link WebStorm to nvm
 
 This one is important as it tells WebStorm where our node version is, which helps with IDE integration.
-Back in the Settings window, type ***Node interpreter*** in the search box, which should lead you to *Languages & Frameworks->Node.js*.
+Back in the Settings window, type ***Node runtime*** in the search box, which should lead you to *Languages & Frameworks->Javascript Runtime*.
 Click on the Node interpreter dropdown, and select ***Add...->Add local...***.
-Click the home button, then select ***.nvm/current/bin/node.exe*** and click ***OK*** to close both Windows.
+On Windows, the Node interpreter should be set to
+*`C:\Program Files\nodejs\node.exe`* (*this path always points to the currently active Node version*).
+On macOS/Linux, the Node interpreter is typically located at
+*`~/.nvm/versions/node/<version>/bin/node`*.
 
 > If you cannot find a *.nvm* folder in your installation directory,
 > it may be that *nvm* has automatically created a symbolic link in your Applications directory,
@@ -490,7 +493,7 @@ Click on the ***Grant*** button next to comp227, and now try cloning the project
 By this point, your project should be open.
 
 What you should do is watch
-[this animation a few times to see how to make changes to the markdown file](https://imgur.com/blj5aGh)
+[**this animation a few times** to see how to make changes to the markdown file](https://imgur.com/blj5aGh)
 and how to send those changes so that they are recorded on GitHub.
 
 Because we are editing a markdown file, WebStorm defaults for it to be in preview mode,
@@ -534,7 +537,7 @@ For one, I would like you to edit the file that we created via WebStorm and add 
 
 You should have been following along here with the reading.
 Once you completed the steps above and push, verify that you have finished by visiting **github.com** and clicking on your repository.
-Once there, you can click to see [this gif animation that helps you verify that the commits were made on GitHub](https://imgur.com/fpaI9XK)
+Once there, you can click to see [**this gif animation that helps you verify that the commits were made on GitHub**](https://imgur.com/fpaI9XK)
 
 Like the image, you should see your changes on github.com and you should see your profile and link as well.
 

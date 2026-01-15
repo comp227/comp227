@@ -6,13 +6,13 @@ module.exports = {
       c: 'Fundamentals of Web apps',
       d: 'Configuring your machine for this course'
     },
-    /* 1: {
+    1: {
       a: 'Introduction to React',
       b: 'JavaScript',
       c: 'Component state, event handlers',
       d: 'A more complex state, debugging React apps',
     },
-    2: {
+    /* 2: {
       a: 'Rendering a collection, modules',
       b: 'Forms',
       c: 'Getting data from server',

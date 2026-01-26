@@ -12,14 +12,14 @@ module.exports = {
       c: 'Component state, event handlers',
       d: 'A more complex state, debugging React apps',
     },
-    /* 2: {
+     2: {
       a: 'Rendering a collection, modules',
       b: 'Forms',
       c: 'Getting data from server',
       d: 'Altering data in server',
       e: 'Adding styles to React app',
     },
-    3: {
+    /*3: {
       a: 'Node.js and Express',
       b: 'Deploying app to internet',
       c: 'Saving data to MongoDB',

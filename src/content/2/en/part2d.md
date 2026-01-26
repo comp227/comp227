@@ -83,7 +83,7 @@ which was used heavily at the beginning of [part 0](/part0/fundamentals_of_web_a
 
 Also, the *response* tab is useful, it shows what was the data the server responded with:
 
-![TODO - provide response tab screenshot here with tasks as response from server](../../images/2/21e3.png)
+![response tab screenshot here with tasks as response from server](../../images/2/21e3.png)
 
 We can use the inspector to check that the headers sent in the POST request are what we expected them to be and that their values are correct.
 

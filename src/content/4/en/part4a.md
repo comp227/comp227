@@ -166,20 +166,20 @@ tasksRouter.delete("/:id", (request, response, next) => {
 });
 
 tasksRouter.put('/:id', (request, response, next) => {
-  const { content, important } = request.body
+  const { content, important } = request.body;
 
   Task.findById(request.params.id)
     .then(task => {
       if (!task) {
-        return response.status(404).end()
+        return response.status(404).end();
       }
 
-      task.content = content
-      task.important = important
+      task.content = content;
+      task.important = important;
 
       return task.save().then((updatedTask) => {
-        response.json(updatedTask)
-      })
+        response.json(updatedTask);
+      });
     })
     .catch(error => next(error));
 });
@@ -604,28 +604,28 @@ Let's define the *npm script `test`* for the test execution:
 Let's create a separate directory for our tests called *tests* and create a new file called *reverse.test.js* with the following contents:
 
 ```js
-const { test } = require('node:test')
-const assert = require('node:assert')
+const { test } = require("node:test");
+const assert = require("node:assert");
 
-const reverse = require('../utils/for_testing').reverse
+const reverse = require("../utils/for_testing").reverse;
 
-test('reverse of a', () => {
-  const result = reverse('a')
+test("reverse of a", () => {
+  const result = reverse("a");
 
-  assert.strictEqual(result, 'a')
-})
+  assert.strictEqual(result, "a");
+});
 
-test('reverse of react', () => {
-  const result = reverse('react')
+test("reverse of react", () => {
+  const result = reverse("react");
 
-  assert.strictEqual(result, 'tcaer')
-})
+  assert.strictEqual(result, "tcaer");
+});
 
-test('reverse of releveler', () => {
-  const result = reverse('releveler')
+test("reverse of releveler", () => {
+  const result = reverse("releveler");
 
-  assert.strictEqual(result, 'releveler')
-})
+  assert.strictEqual(result, "releveler");
+});
 ```
 
 Let's now examine the file.
@@ -647,7 +647,7 @@ The functionality for the second test case looks like this:
 () => {
   const result = reverse("react");
 
-  assert.strictEqual(result, 'tcaer')
+  assert.strictEqual(result, 'tcaer');
 };
 ```
 
@@ -665,11 +665,11 @@ In the course, we follow the convention where test file names end with *.test.js
 Let's break the test by changing the expected result from `tcaer` to the incorrect `67caer`:
 
 ```js
-test('reverse of react', () => {
-  const result = reverse('react')
+test("reverse of react", () => {
+  const result = reverse("react");
 
-  assert.strictEqual(result, '67caer')
-})
+  assert.strictEqual(result, "67caer");
+});
 ```
 
 Running this test results in the following error message:
@@ -681,24 +681,24 @@ Change the test back.
 Let's add a few tests for the `average` function, into a new file *tests/average.test.js*:
 
 ```js
-const { test, describe } = require('node:test')
-const assert = require('node:assert')
+const { test, describe } = require("node:test");
+const assert = require("node:assert");
 
-const average = require('../utils/for_testing').average
+const average = require("../utils/for_testing").average;
 
-describe('average', () => {
-  test('of one value is the value itself', () => {
-    assert.strictEqual(average([1]), 1)
-  })
+describe("average", () => {
+  test("of one value is the value itself", () => {
+    assert.strictEqual(average([1]), 1);
+  });
 
-  test('of many is calculated right', () => {
-    assert.strictEqual(average([1, 2, 3, 4, 5, 6]), 3.5)
-  })
+  test("of many is calculated right", () => {
+    assert.strictEqual(average([1, 2, 3, 4, 5, 6]), 3.5);
+  });
 
-  test('of empty array is zero', () => {
-    assert.strictEqual(average([]), 0)
-  })
-})
+  test("of empty array is zero", () => {
+    assert.strictEqual(average([]), 0);
+  });
+});
 ```
 
 The test reveals that the function does not work correctly with an empty array (this is because in JavaScript dividing by zero results in `NaN`):
@@ -743,9 +743,9 @@ Another thing to notice is that we wrote the tests in quite a compact way,
 without assigning the output of the function being tested to a variable:
 
 ```js
-test('of empty array is zero', () => {
-  assert.strictEqual(average([]), 0)
-})
+test("of empty array is zero", () => {
+  assert.strictEqual(average([]), 0);
+});
 ```
 
 </div>
@@ -776,16 +776,16 @@ module.exports = {
 Verify that your test configuration works with the following test:
 
 ```js
-const { test, describe } = require('node:test')
-const assert = require('node:assert')
-const listHelper = require('../utils/list_helper')
+const { test, describe } = require("node:test");
+const assert = require("node:assert");
+const listHelper = require("../utils/list_helper");
 
 test("dummy returns one", () => {
   const shows = [];
 
   const result = listHelper.dummy(shows);
-  assert.strictEqual(result, 1)
-})
+  assert.strictEqual(result, 1);
+});
 ```
 
 #### 4.4: Helper functions and unit tests, Step 2
@@ -815,7 +815,7 @@ describe("total likes", () => {
 
   test("when list has only one show, equals the likes of that", () => {
     const result = listHelper.totalLikes(listWithOneShow);
-    assert.strictEqual(result, 5)
+    assert.strictEqual(result, 5);
   });
 });
 ```

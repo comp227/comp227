@@ -237,7 +237,7 @@ The code uses the `createServer` method of the [`http` module](https://nodejs.or
 An **event handler** is registered to the server that is called *every time* an HTTP request is made to the server's address <http://localhost:3001>.
 
 The request is responded to with the status code *`200`*,
-with the `Content-Type` header set to `text/plain`, and the content of the site to be returned set to `Hello World`.
+with the `Content-Type` header set to `text/plain`, and the content of the site to be returned set to `Hello COMP227`.
 
 The last rows bind the http server assigned to the `app` variable, to listen to HTTP requests sent to port *`3001`*:
 
@@ -256,19 +256,19 @@ const http = require("http");
 // highlight-start
 let tasks = [
   {
-    id: "1",
+    id: 1,
     content: "Wash the dishes",
     date: "2023-01-10T17:30:31.098Z",
     important: true
   },
   {
-    id: "2",
+    id: 2,
     content: "Take out the trash",
     date: "2023-01-10T18:39:34.091Z",
     important: false
   },
   {
-    id: "3",
+    id: 3,
     content: "Buy salty snacks",
     date: "2023-01-10T19:20:14.298Z",
     important: true
@@ -319,7 +319,7 @@ The dependency is also added to our *package.json* file:
 {
   // ...
   "dependencies": {
-    "express": "^5.1.0"
+    "express": "^5.2.1"
   }
 }
 ```
@@ -332,11 +332,11 @@ In addition to Express, you can find a great number of other dependencies in the
 These are the dependencies of the Express library and the dependencies of all of its dependencies, and so forth.
 These are called the [transitive dependencies](https://lexi-lambda.github.io/blog/2016/08/24/understanding-the-npm-dependency-model/) of our project.
 
-Version 5.1.0 of Express was installed in our project.
+Version 5.2.1 of Express was installed in our project.
 What does the caret in front of the version number in *package.json* mean?
 
 ```json
-"express": "^5.1.0"
+"express": "^5.2.1"
 ```
 
 The versioning model used in npm is called [semantic versioning](https://docs.npmjs.com/about-semantic-versioning).
@@ -408,7 +408,7 @@ The first one defines an event handler that is used to handle HTTP GET requests 
 
 > ```js
 > app.get("/", (request, response) => {
->   response.send("<h1>Hello World!</h1>");
+>   response.send("<h1>Hello COMP227!</h1>");
 > });
 > ```
 
@@ -417,7 +417,7 @@ The [`request` parameter](http://expressjs.com/en/4x/api.html#req) contains all 
 and the [`response` parameter](http://expressjs.com/en/4x/api.html#res) is used to define how the request is responded to.
 
 In our code, the request is answered by using the [`send` method](http://expressjs.com/en/4x/api.html#res.send) of the `response` object.
-Calling the method makes the server respond to the HTTP request by sending a response containing the string `<h1>Hello World!</h1>` that was passed to the `send` method.
+Calling the method makes the server respond to the HTTP request by sending a response containing the string `<h1>Hello COMP227!</h1>` that was passed to the `send` method.
 Since the parameter is a *`string`*, *Express* automatically sets the value of the `Content-Type` header to be `text/html`.
 The status code of the response defaults to *`200`*.
 
@@ -775,6 +775,7 @@ While Postman has become fairly popular due to all of its options, in our case w
 To use the rest client, right-click on the *backend-reading* folder and select ***New->HTTP Request***.
 Give it the name `all_tasks` and then you'll see a file named ***all_tasks.http***.
 We'll use that file to define a request that fetches all tasks.
+> ***FYI:*** Make sure to *use `http`* and not `https` for these examples.
 
 ![get all tasks rest file with get request on tasks](../../images/3/12ea.png)
 
@@ -832,7 +833,8 @@ In Postman, the picture below shows how also have to define the data sent in the
 
 ![postman post on api/tasks with post content](../../images/3/14x.png)
 
-The application prints the data that we sent in the request to the console:
+*You'll need to restart the backend to have express be used*.
+Once the backend restarts and you send the POST request, the application prints the data that we sent in the request to the console:
 
 ![terminal printing content provided in postman](../../images/3/15e.png)
 
@@ -840,7 +842,7 @@ The application prints the data that we sent in the request to the console:
 The development server will restart if changes are made to the code,
 so by monitoring the console, you will immediately notice if there is an error in the application's code:
 >
-> ```![console error about SyntaxError](../../images/3/16_25.png)   //TODO: redo this image```
+> ![console error about SyntaxError](../../images/3/16.png)
 >
 > Similarly, it is useful to check the console to make sure that the backend behaves as we expect it to in different situations, like when we send data with an HTTP POST request.
 Any `console.log` commands that you have put in temporarily for development will also appear here.
@@ -874,15 +876,16 @@ and they can be distributed to everyone in the development team.
 Notice in the picture above that we are also able to add the POST request in same file using `###` separators:
 
 ```text
-GET http://localhost:3001/api/tasks/
+### GET request to example server
+GET http://localhost:3001/api/tasks
 
-###
-POST http://localhost:3001/api/tasks/ HTTP/1.1
-content-type: application/json
+### POST request to create a new task
+POST http://localhost:3001/api/tasks
+Content-Type: application/json
 
 {
-    "name": "sample",
-    "time": "Wed, 21 Oct 2015 18:27:50 GMT"
+  "content": "Learn more about working with APIs and Postman",
+  "important": true
 }
 ```
 
@@ -1006,9 +1009,9 @@ If you clone the project, run the `npm i` command before starting the applicatio
 > const generateId = () => {
 >   const maxId = tasks.length > 0
 >     ? Math.max(...tasks.map(t => Number(t.id))) // highlight-line
->     : 0
->   return String(maxId + 1)
-> }
+>     : 0;
+>   return String(maxId + 1);
+> };
 > ```
 >
 > This part of the highlighted line may look intriguing:

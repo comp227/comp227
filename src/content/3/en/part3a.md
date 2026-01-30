@@ -105,7 +105,7 @@ Let's make a small change to the `scripts` object by adding a new script command
 Next, let's create the first version of our application by adding an *index.js* file to the root of the *backend-reading* folder with the following code:
 
 ```js
-console.log('hello comp227')
+console.log("hello comp227");
 ```
 
 At this point, verify that your file watcher has committed the files, which can be done by typing `git status` in the repo.
@@ -152,16 +152,16 @@ echo "Error: no test specified" && exit 1
 Let's change the application into a web server by editing the *index.js* file as follows:
 
 ```js
-const http = require('http')
+const http = require("http");
 
 const app = http.createServer((request, response) => {
-  response.writeHead(200, { 'Content-Type': 'text/plain' })
-  response.end('Hello COMP227!')
-})
+  response.writeHead(200, { "Content-Type": "text/plain" });
+  response.end("Hello COMP227!");
+});
 
-const PORT = 3001
-app.listen(PORT)
-console.log(`Server running on port ${PORT}`)
+const PORT = 3001;
+app.listen(PORT);
+console.log(`Server running on port ${PORT}`);
 ```
 
 Once you start the application again, the following message is printed in the console:
@@ -203,14 +203,14 @@ Also the address <http://localhost:3001/foo/bar> will display the same content.
 Let's take a closer look at the first line of the code:
 
 ```js
-const http = require('http')
+const http = require("http");
 ```
 
 In the first row, the application imports Node's built-in [web server](https://nodejs.org/docs/latest-v22.x/api/http.html) module.
 This is practically what we have already been doing in our browser-side code, but with a slightly different syntax:
 
 ```js
-import http from 'http'
+import http from "http";
 ```
 
 These days, code that runs in the browser uses ES6 modules.
@@ -228,9 +228,9 @@ The next chunk in our code looks like this:
 
 ```js
 const app = http.createServer((request, response) => {
-  response.writeHead(200, { 'Content-Type': 'text/plain' })
-  response.end('Hello COMP227!')
-})
+  response.writeHead(200, { "Content-Type": "text/plain" });
+  response.end("Hello COMP227!");
+});
 ```
 
 The code uses the `createServer` method of the [`http` module](https://nodejs.org/docs/latest-v22.x/api/http.html) to create a new web server.
@@ -242,16 +242,16 @@ with the `Content-Type` header set to `text/plain`, and the content of the site 
 The last rows bind the http server assigned to the `app` variable, to listen to HTTP requests sent to port *`3001`*:
 
 ```js
-const PORT = 3001
-app.listen(PORT)
-console.log(`Server running on port ${PORT}`)
+const PORT = 3001;
+app.listen(PORT);
+console.log(`Server running on port ${PORT}`);
 ```
 
 The primary purpose of the backend server in this course is to offer raw data in JSON format to the frontend.
 For this reason, let's immediately change our server to return a hardcoded list of tasks in the JSON format:
 
 ```js
-const http = require('http')
+const http = require("http");
 
 // highlight-start
 let tasks = [
@@ -273,17 +273,17 @@ let tasks = [
     date: "2023-01-10T19:20:14.298Z",
     important: true
   }
-]
+];
 
 const app = http.createServer((request, response) => {
-  response.writeHead(200, { 'Content-Type': 'application/json' })
-  response.end(JSON.stringify(tasks))
-})
+  response.writeHead(200, { "Content-Type": "application/json" });
+  response.end(JSON.stringify(tasks));
+});
 // highlight-end
 
-const PORT = 3001
-app.listen(PORT)
-console.log(`Server running on port ${PORT}`)
+const PORT = 3001;
+app.listen(PORT);
+console.log(`Server running on port ${PORT}`);
 ```
 
 Let's restart the server (you can shut the server down by pressing ***Ctrl+C*** in the console) and let's refresh the browser.
@@ -371,25 +371,25 @@ In contrast, the future 6.0.0 version of Express [may contain](https://expressjs
 Let's get back to our application and make the following changes in *index.js*:
 
 ```js
-const express = require('express')
-const app = express()
+const express = require("express");
+const app = express();
 
 let tasks = [
   ...
-]
+];
 
-app.get('/', (request, response) => {
-  response.send('<h1>Hello COMP227!</h1>')
-})
+app.get("/", (request, response) => {
+  response.send("<h1>Hello COMP227!</h1>");
+});
 
-app.get('/api/tasks', (request, response) => {
-  response.json(tasks)
-})
+app.get("/api/tasks", (request, response) => {
+  response.json(tasks);
+});
 
-const PORT = 3001
+const PORT = 3001;
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`)
-})
+  console.log(`Server running on port ${PORT}`);
+});
 ```
 
 To get the new version of our application into use, first we have to restart it.
@@ -399,17 +399,17 @@ Right at the beginning of our code, we're importing `express`,
 which this time is a *function* that is used to create an Express application stored in the `app` variable:
 
 > ```js
-> const express = require('express')
-> const app = express()
+> const express = require("express");
+> const app = express();
 > ```
 
 Next, we define two ***routes*** to the application.
 The first one defines an event handler that is used to handle HTTP GET requests made to the application's `/` root:
 
 > ```js
-> app.get('/', (request, response) => {
->   response.send('<h1>Hello World!</h1>')
-> })
+> app.get("/", (request, response) => {
+>   response.send("<h1>Hello World!</h1>");
+> });
 > ```
 
 The event handler function accepts two parameters.
@@ -428,9 +428,9 @@ We can verify this from the ***Network*** tab in developer tools:
 The second route defines an event handler that handles HTTP GET requests made to the *tasks* path of the application:
 
 ```js
-app.get('/api/tasks', (request, response) => {
-  response.json(tasks)
-})
+app.get("/api/tasks", (request, response) => {
+  response.json(tasks);
+});
 ```
 
 The request is responded to with the [json](http://expressjs.com/en/4x/api.html#res.json) method of the `response` object.
@@ -444,7 +444,7 @@ Next, let's take a quick look at the data sent in JSON format.
 In the earlier version where we were only using Node, we had to transform the data into the JSON formatted string with the `JSON.stringify` method:
 
 ```js
-response.end(JSON.stringify(tasks))
+response.end(JSON.stringify(tasks));
 ```
 
 With *Express*, this is no longer required, because this **transformation happens automatically**.
@@ -564,19 +564,19 @@ The unique address we will use for an individual task is of the form ***tasks/10
 We can define [**parameters**](http://expressjs.com/en/guide/routing.html#route-parameters) for routes in Express by using the `:` syntax:
 
 ```js
-app.get('/api/tasks/:id', (request, response) => {
-  const id = request.params.id
-  const task = tasks.find(task => task.id === id)
-  response.json(task)
-})
+app.get("/api/tasks/:id", (request, response) => {
+  const id = request.params.id;
+  const task = tasks.find(task => task.id === id);
+  response.json(task);
+});
 ```
 
-Now `app.get('/api/tasks/:id', ...)` will handle all HTTP GET requests that are of the form ***/api/tasks/SOMETHING***, where ***SOMETHING*** is an arbitrary string.
+Now `app.get("/api/tasks/:id", ...)` will handle all HTTP GET requests that are of the form ***/api/tasks/SOMETHING***, where ***SOMETHING*** is an arbitrary string.
 
 The `id` parameter in the route of a request can be accessed through the [`request`](http://expressjs.com/en/api.html#req) object:
 
 ```js
-const id = request.params.id
+const id = request.params.id;
 ```
 
 JavaScript array's `find` is used to find the task with an id that matches the parameter.
@@ -598,13 +598,13 @@ So type `log`, ***Enter***, `id`, ***Enter***(2x), and you get the `console.log`
 You could also add the line numbers and file names, but since I have `clog` already, I'll use that in those instances.
 
 ```js
-app.get('/api/tasks/:id', (request, response) => {
-  const id = request.params.id
-  console.log('id =', id)
-  const task = tasks.find(task => task.id === id)
-  console.log('task =', task)
-  response.json(task)
-})
+app.get("/api/tasks/:id", (request, response) => {
+  const id = request.params.id;
+  console.log("id =", id);
+  const task = tasks.find(task => task.id === id);
+  console.log("task =", task);
+  response.json(task);
+});
 ```
 
 When we visit <http://localhost:3001/api/tasks/1> again in the browser,
@@ -621,17 +621,17 @@ Also, while we are here, I used our `clog` and `log` live templates to generate 
 Notice that even with our `log` live template, we can have some complex statements that appear twice, like `task.id === id`.
 
 ```js
-app.get('/api/tasks/:id', (request, response) => {
-    const id = request.params.id
-    console.log('id(' + typeof id + ') =', id, ' | index.js:36 - ')
+app.get("/api/tasks/:id", (request, response) => {
+    const id = request.params.id;
+    console.log("id(" + typeof id + ") =", id, " | index.js:36 - ");
     const task = tasks.find(task => {
-        console.log('task.id(' + typeof task.id + ') =', task.id, ' | index.js:38 - ')
-        console.log('task.id === id =', task.id === id)
-        return task.id === id
-    })
-    console.log('task =', task)
-    response.json(task)
-})
+        console.log("task.id(" + typeof task.id + ") =", task.id, " | index.js:38 - ");
+        console.log("task.id === id =", task.id === id);
+        return task.id === id;
+    });
+    console.log("task =", task);
+    response.json(task);
+});
 ```
 
 When we visit the URL again in the browser, each call to the comparison function prints a few different things to the console.
@@ -649,17 +649,17 @@ task = undefined
 ```
 
 The cause of the bug becomes clear.
-The `id` variable contains a string *`'1'`*, whereas the ids of tasks are integers.
-In JavaScript, the "triple equals" comparison `===` considers all values of different types to not be equal by default, meaning that *`1`* is not *`'1'`*.
+The `id` variable contains a string *`"1"`*, whereas the ids of tasks are integers.
+In JavaScript, the "triple equals" comparison `===` considers all values of different types to not be equal by default, meaning that *`1`* is not *`"1"`*.
 
 Let's fix the issue by changing the id parameter from a string into a [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number):
 
 ```js
-app.get('/api/tasks/:id', (request, response) => {
-  const id = Number(request.params.id) // highlight-line
-  const task = tasks.find(task => task.id === id)
-  response.json(task)
-})
+app.get("/api/tasks/:id", (request, response) => {
+  const id = Number(request.params.id); // highlight-line
+  const task = tasks.find(task => task.id === id);
+  response.json(task);
+});
 ```
 
 Now fetching an individual resource works.
@@ -682,18 +682,18 @@ If no task is found, the server should respond with the status code [404 not fou
 Let's make the following change to our code:
 
 ```js
-app.get('/api/tasks/:id', (request, response) => {
-  const id = request.params.id
-  const task = tasks.find(task => task.id === id)
+app.get("/api/tasks/:id", (request, response) => {
+  const id = request.params.id;
+  const task = tasks.find(task => task.id === id);
   
   // highlight-start
   if (task) {
-    response.json(task)
+    response.json(task);
   } else {
-    response.status(404).end()
+    response.status(404).end();
   }
   // highlight-end
-})
+});
 ```
 
 Since no data is attached to the response, we use the [`status` method](http://expressjs.com/en/4x/api.html#res.status) for setting the status and the [`end` method](http://expressjs.com/en/4x/api.html#res.end)
@@ -716,12 +716,12 @@ Next, let's implement a route for deleting resources.
 Deletion happens by making an HTTP DELETE request to the URL of the resource:
 
 ```js
-app.delete('/api/tasks/:id', (request, response) => {
-  const id = request.params.id
-  tasks = tasks.filter(task => task.id !== id)
+app.delete("/api/tasks/:id", (request, response) => {
+  const id = request.params.id;
+  tasks = tasks.filter(task => task.id !== id);
 
-  response.status(204).end()
-})
+  response.status(204).end();
+});
 ```
 
 If deleting the resource is successful, meaning that the task exists and is removed,
@@ -794,20 +794,20 @@ We can use the parser by adding the command **`app.use(express.json())`**.
 Let's activate the JSON parser in *index.js* and *implement an initial handler for dealing with the HTTP POST requests*:
 
 ```js
-const express = require('express')
-const app = express()
+const express = require("express");
+const app = express();
 
-app.use(express.json())  // highlight-line
+app.use(express.json());  // highlight-line
 
 //...
 
 // highlight-start
-app.post('/api/tasks', (request, response) => {
-  const task = request.body
-  console.log('task =', task)
+app.post("/api/tasks", (request, response) => {
+  const task = request.body;
+  console.log("task =", task);
 
-  response.json(task)
-})
+  response.json(task);
+});
 // highlight-end
 ```
 
@@ -906,18 +906,18 @@ You can use the play button next to the line numbers to run the request you'd li
 Once we know that the application receives data correctly, it's time to finalize the handling of the request:
 
 ```js
-app.post('/api/tasks', (request, response) => {
+app.post("/api/tasks", (request, response) => {
   const maxId = tasks.length > 0
     ? Math.max(...tasks.map(t => Number(t.id))) 
-    : 0
+    : 0;
 
-  const task = request.body
-  task.id = String(maxId + 1)
+  const task = request.body;
+  task.id = String(maxId + 1);
 
-  tasks = tasks.concat(task)
+  tasks = tasks.concat(task);
 
-  response.json(task)
-})
+  response.json(task);
+});
 ```
 
 We need a unique id for the task.
@@ -934,30 +934,30 @@ All other properties are discarded:
 const generateId = () => {
   const maxId = tasks.length > 0
     ? Math.max(...tasks.map(t => Number(t.id)))
-    : 0
-  return String(maxId + 1)
-}
+    : 0;
+  return String(maxId + 1);
+};
 
-app.post('/api/tasks', (request, response) => {
-  const body = request.body
+app.post("/api/tasks", (request, response) => {
+  const body = request.body;
 
   if (!body.content) {
     return response.status(400).json({ 
-      error: 'content missing' 
-    })
-  }
+      error: "content missing" 
+    });
+  };
 
   const task = {
     id: generateId(),
     content: body.content,
     important: body.important || false,
     date: new Date().toISOString(),
-  }
+  };
 
-  tasks = tasks.concat(task)
+  tasks = tasks.concat(task);
 
-  response.json(task)
-})
+  response.json(task);
+});
 ```
 
 The logic for generating the new id number for tasks has been extracted into a separate `generateId` function.
@@ -968,8 +968,8 @@ If the received data is missing a value for the `content` property, the server w
 ```js
 if (!body.content) {
   return response.status(400).json({ 
-    error: 'content missing' 
-  })
+    error: "content missing" 
+  });
 }
 ```
 
@@ -1133,7 +1133,7 @@ Respond to requests like these:
 2. with information that explains the reason for the error, e.g.:
 
 ```js
-{ error: 'name must be unique' }
+{ error: "name must be unique" }
 ```
 
 </div>
@@ -1202,12 +1202,12 @@ For a function to be **middleware** it needs to receive three parameters:
 
 ```js
 const requestLogger = (request, response, next) => {
-  console.log('Method:', request.method)
-  console.log('Path:  ', request.path)
-  console.log('Body:  ', request.body)
-  console.log('---')
-  next()
-}
+  console.log("Method:", request.method);
+  console.log("Path:  ", request.path);
+  console.log("Body:  ", request.body);
+  console.log("---");
+  next();
+};
 ```
 
 At the end of the function body, the `next` function that was passed as a parameter is called.
@@ -1233,11 +1233,11 @@ For these requests, the middleware will return an error message in the JSON form
 
 ```js
 const unknownEndpoint = (request, response, next) => {
-  response.status(404).send({ error: 'unknown endpoint' })
-  next()
-}
+  response.status(404).send({ error: "unknown endpoint" });
+  next();
+};
 
-app.use(unknownEndpoint)
+app.use(unknownEndpoint);
 ```
 
 You can find the code for our current application in its entirety in the [*part3-2* branch of our backend repo](https://github.com/comp227/part3-tasks-backend/tree/part3-2).

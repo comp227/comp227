@@ -19,13 +19,13 @@ module.exports = {
       d: 'Altering data in server',
       e: 'Adding styles to React app',
     },
-    /*3: {
+    3: {
       a: 'Node.js and Express',
       b: 'Deploying app to internet',
       c: 'Saving data to MongoDB',
       d: 'Validation and ESLint',
     },
-    4: {
+    /*4: {
       a: 'Structure of backend application, introduction to testing',
       b: 'Testing the backend',
       c: 'User administration',

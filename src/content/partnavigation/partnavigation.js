@@ -25,13 +25,13 @@ module.exports = {
       c: 'Saving data to MongoDB',
       d: 'Validation and ESLint',
     },
-    /*4: {
+    4: {
       a: 'Structure of backend application, introduction to testing',
       b: 'Testing the backend',
       c: 'User administration',
       d: 'Token authentication',
     },
-    5: {
+    /*5: {
       a: 'Login in frontend',
       b: 'props.children and proptypes',
       c: 'Testing React apps',

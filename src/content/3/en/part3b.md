@@ -394,8 +394,8 @@ const getAll = () => {
 
 After the change, we have to:
 
-1. *create a new production build of the **frontend***
-2. *copy it to the root of the **backend** repository*.
+1. create a new production build of the **frontend**
+2. copy it to the root of the **backend** repository.
 
 The application can now be used from the *backend* address <http://localhost:3001>:
 

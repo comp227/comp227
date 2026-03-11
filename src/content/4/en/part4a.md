@@ -8,7 +8,7 @@ lang: en
 <div class="content">
 
 Let's continue our work on the backend of the tasks application we started in [part 3](/part3).
-*This means that you can continue editing the repo that you have from **lab3** for continuing to edit the reading.*
+*This means that you can continue editing the repo that you have from `lab3` for continuing to edit the reading.*
 
 ### Project structure
 

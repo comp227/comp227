@@ -19,7 +19,7 @@ module.exports = {
       d: 'Altering data in server',
       e: 'Adding styles to React app',
     },
-    /*3: {
+    3: {
       a: 'Node.js and Express',
       b: 'Deploying app to internet',
       c: 'Saving data to MongoDB',
@@ -31,7 +31,7 @@ module.exports = {
       c: 'User administration',
       d: 'Token authentication',
     },
-    5: {
+    /*5: {
       a: 'Login in frontend',
       b: 'props.children and proptypes',
       c: 'Testing React apps',

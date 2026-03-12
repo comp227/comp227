@@ -78,42 +78,42 @@ The installation script will ask a few questions, answer them as follows:
 
 ![answer: javascript, tests, false, true](../../images/5/play0.png)
 
-Notice that when installing Playwright your operating system may not support all of the browsers Playwright offers and you may see an error message like below:
-
-```bash
-Webkit 18.0 (playwright build v2070) downloaded to /home/user/.cache/ms-playwright/webkit-2070
-Playwright Host validation warning: 
-╔══════════════════════════════════════════════════════╗
-║ Host system is missing dependencies to run browsers. ║
-║ Missing libraries:                                   ║
-║     libicudata.so.66                                 ║
-║     libicui18n.so.66                                 ║
-║     libicuuc.so.66                                   ║
-║     libjpeg.so.8                                     ║
-║     libwebp.so.6                                     ║
-║     libpcre.so.3                                     ║
-║     libffi.so.7                                      ║
-╚══════════════════════════════════════════════════════╝
-```
-
-If this is the case you can either specify specific browsers to test with `--project=` in your *package.json*:
-
-```json
-    "test": "playwright test --project=chromium --project=firefox",
-```
-
-or remove the entry for any problematic browsers from your *playwright.config.js* file:
-
-```json
-  projects: [
-    // ...
-    //{
-    //  name: "webkit",
-    //  use: { ...devices["Desktop Safari"] },
-    //},
-    // ...
-  ]
-```
+> ***FYI:*** When installing Playwright your operating system may not support all of the browsers Playwright offers and you may see an error message like below:
+>
+> ```bash
+> Webkit 18.0 (playwright build v2070) downloaded to /home/user/.cache/ms-playwright/webkit-2070
+> Playwright Host validation warning: 
+> ╔══════════════════════════════════════════════════════╗
+> ║ Host system is missing dependencies to run browsers. ║
+> ║ Missing libraries:                                   ║
+> ║     libicudata.so.66                                 ║
+> ║     libicui18n.so.66                                 ║
+> ║     libicuuc.so.66                                   ║
+> ║     libjpeg.so.8                                     ║
+> ║     libwebp.so.6                                     ║
+> ║     libpcre.so.3                                     ║
+> ║     libffi.so.7                                      ║
+> ╚══════════════════════════════════════════════════════╝
+> ```
+>
+> If this is the case you can either specify specific browsers to test with `--project=` in your *package.json*:
+>
+> ```json
+>     "test": "playwright test --project=chromium --project=firefox",
+> ```
+>
+> or remove the entry for any problematic browsers from your *playwright.config.js* file:
+>
+> ```json
+>   projects: [
+>     // ...
+>     //{
+>     //  name: "webkit",
+>     //  use: { ...devices["Desktop Safari"] },
+>     //},
+>     // ...
+>   ]
+> ```
 
 Let's define an npm script for running tests and test reports in *package.json*:
 
@@ -133,7 +133,6 @@ During installation, the following is printed to the console:
 ```text
 And check out the following files:
   - ./tests/example.spec.js - Example end-to-end test
-  - ./tests-examples/demo-todo-app.spec.js - Demo Todo App end-to-end tests
   - ./playwright.config.js - Playwright Test configuration
 ```
 
@@ -157,11 +156,7 @@ To open last HTML report run:
 ```
 
 The tests pass.
-A more detailed test report can be opened either with the command suggested by the output, or with the npm script we just defined:
-
-```bash
-npm run test:report
-```
+A more detailed test report can be opened either with `npx playwrite show-report`, or with `npm run test:report`.
 
 Tests can also be run via the graphical UI with the command:
 
@@ -169,7 +164,7 @@ Tests can also be run via the graphical UI with the command:
 npm run test -- --ui
 ```
 
-Sample tests in the file tests/example.spec.js look like this:
+The sample tests in *tests/example.spec.js* look like this:
 
 ```js
 // @ts-check
@@ -197,7 +192,7 @@ The first line of the test functions says that the tests are testing the page at
 
 ### Testing our own code
 
-Now let's remove the sample tests and start testing our own application.
+Now let's remove the sample tests (by deleting *tests/example.spec.js*) and start testing our own application.
 
 Playwright tests assume that the system under test is running when the tests are executed.
 Unlike, for example, backend integration tests, Playwright tests **do not start** the system under test during testing.
@@ -230,7 +225,7 @@ test("front page can be opened", async ({ page }) => {
 
   const locator = page.getByText("Tasks");
   await expect(locator).toBeVisible();
-  await expect(page.getByText("Task app, Department of Computer Science, University of the Pacific 2025")).toBeVisible();
+  await expect(page.getByText("Task app, Department of Computer Science, University of the Wacific")).toBeVisible();
 });
 ```
 
@@ -243,19 +238,15 @@ ensures that the element corresponding to the locator is visible at the page.
 
 The second check is done without using the auxiliary variable.
 
-The test fails because an old year ended up in the test.
+The test fails because we are looking for the incorrect name for our university (*`Wacific`*).
 Playwright opens the test report in the browser and it becomes clear that Playwright has actually performed the tests with three different browsers:
 Chrome, Firefox and Webkit, i.e. the browser engine used by Safari:
 
-```bash
-![test report showing the test failing in three different browsers](../../images/5/play2.png) //TODO: Replace this image
-```
+![test report showing the test failing in three different browsers](../../images/5/play2.png)
 
 By clicking on the report of one of the browsers, we can see a more detailed error message:
 
-```bash
-![test error message](../../images/5/play3a.png) //TODO: Replace this image
-```
+![test error message](../../images/5/play3a.png)
 
 In the big picture, it is of course a very good thing that the testing takes place with all three commonly used browser engines,
 but this is slow, and when developing the tests it is probably best to carry them out mainly with only one browser.
@@ -265,7 +256,10 @@ You can define the browser engine to be used with the command line parameter:
 npm test -- --project chromium
 ```
 
-Now let's fix the test with the correct year and let's add a `describe` block to the tests:
+> ***FYI:*** If later on you find that this did not work,
+> you can also comment out the `firefox` and `webkit` projects in *playwright.config.js*
+
+Now let's fix the test with the correct name and let's add a `describe` block to the tests:
 
 ```js
 const { test, describe, expect } = require("@playwright/test");
@@ -276,7 +270,7 @@ describe("Task app", () => {  // highlight-line
 
     const locator = page.getByText("Tasks");
     await expect(locator).toBeVisible();
-    await expect(page.getByText("Task app, Department of Computer Science, University of the Pacific 2025")).toBeVisible();
+    await expect(page.getByText("Task app, Department of Computer Science, University of the Pacific")).toBeVisible();
   });
 });
 ```
@@ -314,7 +308,7 @@ Let's start by opening the login form.
 describe("Task app", () => {
   // ...
 
-  test("user can log in", async ({ page }) => {
+  test("user can login", async ({ page }) => {
     await page.goto("http://localhost:5173");
 
     await page.getByRole("button", { name: "login" }).click();
@@ -335,15 +329,11 @@ npm test -- --ui
 
 We now see that the test finds the button
 
-```bash
-![playwright UI rendering the tasks app while testing it](../../images/5/play4.png) //TODO: Replace this image
-```
+![playwright UI rendering the tasks app while testing it](../../images/5/play4.png)
 
-After clicking, the form will appear
+After clicking on *After Hooks*, the form will appear
 
-```bash
-![playwright UI rendering the login form of the tasks app](../../images/5/play5.png) //TODO: Replace this image
-```
+![playwright UI rendering the login form of the tasks app](../../images/5/play5.png)
 
 When the form is opened, the test should look for the text fields and enter the username and password in them.
 Let's make the first attempt using the [method `page.getByRole`](https://playwright.dev/docs/api/class-page#page-get-by-role):
@@ -352,7 +342,7 @@ Let's make the first attempt using the [method `page.getByRole`](https://playwri
 describe("Task app", () => {
   // ...
 
-  test("user can log in", async ({ page }) => {
+  test("user can login", async ({ page }) => {
     await page.goto("http://localhost:5173");
 
     await page.getByRole("button", { name: "login" }).click();
@@ -365,8 +355,8 @@ This results in an error:
 
 ```bash
 Error: locator.fill: Error: strict mode violation: getByRole("textbox") resolved to 2 elements:
-  1) <input value=""/> aka locator("div").filter({ hasText: /^username$/ }).getByRole("textbox")
-  2) <input value="" type="password"/> aka locator("input[type="password"]")
+  1) <input value=""/> aka getByRole('textbox').first()
+  2) <input value="" type="password"/> aka locator('input[type="password"]')
 ```
 
 The problem now is that `getByRole` finds two text fields, and calling the [`fill` method](https://playwright.dev/docs/api/class-locator#locator-fill) fails,
@@ -377,7 +367,7 @@ One way around the problem is to use the methods [`first`](https://playwright.de
 describe("Task app", () => {
   // ...
 
-  test("user can log in", async ({ page }) => {
+  test("user can login", async ({ page }) => {
     await page.goto("http://localhost:5173");
 
     await page.getByRole("button", { name: "login" }).click();
@@ -400,7 +390,7 @@ One possibility would be to use the [`all` method](https://playwright.dev/docs/a
 ```js
 describe("Task app", () => {
   // ...
-  test("user can log in", async ({ page }) => {
+  test("user can login", async ({ page }) => {
     await page.goto("http://localhost:5173");
 
     await page.getByRole("button", { name: "login" }).click();
@@ -460,16 +450,16 @@ Input fields can and should be located in tests using *labels* with the [`getByL
 describe("Task app", () => {
   // ...
 
-  test("user can log in", async ({ page }) => {
+  test("user can login", async ({ page }) => {
     await page.goto("http://localhost:5173");
 
     await page.getByRole("button", { name: "login" }).click();
-    await page.getByLabel("username").fill("root"); // highlight-line
-    await page.getByLabel("password").fill("tigers");  // highlight-line
+    await page.getByLabel("username").fill("pacrock"); // highlight-line
+    await page.getByLabel("password").fill("ilikepaint");  // highlight-line
   
     await page.getByRole("button", { name: "login" }).click(); 
   
-    await expect(page.getByText("Superuser logged in")).toBeVisible();
+    await expect(page.getByText("Khoury Graffiti Rock logged in")).toBeVisible();
   });
 });
 ```
@@ -477,7 +467,7 @@ describe("Task app", () => {
 When locating elements, it makes sense to aim to utilize the content visible to the user in the interface,
 as this best simulates how a user would actually find the desired input field while navigating the application.
 
-Notice that passing the test at this stage requires that there is a user in the *test* database of the backend with username *`root`* and password *`tigers`*.
+Notice that passing the test at this stage requires that there is a user in the *test* database of the backend with username *`pacrock`* and password *`ilikepaint`*.
 Create a user if needed!
 
 ### Test Initialization
@@ -498,15 +488,15 @@ describe("Task app", () => {
   test("front page can be opened", async ({ page }) => {
     const locator = page.getByText("Tasks");
     await expect(locator).toBeVisible();
-    await expect(page.getByText("Task app, Department of Computer Science, University of the Pacific 2025")).toBeVisible();
+    await expect(page.getByText("Task app, Department of Computer Science, University of the Pacific")).toBeVisible();
   });
 
-  test("user can log in", async ({ page }) => {
+  test("user can login", async ({ page }) => {
     await page.getByRole("button", { name: "login" }).click();
-    await page.getByLabel("username").fill("root");
-    await page.getByLabel("password").fill("tigers");
+    await page.getByLabel("username").fill("pacrock");
+    await page.getByLabel("password").fill("ilikepaint");
     await page.getByRole("button", { name: "login" }).click();
-    await expect(page.getByText("Superuser logged in")).toBeVisible();
+    await expect(page.getByText("Khoury Graffiti Rock logged in")).toBeVisible();
   });
 });
 ```
@@ -524,8 +514,8 @@ describe("Task app", () => {
   describe("when logged in", () => {
     beforeEach(async ({ page }) => {
       await page.getByRole("button", { name: "login" }).click();
-      await page.getByLabel("username").fill("root");
-      await page.getByLabel("password").fill("tigers");
+      await page.getByLabel("username").fill("pacrock");
+      await page.getByLabel("password").fill("ilikepaint");
       await page.getByRole("button", { name: "login" }).click();
     });
 
@@ -569,19 +559,19 @@ const { test, describe, expect, beforeEach } = require("@playwright/test");
 describe("Task app", () => {
   // ....
 
-  test("user can log in", async ({ page }) => {
+  test("user can login", async ({ page }) => {
     await page.getByRole("button", { name: "login" }).click();
-    await page.getByLabel("username").fill("root");
-    await page.getByLabel("password").fill("tigers");
+    await page.getByLabel("username").fill("pacrock");
+    await page.getByLabel("password").fill("ilikepaint");
     await page.getByRole("button", { name: "login" }).click();
-    await expect(page.getByText("Superuser logged in")).toBeVisible();
+    await expect(page.getByText("Khoury Graffiti Rock logged in")).toBeVisible();
   });
 
   describe("when logged in", () => {
     beforeEach(async ({ page }) => {
       await page.getByRole("button", { name: "login" }).click();
-      await page.getByLabel("username").fill("root");
-      await page.getByLabel("password").fill("tigers");
+      await page.getByLabel("username").fill("pacrock");
+      await page.getByLabel("password").fill("ilikepaint");
       await page.getByRole("button", { name: "login" }).click();
     });
 
@@ -596,10 +586,10 @@ describe("Task app", () => {
 ```
 
 Since we have prevented the tests from running in parallel, Playwright runs the tests in the order they appear in the test code.
-The first test, ***user can log in***, checks whether the user *`root`* can login to the application.
+The first test, ***user can login***, checks whether the user *`root`* can login to the application.
 Then, the test ***a new task can be created*** gets executed, which also performs a login (*shown in the `beforeEach` block*).
 
-> ***Pertinent:*** Why do we login again, *isn't the user already logged in because of the first test*?
+> ***Pertinent:*** Why do we log in again, *isn't the user already logged in because of the first test*?
 > No, because the execution of each test starts from the browser's **zero state**, *all changes made to the browser's state by the previous tests are reset*.
 
 ### Controlling the state of the database
@@ -607,7 +597,7 @@ Then, the test ***a new task can be created*** gets executed, which also perform
 If the tests need to be able to modify the server's database, the situation immediately becomes more complicated.
 Ideally, the *server's database should be the same each time we run the tests*, so our tests can be reliably and easily repeatable.
 
-As with unit and integration tests, with E2E tests it is best to empty the database and possibly format it before the tests are run.
+As with unit and integration tests, with E2E tests we should empty the database and format it before the tests are run.
 The challenge with E2E tests is that they do not have access to the database.
 
 The solution is to ***create API endpoints for the backend tests***.
@@ -689,6 +679,7 @@ describe("Task app", () => {
   });
 
   test("user can login", () => {
+    // change to test and pacific username here
     // ...
   });
 
@@ -725,8 +716,8 @@ describe("Task app", () => {
       })
   
       test("importance can be changed", async ({ page }) => {
-        await page.getByRole("button", { name: "make not important" }).click();
-        await expect(page.getByText("make important")).toBeVisible();
+        await page.getByRole("button", { name: "make important" }).click();
+        await expect(page.getByText("make not important")).toBeVisible();
       });
     // highlight-end
     });
@@ -760,7 +751,7 @@ describe("Task app", () => {
     await page.getByLabel("password").fill("wrong");
     await page.getByRole("button", { name: "login" }).click();
 
-    await expect(page.getByText("wrong credentials")).toBeVisible();
+    await expect(page.getByText("Wrong credentials")).toBeVisible();
   });
 
   // ...
@@ -792,7 +783,7 @@ test("login fails with wrong password", async ({ page }) => {
   // ...
 
   const errorDiv = page.locator(".error"); // highlight-line
-  await expect(errorDiv).toContainText("wrong credentials");
+  await expect(errorDiv).toContainText("Wrong credentials");
 });
 ```
 
@@ -808,9 +799,9 @@ test("login fails with wrong password", async ({ page }) => {
   // ...
 
   const errorDiv = page.locator(".error");
-  await expect(errorDiv).toContainText("wrong credentials");
+  await expect(errorDiv).toContainText("Wrong credentials");
   await expect(errorDiv).toHaveCSS("border-style", "solid"); // highlight-line
-  await expect(errorDiv).toHaveCSS("color", "rgb(255, 0, 0)"); // highlight-line
+  await expect(errorDiv).toHaveCSS("color", "rgb(156, 43, 46)"); // highlight-line
 });
 ```
 
@@ -821,14 +812,14 @@ Let's finalize this incorrect login test by ensuring that the application **does
 ```js
 test("login fails with wrong password", async ({ page }) =>{
   await page.getByRole("button", { name: "login" }).click();
-  await page.getByLabel("username").fill("root");
+  await page.getByLabel("username").fill("test");
   await page.getByLabel("password").fill("wrong");
   await page.getByRole("button", { name: "login" }).click();
 
   const errorDiv = page.locator(".error");
-  await expect(errorDiv).toContainText("wrong credentials");
+  await expect(errorDiv).toContainText("Wrong credentials");
   await expect(errorDiv).toHaveCSS("border-style", "solid");
-  await expect(errorDiv).toHaveCSS("color", "rgb(255, 0, 0)");
+  await expect(errorDiv).toHaveCSS("color", "rgb(156, 43, 46)");
 
   await expect(page.getByText("Pacific Tests logged in")).not.toBeVisible(); // highlight-line
 });
@@ -935,9 +926,9 @@ const { loginWith } = require("./helper"); // highlight-line
 describe("Task app", () => {
   // ...
 
-  test("user can log in", async ({ page }) => {
+  test("user can login", async ({ page }) => {
     await loginWith(page, "test", "pacific"); // highlight-line
-    await expect(page.getByText("Powercat logged in")).toBeVisible();
+    await expect(page.getByText("Pacific Tests logged in")).toBeVisible();
   });
 
   test("login fails with wrong password", async ({ page }) => {
@@ -961,7 +952,7 @@ Playwright also offers a [solution](https://playwright.dev/docs/auth) where the 
 and each test starts from a state where the application is already logged in.
 In order for us to take advantage of this method, the initialization of the application's test data should be done a bit differently than now.
 In the current solution, the database is reset before each test, and because of this, logging in just once before the tests is impossible.
-In order for us to use the pre-test login provided by Playwright, the user should be initialized only once before the tests.
+In order for us to use the pre-test login provided by Playwright, *the user should be initialized only once before the tests*.
 We'll stick to our current solution for the sake of simplicity.
 
 The corresponding repeating code actually also applies to creating a new task:
@@ -1040,8 +1031,8 @@ describe("Task app", () => {
       });
   
       test("importance can be changed", async ({ page }) => {
-        await page.getByRole("button", { name: "make not important" }).click();
-        await expect(page.getByText("make important")).toBeVisible();
+        await page.getByRole("button", { name: "make important" }).click();
+        await expect(page.getByText("make not important")).toBeVisible();
       });
     });
   });
@@ -1119,25 +1110,25 @@ describe("when logged in", () => {
       const otherTaskElement = page.getByText("first task");
 
       await otherTaskElement
-        .getByRole("button", { name: "make not important" }).click();
-      await expect(otherTaskElement.getByText("make important")).toBeVisible();
+        .getByRole("button", { name: "make important" }).click();
+      await expect(otherTaskElement.getByText("make not important")).toBeVisible();
     });
   });
 });
 ```
 
-The above test searches for the element `first task`using the method `page.getByText` and stores it in a variable (`otherTaskElement`).
-After this, a button with the text ***make not important*** is searched inside the element and the button is pressed.
-Finally, the test verifies that the button's text has changed to ***make important***.
+The above test searches for the element `first task` using the method `page.getByText` and stores it in a variable (`otherTaskElement`).
+After this, a button with the text ***make important*** is searched inside the element and the button is pressed.
+Finally, the test verifies that the button's text has changed to ***make not important***.
 
 The test could also have been written without the auxiliary variable *`otherTaskElement`*:
 
 ```js
 test("one of those can be made non-important", async ({ page }) => {
   page.getByText("first task")
-    .getByRole("button", { name: "make not important" }).click();
+    .getByRole("button", { name: "make important" }).click();
 
-  await expect(page.getByText("first task").getByText("make important"))
+  await expect(page.getByText("first task").getByText("make not important"))
     .toBeVisible();
 });
 ```
@@ -1145,7 +1136,7 @@ test("one of those can be made non-important", async ({ page }) => {
 Let's change the `Task` component so that the task text is rendered inside a `span` element
 
 ```js
-const Task = ({ task, toggleImportance }); => {
+const Task = ({ task, toggleImportance }) => {
   const label = task.important
     ? "make not important" : "make important";
 
@@ -1168,8 +1159,8 @@ test("one of those can be made non-important", async ({ page }) => {
   const otherTaskText = page.getByText("first task"); // highlight-line
   const otherTaskElement = otherTaskText.locator(".."); // highlight-line
 
-  await otherTaskElement.getByRole("button", { name: "make not important" }).click();
-  await expect(otherTaskElement.getByText("make important")).toBeVisible();
+  await otherTaskElement.getByRole("button", { name: "make important" }).click();
+  await expect(otherTaskElement.getByText("make not important")).toBeVisible();
 });
 ```
 
@@ -1184,8 +1175,8 @@ Of course, the test can also be written using only one auxiliary variable:
 ```js
 test("one of those can be made non-important", async ({ page }) => {
   const secondTaskElement = page.getByText("second task").locator("..");
-  await secondTaskElement.getByRole("button", { name: "make not important" }).click();
-  await expect(secondTaskElement.getByText("make important")).toBeVisible();
+  await secondTaskElement.getByRole("button", { name: "make important" }).click();
+  await expect(secondTaskElement.getByText("make not important")).toBeVisible();
 });
 ```
 
@@ -1194,7 +1185,7 @@ Let's change the test so that three tasks are created, and the importance is cha
 ```js
 describe("when logged in", () => {
   beforeEach(async ({ page }) => {
-    await loginWith(page, "root", "tigers");
+    await loginWith(page, "powercat", "tigers");
   });
 
   test("a new task can be created", async ({ page }) => {
@@ -1213,8 +1204,8 @@ describe("when logged in", () => {
       const otherTaskText = page.getByText("second task"); // highlight-line
       const otherTaskElement = otherTaskText.locator("..");
     
-      await otherTaskElement.getByRole("button", { name: "make not important" }).click();
-      await expect(otherTaskElement.getByText("make important")).toBeVisible();
+      await otherTaskElement.getByRole("button", { name: "make important" }).click();
+      await expect(otherTaskElement.getByText("make not important")).toBeVisible();
     });
   });
 }); 
@@ -1235,13 +1226,18 @@ The following command runs the problematic test in debug mode:
 npm test -- -g"one of those can be made non-important" --debug
 ```
 
-Playwright-inspector shows the progress of the tests step by step.
-The **arrow-dot** button at the top takes the tests one step further.
-The elements found by the locators and the interaction with the browser are visualized in the browser:
+Once this launches, you'll see two windows open.
+One is the browser and the other is the *Playwright Inspector*.
 
-```bash
-![playwright inspector highlighting element found by the selected locator in the application](../../images/5/play6a.png) //TODO: Replace this image
-```
+The Playwright Inspector shows the progress of the tests step by step.
+The **arrow-dot** button at the top ![arrow dot icon](../../images/5/arrow-dot.png) takes the tests one step further.
+It is also called a **step over** button.
+When you click on that button,
+playwright will show the locators and the interaction in that new browser window and execute one step.
+As you keep clicking on it, you'll see each step play out, with it logging in and adding a task.
+For example, after several clicks of that button you would get to a screen like this:
+
+![playwright inspector highlighting element found by the selected locator in the application](../../images/5/play6a.png)
 
 By default, debug steps through the test command by command.
 If it is a complex test, it can be quite a burden to step through the test to the point of interest.
@@ -1270,20 +1266,20 @@ describe("Task app", () => {
         const otherTaskText = page.getByText("second task");
         const otherTaskElement = otherTaskText.locator("..");
       
-        await otherTaskElement.getByRole("button", { name: "make not important" }).click();
-        await expect(otherTaskElement.getByText("make important")).toBeVisible();
+        await otherTaskElement.getByRole("button", { name: "make important" }).click();
+        await expect(otherTaskElement.getByText("make not important")).toBeVisible();
       });
     });
   });
 });
 ```
 
-Now in the test you can go to `page.pause()` in one step, by pressing the green arrow symbol in the inspector.
-When we now run the test and jump to the `page.pause()` command, we find an interesting fact:
+Now in the test you can go to `page.pause()` in one step, by pressing resume ![green arrow button](../../images/5/arrow.png)
+in the inspector.
+Resume will continue until we hit that `pause` command,
+and at that point we find an interesting fact:
 
-```bash
-![playwright inspector showing the state of the application at page.pause](../../images/5/play6b.png) //TODO: Replace this image
-```
+![playwright inspector showing the state of the application at page.pause](../../images/5/play6b.png)
 
 > ***Pertinent:*** It seems that the browser ***does not render*** all the tasks created in the block `beforeEach`.
 > What is the problem?
@@ -1327,32 +1323,31 @@ npx playwright show-report
 
 or with the npm script we defined `npm run test:report`
 
-Trace looks practically the same as running tests in UI mode.
+Once you click on one of the tests and then click the *traces* image after the report results,
+trace looks practically the same as running tests in UI mode.
 
 UI mode and Trace Viewer also offer the possibility of assisted search for locators.
-This is done by pressing the double circle on the left side of the lower bar, and then by clicking on the desired user interface element.
+This is done by pressing the locator button on the lower bar, and then by clicking on the desired user interface element.
 Playwright displays the element locator:
 
-```bash
-![playwright's trace viewer with red arrows pointing at the locator assisted search location and to the element selected with it showing a suggested locator for the element](../../images/5/play8.png) //TODO: Replace this image
-```
+![playwright's trace viewer with red arrows pointing at the locator assisted search location and to the element selected with it showing a suggested locator for the element](../../images/5/play8.png)
 
 Playwright suggests the following as the locator for the third task
 
 ```js
-page.locator("li").filter({ hasText: "third task" }).getByRole("button");
+getByRole('listitem').filter({ hasText: 'third taskmake important' }).getByRole('button')
 ```
 
-The method [`page.locator`](https://playwright.dev/docs/api/class-page#page-locator) is called with the argument `li`,
-i.e. we search for all `li` elements on the page, of which there are three in total.
-After this, using the [`locator.filter` method](https://playwright.dev/docs/api/class-locator#locator-filter),
+The method [`getByRole`](https://playwright.dev/docs/api/class-locator#locator-get-by-role) is called with the argument `listitem`,
+i.e. we search for all `listitem` elements on the page, of which there are three in total.
+After this, using the [`filter` method](https://playwright.dev/docs/api/class-locator#locator-filter),
 we narrow down to the `li` element that contains the text ***`third task`*** and the button element inside it is taken using the
-[`locator.getByRole` method](https://playwright.dev/docs/api/class-locator#locator-get-by-role).
+[`getByRole` method](https://playwright.dev/docs/api/class-locator#locator-get-by-role) again.
 
 The locator generated by Playwright is somewhat different from the locator used by our tests, which was
 
 ```js
-page.getByText("first task").locator("..").getByRole("button", { name: "make not important" });
+page.getByText("third task").locator("..").getByRole("button", { name: "make important" });
 ```
 
 Which of the locators is better is probably a matter of taste.
@@ -1366,9 +1361,7 @@ npx playwright codegen http://localhost:5173/
 
 When the `Record` mode is on, the test generator "records" the user's interaction in the Playwright inspector, from where it is possible to copy the locators and actions to the tests:
 
-```bash
-![playwright's record mode enabled with its output in the inspector after user interaction](../../images/5/play9.png) //TODO: Replace this image
-```
+![playwright's record mode enabled with its output in the inspector after user interaction](../../images/5/play9.png)
 
 Instead of the command line, Playwright can also be used via [Webstorm's IDE](https://www.jetbrains.com/help/webstorm/playwright.html).
 

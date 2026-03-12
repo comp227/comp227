@@ -733,9 +733,7 @@ describe("average", () => {
 **Describe blocks** can be used for grouping tests into logical collections.
 The test output also uses the name of the `describe` block:
 
-```bash
-![screenshot of npm test showing describe blocks](../../images/4/4new.png) // TODO: replace this image
-```
+![screenshot of npm test showing describe blocks](../../images/4/4new.png)
 
 As we will see later on `describe` blocks are necessary when we want to run some shared setup or teardown operations for a group of tests.
 

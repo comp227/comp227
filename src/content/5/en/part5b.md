@@ -11,9 +11,7 @@ lang: en
 
 Let's modify the application so that the login form is not displayed by default:
 
-```bash
-![browser showing log in button by default] //TODO: Create image here
-```
+![browser showing login button with no form](../../images/5/nologinform.png)
 
 Rather, the login form appears when the user presses the ***login*** button.
 

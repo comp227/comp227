@@ -841,11 +841,28 @@ npm test -- --coverage
 The first time you run the command, Vitest will ask you if you want to install the required library `@vitest/coverage-v8`.
 Install it, and run the command again:
 
-```bash
-![terminal output of test coverage](../../images/5/18new.png)  //TODO: Create image
-```
+![terminal output of test coverage](../../images/5/18newlimited.png)
 
-A HTML report will be generated to the *coverage* directory.
+> ***Pertinent:*** One thing to realize here is that coverage is not giving us coverage for *all of our files*.
+> Why is that?
+> It turns out that vitest will only add files that have actually been tested to its coverage report.
+> To get all filest to be included, you need to change the configuration of your *vitest.config.js*.
+> In that file, inside of the `test` json object, add the following `coverage` object:
+>
+> ```json
+> coverage: {
+>   include: [
+>     "src/**/*.{js,jsx}"
+>   ],
+> }
+> ```
+>
+> Running the test coverage again will yield you something more comprehensive.
+> ![terminal output of more substantial test coverage](../../images/5/18new.png)
+>
+> Now, you get a much more comprehensive report (though much sadder looking on the coverage side. 🥹)
+
+After generating the coverage, a HTML report will be generated to the *coverage* directory.
 The report will tell us the lines of untested code in each component:
 
 ![HTML report of the test coverage](../../images/5/19newer.png)

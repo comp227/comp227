@@ -31,14 +31,14 @@ module.exports = {
       c: 'User administration',
       d: 'Token authentication',
     },
-    /*5: {
+    5: {
       a: 'Login in frontend',
       b: 'props.children and proptypes',
       c: 'Testing React apps',
       d: 'End to end testing: Playwright',
       e: 'End to end testing: Cypress',
     },
-    6: {
+    /*6: {
       a: 'Flux-architecture and Redux',
       b: 'Many reducers',
       c: 'Communicating with a server in a Redux application',
